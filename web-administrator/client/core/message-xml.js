@@ -8,7 +8,7 @@ export function protectMessageXml(text) {
     const values = [];
     const xml = text.replaceAll(marker, marker + marker).replace(/<!\[CDATA\[[\s\S]*?\]\]>|<!--[\s\S]*?-->|<\?[\s\S]*?\?>|<!DOCTYPE\b|&#(?:x[\da-fA-F]+|\d+);/g, token => {
         if (token === '<!DOCTYPE')
-            throw new Error('Engine returned invalid message XML');
+            throw new Error('引擎返回的消息 XML 无效');
         // Entity references are literal text inside CDATA/comments/PIs.
         if (!token.startsWith('&#'))
             return token;
@@ -66,7 +66,7 @@ export function parseMessageDocument(text) {
     if (doc.doctype || !root || root.tagName === 'parsererror'
         || doc.getElementsByTagNameNS('http://www.mozilla.org/newlayout/xml/parsererror.xml', 'parsererror').length
         || doc.getElementsByTagNameNS('http://www.w3.org/1999/xhtml', 'parsererror').length) {
-        throw new Error('Engine returned invalid message XML');
+        throw new Error('引擎返回的消息 XML 无效');
     }
     const walk = (node) => {
         for (const attribute of node.attributes)
@@ -84,7 +84,7 @@ export function parseMessageDocument(text) {
 export function parseMessageXml(text) {
     const root = parseMessageDocument(text).documentElement;
     if (root.tagName !== 'message')
-        throw new Error('Engine returned invalid message XML');
+        throw new Error('引擎返回的消息 XML 无效');
     const read = (node) => {
         // A null prototype keeps arbitrary engine map/metadata names, including
         // __proto__ and constructor, as data without invoking object setters.
@@ -112,6 +112,6 @@ export function parseMessageXml(text) {
     };
     const result = read(root);
     if (!result || typeof result !== 'object')
-        throw new Error('Engine returned invalid message XML');
+        throw new Error('引擎返回的消息 XML 无效');
     return result;
 }

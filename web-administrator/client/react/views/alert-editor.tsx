@@ -357,7 +357,7 @@ export function AlertEditor({ params, query = {} }: any) {
             } else if (isNew) {
                 model = await loadAlertForEdit(alertId).catch(() => null);
                 if (!model) {
-                    toast('The unsaved new alert was discarded.');
+                    toast('未保存的新警报已丢弃。');
                     store.setState('navGuard', null);
                     history.replaceState(null, '', routeUrl('/alerts'));
                     router.navigate('/alerts');

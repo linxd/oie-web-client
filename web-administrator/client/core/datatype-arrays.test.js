@@ -71,7 +71,7 @@ for (const wrap of [value => value, value => [value]]) {
     normalizeChannelDataTypeArrays(channel);
     assert.equal(JSON.stringify(channel).includes('"columnWidths":null'), false, 'all sides and responses repaired');
     channel.sourceConnector.transformer.inboundProperties.serializationProperties.columnWidths = '0';
-    assert.throws(() => normalizeChannelDataTypeArrays(channel), /Invalid Delimited Text properties/);
+    assert.throws(() => normalizeChannelDataTypeArrays(channel), /(Invalid Delimited Text properties|分隔文本属性无效)/);
     assert.equal(channel.sourceConnector.transformer.inboundProperties.serializationProperties.columnWidths, '0', 'invalid value not silently replaced');
 }
 const readback = { sourceConnector: { transformer: { inboundDataType: 'DELIMITED',

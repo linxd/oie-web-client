@@ -158,7 +158,7 @@ export function openEditUserModal(user: any, { onSaved }: any = {}) {
                     if (!pw.validate()) return false;
                     const password = (pw.password as any).value;
                     if (isSelf && !(pw.password as any).disabled && username !== user.username && !password) {
-                        toast('If you are changing your username, you must also update your password.', 'warn');
+                        toast('如果要修改用户名，必须同时更新密码。', 'warn');
                         return false;
                     }
                     try {

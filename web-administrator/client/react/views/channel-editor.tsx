@@ -3029,7 +3029,7 @@ export function ChannelEditorView({ params, query }: any) {
             setReady(true);
         }).catch((e: any) => {
             if (!alive) return;
-            if (query.new === '1') toast('The unsaved new channel was discarded.');
+            if (query.new === '1') toast('未保存的新通道已丢弃。');
             else toast(e.message, 'error');
             history.replaceState(null, '', routeUrl('/channels'));
             router.navigate('/channels');

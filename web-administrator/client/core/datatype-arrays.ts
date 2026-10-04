@@ -4,8 +4,8 @@
 export type DataTypeListItem = 'int' | 'string';
 type ListResult = { value?: Record<string, any>; error?: string };
 
-const widthError = 'Enter comma-separated whole numbers from 1 to 2147483647, or leave blank.';
-const nameError = 'Enter comma-separated XML column names starting with a letter, underscore or colon.';
+const widthError = '请输入以逗号分隔的 1 到 2147483647 之间的整数，或留空。';
+const nameError = '请输入以逗号分隔的 XML 列名，每个列名需以字母、下划线或冒号开头。';
 // XML 1.0 NameStartChar/NameChar (also used by the engine's DatabaseReceiver).
 // The Delimited property setter also accepts Java Character.isLetter names
 // outside this range, including ª, µ and º. Keep both accepted wire shapes.
@@ -33,7 +33,7 @@ export function normalizeDataTypeList(value: any, item: DataTypeListItem, xmlNam
     let wire: Record<string, any> | undefined;
     if (typeof value === 'object' && !Array.isArray(value)) {
         if (Object.keys(value).some(key => key !== item && !key.startsWith('@'))) {
-            return { error: `Unrecognized ${item} array contents. Correct the list before saving.` };
+            return { error: `无法识别 ${item} 数组内容，请先修正列表后再保存。` };
         }
         wire = value;
         let entries = value[item];
@@ -56,7 +56,7 @@ export function normalizeDataTypeList(value: any, item: DataTypeListItem, xmlNam
         // of an empty array. Preserve it and ask for correction rather than
         // silently deleting possibly meaningful data during a channel save.
         if (wire && Object.keys(wire).some(key => key !== item && key !== '@class' && key !== '@version')) {
-            return { error: `Unrecognized ${item} array contents. Correct the list before saving.` };
+            return { error: `无法识别 ${item} 数组内容，请先修正列表后再保存。` };
         }
         return {};
     }
@@ -110,5 +110,5 @@ export function normalizeChannelDataTypeArrays(channel: any): void {
             }
         }
     }
-    if (errors.length) throw new Error(`Invalid Delimited Text properties:\n${errors.join('\n')}`);
+    if (errors.length) throw new Error(`分隔文本属性无效：\n${errors.join('\n')}`);
 }

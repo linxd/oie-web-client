@@ -19,6 +19,6 @@ assert.equal(protectMessageXml('<!-- &#x1c; --><?example &#x1c;?>').xml, '<!-- &
 for (const invalid of ['&#xD800;', '&#1114112;', '&#x110000;', '&#wat;', '&unknown;', '&#-1;']) {
     assert.equal(protectMessageXml(invalid).xml, invalid, 'native XML validation must see malformed references');
 }
-assert.throws(() => protectMessageXml('<!DOCTYPE message [<!ENTITY x "sensitive">]><message/>'), /invalid message XML/);
+assert.throws(() => protectMessageXml('<!DOCTYPE message [<!ENTITY x "sensitive">]><message/>'), /(invalid message XML|消息 XML 无效)/);
 assert.equal(protectMessageXml('<![CDATA[<!DOCTYPE example>]]>').xml, '<![CDATA[<!DOCTYPE example>]]>');
 console.log('message-xml: control references, collision safety, literal CDATA/entities, DTD rejection passed');
