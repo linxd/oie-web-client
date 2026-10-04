@@ -27,7 +27,7 @@ const javascriptReader = {
             <div>
                 <PollSection properties={properties} onChange={onChange} />
                 <ConnectorForm properties={properties} onChange={onChange} fields={[
-                    { section: 'JavaScript Reader Settings' },
+                    { section: 'JavaScript 读取器设置' },
                     {
                         key: 'script', label: 'JavaScript', type: 'code', language: 'javascript', minHeight: '260px',
                         placeholder: '// Return one or more messages to be processed'
@@ -57,7 +57,7 @@ const javascriptWriter = {
     component({ properties, onChange }: any) {
         return (
             <ConnectorForm properties={properties} onChange={onChange} fields={[
-                { section: 'JavaScript Writer Settings' },
+                { section: 'JavaScript 写入器设置' },
                 {
                     key: 'script', label: 'JavaScript', type: 'code', language: 'javascript', minHeight: '300px',
                     placeholder: '// Write your script here. Return a Response or a status to set the message status.'

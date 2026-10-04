@@ -7,7 +7,7 @@ var num = (key, label, def, hint) => ({ key, label, type: "number", default: def
 var bool = (key, label, def, hint) => ({ key, label, type: "checkbox", default: def, hint });
 var opt = (key, label, options, def, hint) => ({ key, label, type: "select", options, default: def, hint });
 var code = (key, label, def, hint) => ({ key, label, type: "code", default: def, hint });
-var BATCH_SCRIPT_HINT = "JavaScript that splits the batch and returns the next message. Has access to 'reader' (a Java BufferedReader); return null/empty to signal end of input. Only used when Process Batch is enabled in the connector.";
+var BATCH_SCRIPT_HINT = "\u62C6\u5206\u6279\u5904\u7406\u5E76\u8FD4\u56DE\u4E0B\u4E00\u6761\u6D88\u606F\u7684 JavaScript\uFF0C\u53EF\u8BBF\u95EE 'reader'\uFF08Java BufferedReader\uFF09\uFF0C\u8FD4\u56DE null/\u7A7A \u8868\u793A\u8F93\u5165\u7ED3\u675F\uFF1B\u4EC5\u5728\u8FDE\u63A5\u5668\u4E2D\u542F\u7528\u6279\u5904\u7406\u65F6\u4F7F\u7528";
 var DEF = {
   name: "XML",
   label: "XML",
@@ -16,26 +16,26 @@ var DEF = {
   groups: [
     {
       key: "serializationProperties",
-      label: "Serialization",
+      label: "\u5E8F\u5217\u5316",
       class: `${PKG}.XMLSerializationProperties`,
       fields: [
-        bool("stripNamespaces", "Strip Namespaces", false, "Strip namespace definitions from the transformed XML message (prefixes are not removed).")
+        bool("stripNamespaces", "\u53BB\u9664\u547D\u540D\u7A7A\u95F4", false, "\u4ECE\u8F6C\u6362\u540E\u7684 XML \u6D88\u606F\u4E2D\u53BB\u9664\u547D\u540D\u7A7A\u95F4\u5B9A\u4E49\uFF08\u4E0D\u4F1A\u79FB\u9664\u524D\u7F00\uFF09")
       ]
     },
     {
       key: "batchProperties",
-      label: "Batch",
+      label: "\u6279\u5904\u7406",
       class: `${PKG}.XMLBatchProperties`,
       fields: [
-        opt("splitType", "Split Batch By", [
-          { value: "Element_Name", label: "Element Name" },
-          { value: "Level", label: "Level" },
-          { value: "XPath_Query", label: "XPath Query" },
+        opt("splitType", "\u6279\u5904\u7406\u62C6\u5206\u65B9\u5F0F", [
+          { value: "Element_Name", label: "\u6309\u5143\u7D20\u540D" },
+          { value: "Level", label: "\u6309\u5C42\u7EA7" },
+          { value: "XPath_Query", label: "\u6309 XPath \u67E5\u8BE2" },
           { value: "JavaScript", label: "JavaScript" }
-        ], "Element_Name", "Method for splitting the batch message. Only used when Process Batch is enabled in the connector."),
-        text("elementName", "Element Name", null, "Each element with this name is split into its own message."),
-        num("level", "Level", 1, "Each element at this level is split into its own message (root element is level 0)."),
-        text("query", "XPath Query", null, "Each element found with the XPath query is split into its own message."),
+        ], "Element_Name", "\u62C6\u5206\u6279\u5904\u7406\u6D88\u606F\u7684\u65B9\u5F0F\uFF0C\u4EC5\u5728\u8FDE\u63A5\u5668\u4E2D\u542F\u7528\u6279\u5904\u7406\u65F6\u4F7F\u7528"),
+        text("elementName", "\u5143\u7D20\u540D", null, "\u5C06\u6BCF\u4E2A\u4F7F\u7528\u8BE5\u540D\u79F0\u7684\u5143\u7D20\u62C6\u5206\u4E3A\u72EC\u7ACB\u6D88\u606F"),
+        num("level", "\u5C42\u7EA7", 1, "\u5C06\u6BCF\u4E2A\u5904\u4E8E\u8BE5\u5C42\u7EA7\u7684\u5143\u7D20\u62C6\u5206\u4E3A\u72EC\u7ACB\u6D88\u606F\uFF08\u6839\u5143\u7D20\u4E3A 0 \u7EA7\uFF09"),
+        text("query", "XPath \u67E5\u8BE2", null, "\u5C06 XPath \u67E5\u8BE2\u547D\u4E2D\u7684\u6BCF\u4E2A\u5143\u7D20\u62C6\u5206\u4E3A\u72EC\u7ACB\u6D88\u606F"),
         code("batchScript", "JavaScript", null, BATCH_SCRIPT_HINT)
       ]
     }

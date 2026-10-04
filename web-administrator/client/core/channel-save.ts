@@ -22,7 +22,7 @@ function fingerprint(channel: any): string {
 
 export async function loadChannelForEdit(id: string): Promise<any> {
     const channel = await api.channels.get(id);
-    if (!channel || channel.id !== id) throw new Error(`Channel ${id} was not found.`);
+    if (!channel || channel.id !== id) throw new Error(`未找到通道 ${id}。`);
     sessions.set(channel, { isNew: false, baseline: fingerprint(channel), workingBaseline: fingerprint(channel), saving: false });
     return channel;
 }
@@ -62,7 +62,7 @@ export async function updateChannelWithConflict(channelId: string, update: (over
     if (String(accepted) === 'false') {
         const latest = await api.channels.get(channelId);
         assertSession();
-        if (!latest || latest.id !== channelId) throw new Error('The channel was removed. Reopen the channel list before saving.');
+        if (!latest || latest.id !== channelId) throw new Error('该通道已被删除。请重新打开通道列表后再保存。');
         if (!savedByUser(latest, options.userId)) {
             const confirmed = await options.confirmConflict();
             assertSession();
@@ -171,10 +171,10 @@ export async function saveChannelModel(channel: any, options: {
             } else if (!options.confirmCreationRetry || !await confirm(options.confirmCreationRetry())) return false;
         }
         if (!state.isNew) {
-            if (!state.baseline) throw new Error('Cannot verify the original channel. Reopen it before saving.');
+            if (!state.baseline) throw new Error('无法校验原始通道，请重新打开后再保存。');
             current = current || await api.channels.get(channel.id);
             assertSession();
-            if (!current || current.id !== channel.id) throw new Error('The channel was removed. Reopen the channel list before saving.');
+            if (!current || current.id !== channel.id) throw new Error('该通道已被删除。请重新打开通道列表后再保存。');
             const conflict = fingerprint(current) !== state.baseline;
             if (conflict && !savedByUser(current, options.userId) && !await confirm(options.confirmConflict())) return false;
             if (!conflict && options.skipUnchanged && fingerprint(channel) === state.workingBaseline) return true;

@@ -34,26 +34,26 @@ import type { Platform } from '@oie/web-shell';
 const React = platform.React;
 
 const SCOPES = [
-    { value: 'CHANNEL', label: 'Channel Map' },
-    { value: 'CONNECTOR', label: 'Connector Map' },
-    { value: 'GLOBAL_CHANNEL', label: 'Global Channel Map' },
-    { value: 'GLOBAL', label: 'Global Map' },
-    { value: 'RESPONSE', label: 'Response Map' }
+    { value: 'CHANNEL', label: '通道映射' },
+    { value: 'CONNECTOR', label: '连接器映射' },
+    { value: 'GLOBAL_CHANNEL', label: '全局通道映射' },
+    { value: 'GLOBAL', label: '全局映射' },
+    { value: 'RESPONSE', label: '响应映射' }
 ];
 
 const CONDITIONS = [
-    { value: 'EXISTS', label: 'Exists' },
-    { value: 'NOT_EXIST', label: 'Not Exist' },
-    { value: 'EQUALS', label: 'Equals' },
-    { value: 'NOT_EQUAL', label: 'Not Equal' },
-    { value: 'CONTAINS', label: 'Contains' },
-    { value: 'NOT_CONTAIN', label: 'Not Contain' }
+    { value: 'EXISTS', label: '存在' },
+    { value: 'NOT_EXIST', label: '不存在' },
+    { value: 'EQUALS', label: '等于' },
+    { value: 'NOT_EQUAL', label: '不等于' },
+    { value: 'CONTAINS', label: '包含' },
+    { value: 'NOT_CONTAIN', label: '不包含' }
 ];
 
 const BEHAVIORS = [
-    { value: 'REMOVE', label: 'Remove the following' },
-    { value: 'REMOVE_ALL_EXCEPT', label: 'Remove all except the following' },
-    { value: 'REMOVE_ALL', label: 'Remove all' }
+    { value: 'REMOVE', label: '移除以下项' },
+    { value: 'REMOVE_ALL_EXCEPT', label: '除以下项外全部移除' },
+    { value: 'REMOVE_ALL', label: '全部移除' }
 ];
 
 /* Conditions that actually consume the Values list (the Swing DestinationSetFilter
@@ -182,7 +182,7 @@ function CodeEditorIsland({ value, minHeight, fill, onChange }: any) {
 
 function ScriptEditor({ element, onChange }: any) {
     return (
-        <Field label="Script">
+        <Field label="脚本">
             <CodeEditorIsland
                 value={element.script ?? ''}
                 minHeight="260px"
@@ -197,8 +197,8 @@ function ScriptPathEditor({ element, onChange }: any) {
     const force = useRerender();
     return (
         <Field
-            label="Script Path"
-            hint="Path to a JavaScript file on the server — its contents are loaded when the channel is deployed"
+            label="脚本路径"
+            hint="服务器上 JavaScript 文件的路径——通道部署时将加载其内容"
         >
             <input
                 type="text"
@@ -225,7 +225,7 @@ function emptyIteratorProperties() {
 
 function makeIteratorEditor(isRule: any) {
     const type = isRule ? 'com.mirth.connect.model.IteratorRule' : 'com.mirth.connect.model.IteratorStep';
-    const childNoun = isRule ? 'rule' : 'step';
+    const childNoun = isRule ? '规则' : '步骤';
 
     function IteratorEditor({ element, onChange }: any) {
         const force = useRerender();
@@ -238,8 +238,8 @@ function makeIteratorEditor(isRule: any) {
             <>
                 <div className="form-grid">
                     <Field
-                        label="Iterate On (target)"
-                        hint="E4X XML node list or JavaScript array to iterate over"
+                        label="迭代对象（目标）"
+                        hint="要迭代的 E4X XML 节点列表或 JavaScript 数组"
                     >
                         <input
                             type="text"
@@ -248,7 +248,7 @@ function makeIteratorEditor(isRule: any) {
                             onChange={(e: any) => { props.target = e.target.value; onChange(); force(); }}
                         />
                     </Field>
-                    <Field label="Index Variable">
+                    <Field label="索引变量">
                         <input
                             type="text"
                             value={props.indexVariable ?? 'i'}
@@ -257,8 +257,8 @@ function makeIteratorEditor(isRule: any) {
                     </Field>
                     <div className="span-2">
                         <Field
-                            label="Prefix Substitutions"
-                            hint="One prefix per line — when dragging values into children, the index variable (e.g. [i]) is injected after these prefixes"
+                            label="前缀替换"
+                            hint="每行一个前缀——把取值拖入子项时，索引变量（如 [i]）会注入到这些前缀之后"
                         >
                             <textarea
                                 rows={3}
@@ -277,15 +277,15 @@ function makeIteratorEditor(isRule: any) {
                 {/* Children are managed in the main element list (nested under this
                     Iterator), matching the Swing tree-table — not edited here. */}
                 <div className="text-text-faint pt-2.5 px-0 pb-0 text-[10px]">
-                    {`Child ${childNoun}s appear nested under this Iterator in the ${childNoun} list. `
-                        + `Add a ${childNoun} while a child is selected, or right-click a ${childNoun} and choose "Assign To Iterator".`}
+                    {`子${childNoun}会嵌套显示在此迭代器之下 · `
+                        + `选中子项时可添加${childNoun}，或右键点击${childNoun}并选择"指派给迭代器"`}
                 </div>
             </>
         );
     }
 
     return {
-        label: 'Iterator',
+        label: '迭代器',
         create: () => ({
             __type: type,
             name: '', enabled: true,
@@ -295,8 +295,8 @@ function makeIteratorEditor(isRule: any) {
         validate: (el: any) => {
             const p = el.properties || {};
             let m = '';
-            if (isBlank(p.target)) m += 'The iteration target expression cannot be blank.\n';
-            if (isBlank(p.indexVariable)) m += 'The iteration index variable cannot be blank.\n';
+            if (isBlank(p.target)) m += '迭代目标表达式不能为空\n';
+            if (isBlank(p.indexVariable)) m += '迭代索引变量不能为空\n';
             return m.trim();
         },
         component: IteratorEditor
@@ -309,14 +309,14 @@ function MapperEditor({ element, onChange }: any) {
     const force = useRerender();
     return (
         <div className="form-grid">
-            <Field label="Variable">
+            <Field label="变量">
                 <input
                     type="text"
                     value={element.variable ?? ''}
                     onChange={(e: any) => { element.variable = e.target.value; onChange(); force(); }}
                 />
             </Field>
-            <Field label="Add to">
+            <Field label="添加到">
                 <Select
                     options={SCOPES}
                     value={element.scope || 'CHANNEL'}
@@ -324,7 +324,7 @@ function MapperEditor({ element, onChange }: any) {
                 />
             </Field>
             <div className="span-2">
-                <Field label="Mapping">
+                <Field label="映射">
                     <input
                         type="text"
                         value={element.mapping ?? ''}
@@ -333,7 +333,7 @@ function MapperEditor({ element, onChange }: any) {
                 </Field>
             </div>
             <div className="span-2 mt-2">
-                <Field label="Default Value">
+                <Field label="默认值">
                     <input
                         type="text"
                         value={element.defaultValue ?? ''}
@@ -350,7 +350,7 @@ function MessageBuilderEditor({ element, onChange }: any) {
     return (
         <div className="form-grid">
             <div className="span-2">
-                <Field label="Message Segment">
+                <Field label="消息段">
                     <input
                         type="text"
                         placeholder="tmp['MSH']['MSH.3']['MSH.3.1']"
@@ -360,7 +360,7 @@ function MessageBuilderEditor({ element, onChange }: any) {
                 </Field>
             </div>
             <div className="span-2">
-                <Field label="Mapping">
+                <Field label="映射">
                     <input
                         type="text"
                         value={element.mapping ?? ''}
@@ -369,7 +369,7 @@ function MessageBuilderEditor({ element, onChange }: any) {
                 </Field>
             </div>
             <div className="span-2">
-                <Field label="Default Value">
+                <Field label="默认值">
                     <input
                         type="text"
                         value={element.defaultValue ?? ''}
@@ -386,7 +386,7 @@ function XsltEditor({ element, onChange }: any) {
     return (
         <>
             <div className="form-grid">
-                <Field label="Source XML String">
+                <Field label="源 XML 字符串">
                     <input
                         type="text"
                         placeholder="msg"
@@ -394,7 +394,7 @@ function XsltEditor({ element, onChange }: any) {
                         onChange={(e: any) => { element.sourceXml = e.target.value; onChange(); force(); }}
                     />
                 </Field>
-                <Field label="Result Variable">
+                <Field label="结果变量">
                     <input
                         type="text"
                         value={element.resultVariable ?? ''}
@@ -402,7 +402,7 @@ function XsltEditor({ element, onChange }: any) {
                     />
                 </Field>
             </div>
-            <Field label="XSLT Template">
+            <Field label="XSLT 模板">
                 <CodeEditorIsland
                     value={element.template ?? ''}
                     minHeight="220px"
@@ -462,14 +462,14 @@ function DestinationSetFilterEditor({ element, onChange, destinations }: any) {
 
     return (
         <div className="form-grid">
-            <Field label="Behavior">
+            <Field label="行为">
                 <Select
                     options={BEHAVIORS}
                     value={behavior}
                     onChange={(e: any) => { element.behavior = e.target.value; onChange(); force(); }}
                 />
             </Field>
-            <Field label="Field">
+            <Field label="字段">
                 <input
                     type="text"
                     placeholder="msg['PID']['PID.3']['PID.3.1'].toString()"
@@ -479,10 +479,10 @@ function DestinationSetFilterEditor({ element, onChange, destinations }: any) {
             </Field>
 
             <div className="span-2 mt-2">
-                <Field label="Destinations">
+                <Field label="目的地">
                     <div className="flex gap-2 mb-1.5">
-                        <button type="button" className="btn btn-sm" disabled={listDisabled} onClick={selectAll}>Select All</button>
-                        <button type="button" className="btn btn-sm" disabled={listDisabled} onClick={deselectAll}>Deselect All</button>
+                        <button type="button" className="btn btn-sm" disabled={listDisabled} onClick={selectAll}>全选</button>
+                        <button type="button" className="btn btn-sm" disabled={listDisabled} onClick={deselectAll}>全不选</button>
                     </div>
                     <div
                         className="dt-wrap border border-line rounded max-h-[162px]"
@@ -492,8 +492,8 @@ function DestinationSetFilterEditor({ element, onChange, destinations }: any) {
                             <thead>
                                 <tr>
                                     <th className="w-[38px]"></th>
-                                    <th>Name</th>
-                                    <th className="w-[63px]">Id</th>
+                                    <th>名称</th>
+                                    <th className="w-[63px]">ID</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -509,12 +509,12 @@ function DestinationSetFilterEditor({ element, onChange, destinations }: any) {
                                                     onChange={(e: any) => toggleId(id, e.target.checked)}
                                                 />
                                             </td>
-                                            <td>{d.name || `Destination ${id}`}</td>
+                                            <td>{d.name || `目的地 ${id}`}</td>
                                             <td className="num">{id}</td>
                                         </tr>
                                     );
                                 }) : (
-                                    <tr><td colSpan={3}><span className="text-text-faint">No destinations on this channel</span></td></tr>
+                                    <tr><td colSpan={3}><span className="text-text-faint">该通道暂无目的地</span></td></tr>
                                 )}
                             </tbody>
                         </table>
@@ -523,7 +523,7 @@ function DestinationSetFilterEditor({ element, onChange, destinations }: any) {
             </div>
 
             <div className="span-2 mt-2">
-                <Field label="Condition">
+                <Field label="条件">
                     <div className="radio-group inline-row">
                         {CONDITIONS.map((opt: any) => (
                             <label className="check" key={opt.value}>
@@ -541,22 +541,22 @@ function DestinationSetFilterEditor({ element, onChange, destinations }: any) {
             </div>
 
             <div className="span-2 mt-2">
-                <Field label="Values">
+                <Field label="值">
                     <div className="flex gap-2 mb-1.5">
-                        <button type="button" className="btn btn-sm" disabled={!valuesEnabled} onClick={newValue}>New</button>
+                        <button type="button" className="btn btn-sm" disabled={!valuesEnabled} onClick={newValue}>新建</button>
                         <button
                             type="button"
                             className="btn btn-sm btn-danger"
                             disabled={!valuesEnabled || selValue < 0 || selValue >= values.length}
                             onClick={deleteSelected}
-                        >Delete</button>
+                        >删除</button>
                     </div>
                     <div
                         className="dt-wrap border border-line rounded max-h-[162px]"
                         style={!valuesEnabled ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
                     >
                         <table className="dt">
-                            <thead><tr><th>Value</th></tr></thead>
+                            <thead><tr><th>值</th></tr></thead>
                             <tbody>
                                 {values.length ? values.map((v: any, i: any) => (
                                     <tr
@@ -575,7 +575,7 @@ function DestinationSetFilterEditor({ element, onChange, destinations }: any) {
                                         </td>
                                     </tr>
                                 )) : (
-                                    <tr><td><span className="text-text-faint">No values — use New</span></td></tr>
+                                    <tr><td><span className="text-text-faint">暂无值——请点击新建</span></td></tr>
                                 )}
                             </tbody>
                         </table>
@@ -590,7 +590,7 @@ function RuleBuilderEditor({ element, onChange }: any) {
     const force = useRerender();
     return (
         <div className="form-grid">
-            <Field label="Field">
+            <Field label="字段">
                 <input
                     type="text"
                     placeholder="msg['MSH']['MSH.9']['MSH.9.1'].toString()"
@@ -598,7 +598,7 @@ function RuleBuilderEditor({ element, onChange }: any) {
                     onChange={(e: any) => { element.field = e.target.value; onChange(); force(); }}
                 />
             </Field>
-            <Field label="Condition">
+            <Field label="条件">
                 <Select
                     options={CONDITIONS}
                     value={element.condition || 'EXISTS'}
@@ -606,11 +606,11 @@ function RuleBuilderEditor({ element, onChange }: any) {
                 />
             </Field>
             <div className="span-2">
-                <Field label="Values">
+                <Field label="值">
                     <textarea
                         rows={4}
-                        placeholder="One value per line"
-                        title="Only used by Equals / Not Equal / Contains / Not Contain"
+                        placeholder="每行一个值"
+                        title="仅在等于 / 不等于 / 包含 / 不包含时使用"
                         value={stringListToLines(element.values).join('\n')}
                         onChange={(e: any) => { element.values = linesToStringList(e.target.value); onChange(); force(); }}
                     />
@@ -637,29 +637,29 @@ export function register(platform: Platform) {
     });
 
     platform.registerStepType('com.mirth.connect.plugins.mapper.MapperStep', {
-        label: 'Mapper',
+        label: '映射器',
         create: () => ({
             __type: 'com.mirth.connect.plugins.mapper.MapperStep',
             name: '', enabled: true,
             variable: '', mapping: '', defaultValue: '', replacements: '', scope: 'CHANNEL'
         }),
-        validate: (el: any) => isBlank(el.variable) ? 'The variable name cannot be blank.' : '',
+        validate: (el: any) => isBlank(el.variable) ? '变量名不能为空' : '',
         component: MapperEditor
     });
 
     platform.registerStepType('com.mirth.connect.plugins.messagebuilder.MessageBuilderStep', {
-        label: 'Message Builder',
+        label: '消息构建器',
         create: () => ({
             __type: 'com.mirth.connect.plugins.messagebuilder.MessageBuilderStep',
             name: '', enabled: true,
             messageSegment: '', mapping: '', defaultValue: '', replacements: ''
         }),
-        validate: (el: any) => isBlank(el.messageSegment) ? 'The message segment value cannot be blank.' : '',
+        validate: (el: any) => isBlank(el.messageSegment) ? '消息段值不能为空' : '',
         component: MessageBuilderEditor
     });
 
     platform.registerStepType('com.mirth.connect.plugins.xsltstep.XsltStep', {
-        label: 'XSLT Step',
+        label: 'XSLT 步骤',
         create: () => ({
             __type: 'com.mirth.connect.plugins.xsltstep.XsltStep',
             name: '', enabled: true,
@@ -668,15 +668,15 @@ export function register(platform: Platform) {
         }),
         validate: (el: any) => {
             let m = '';
-            if (isBlank(el.sourceXml)) m += 'The source XML string cannot be blank.\n';
-            if (isBlank(el.resultVariable)) m += 'The result variable cannot be blank.\n';
+            if (isBlank(el.sourceXml)) m += '源 XML 字符串不能为空\n';
+            if (isBlank(el.resultVariable)) m += '结果变量不能为空\n';
             return m.trim();
         },
         component: XsltEditor
     });
 
     platform.registerStepType('com.mirth.connect.plugins.destinationsetfilter.DestinationSetFilterStep', {
-        label: 'Destination Set Filter',
+        label: '目的地集过滤器',
         // Only available on the source transformer (DestinationSetFilterPlugin
         // .onlySourceConnector()); destinations/response transformers exclude it.
         onlySource: true,
@@ -685,18 +685,18 @@ export function register(platform: Platform) {
             name: '', enabled: true,
             behavior: 'REMOVE', metaDataIds: '', field: '', condition: 'EXISTS', values: ''
         }),
-        validate: (el: any) => isBlank(el.field) ? 'The field cannot be blank.' : '',
+        validate: (el: any) => isBlank(el.field) ? '字段不能为空' : '',
         component: DestinationSetFilterEditor
     });
 
     platform.registerStepType('com.mirth.connect.plugins.scriptfilestep.ExternalScriptStep', {
-        label: 'External Script',
+        label: '外部脚本',
         create: () => ({
             __type: 'com.mirth.connect.plugins.scriptfilestep.ExternalScriptStep',
             name: '', enabled: true,
             scriptPath: ''
         }),
-        validate: (el: any) => isBlank(el.scriptPath) ? 'The script path cannot be blank.' : '',
+        validate: (el: any) => isBlank(el.scriptPath) ? '脚本路径不能为空' : '',
         component: ScriptPathEditor
     });
 
@@ -715,24 +715,24 @@ export function register(platform: Platform) {
     });
 
     platform.registerRuleType('com.mirth.connect.plugins.rulebuilder.RuleBuilderRule', {
-        label: 'Rule Builder',
+        label: '规则构建器',
         create: () => ({
             __type: 'com.mirth.connect.plugins.rulebuilder.RuleBuilderRule',
             name: '', enabled: true, operator: 'AND',
             field: '', condition: 'EXISTS', values: ''
         }),
-        validate: (el: any) => isBlank(el.field) ? 'The field cannot be blank.' : '',
+        validate: (el: any) => isBlank(el.field) ? '字段不能为空' : '',
         component: RuleBuilderEditor
     });
 
     platform.registerRuleType('com.mirth.connect.plugins.scriptfilerule.ExternalScriptRule', {
-        label: 'External Script',
+        label: '外部脚本',
         create: () => ({
             __type: 'com.mirth.connect.plugins.scriptfilerule.ExternalScriptRule',
             name: '', enabled: true, operator: 'AND',
             scriptPath: ''
         }),
-        validate: (el: any) => isBlank(el.scriptPath) ? 'The script path cannot be blank.' : '',
+        validate: (el: any) => isBlank(el.scriptPath) ? '脚本路径不能为空' : '',
         component: ScriptPathEditor
     });
 

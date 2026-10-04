@@ -21,33 +21,33 @@ const bool = (key: any, label: any, def: any, hint?: any) => ({ key, label, type
 const opt = (key: any, label: any, options: any, def: any, hint?: any) => ({ key, label, type: 'select', options, default: def, hint });
 const code = (key: any, label: any, def: any, hint?: any) => ({ key, label, type: 'code', default: def, hint });
 
-const BATCH_SCRIPT_HINT = 'JavaScript that splits the batch and returns the next message. ' +
-    "Has access to 'reader' (a Java BufferedReader); return null/empty to signal end of input. " +
-    'Only used when Process Batch is enabled in the connector.';
+const BATCH_SCRIPT_HINT = '拆分批处理并返回下一条消息的 JavaScript，' +
+    "可访问 'reader'（Java BufferedReader），返回 null/空 表示输入结束；" +
+    '仅在连接器中启用批处理时使用';
 
 const DEF: any = {
     name: 'XML', label: 'XML', order: 30,
     propertiesClass: `${PKG}.XMLDataTypeProperties`,
     groups: [
         {
-            key: 'serializationProperties', label: 'Serialization',
+            key: 'serializationProperties', label: '序列化',
             class: `${PKG}.XMLSerializationProperties`,
             fields: [
-                bool('stripNamespaces', 'Strip Namespaces', false, 'Strip namespace definitions from the transformed XML message (prefixes are not removed).')
+                bool('stripNamespaces', '去除命名空间', false, '从转换后的 XML 消息中去除命名空间定义（不会移除前缀）')
             ]
         },
         {
-            key: 'batchProperties', label: 'Batch', class: `${PKG}.XMLBatchProperties`,
+            key: 'batchProperties', label: '批处理', class: `${PKG}.XMLBatchProperties`,
             fields: [
-                opt('splitType', 'Split Batch By', [
-                    { value: 'Element_Name', label: 'Element Name' },
-                    { value: 'Level', label: 'Level' },
-                    { value: 'XPath_Query', label: 'XPath Query' },
+                opt('splitType', '批处理拆分方式', [
+                    { value: 'Element_Name', label: '按元素名' },
+                    { value: 'Level', label: '按层级' },
+                    { value: 'XPath_Query', label: '按 XPath 查询' },
                     { value: 'JavaScript', label: 'JavaScript' }
-                ], 'Element_Name', 'Method for splitting the batch message. Only used when Process Batch is enabled in the connector.'),
-                text('elementName', 'Element Name', null, 'Each element with this name is split into its own message.'),
-                num('level', 'Level', 1, 'Each element at this level is split into its own message (root element is level 0).'),
-                text('query', 'XPath Query', null, 'Each element found with the XPath query is split into its own message.'),
+                ], 'Element_Name', '拆分批处理消息的方式，仅在连接器中启用批处理时使用'),
+                text('elementName', '元素名', null, '将每个使用该名称的元素拆分为独立消息'),
+                num('level', '层级', 1, '将每个处于该层级的元素拆分为独立消息（根元素为 0 级）'),
+                text('query', 'XPath 查询', null, '将 XPath 查询命中的每个元素拆分为独立消息'),
                 code('batchScript', 'JavaScript', null, BATCH_SCRIPT_HINT)
             ]
         }

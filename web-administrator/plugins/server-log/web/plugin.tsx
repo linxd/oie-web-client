@@ -109,11 +109,11 @@ function copyText(text: any) {
     try {
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(text);
-            toast('Copied to clipboard');
+            toast('已复制到剪贴板');
             return;
         }
     } catch (e: any) { /* fall through */ }
-    toast('Clipboard unavailable', 'warn');
+    toast('剪贴板不可用', 'warn');
 }
 
 function showDetail(item: any) {
@@ -121,20 +121,20 @@ function showDetail(item: any) {
     // Theme tokens (not hardcoded colors) so the modal works in dark mode.
     const preClass = 'm-0 whitespace-pre-wrap [word-break:break-word] overflow-x-hidden overflow-y-auto bg-bg0 text-text border border-[var(--bg3)] p-2 rounded-[4px]';
     modal({
-        title: 'Server Log Entry',
+        title: '服务器日志条目',
         size: 'wide',
         body: h('div', { class: 'flex flex-col gap-2 min-w-[558px]' },
             h('div', { class: 'flex gap-[13px] items-center flex-wrap' },
                 levelTagDom(item.level),
                 h('span.mono.text-text-faint', formatLogDate(item.date)),
                 h('span.mono', scopeLabel(item))),
-            h('div', { class: 'font-semibold' }, 'Message'),
+            h('div', { class: 'font-semibold' }, '消息'),
             h('pre', { class: preClass + ' max-h-[30vh]' }, String(item.message ?? '')),
-            stack ? h('div', { class: 'font-semibold' }, 'Stack Trace') : null,
+            stack ? h('div', { class: 'font-semibold' }, '堆栈跟踪') : null,
             stack ? h('pre', { class: preClass + ' max-h-[60vh] text-[11px]' }, String(item.throwableInformation)) : null),
         buttons: [
-            { label: 'Copy', onClick: () => { copyText(fullText(item)); return false; } },
-            { label: 'Close', primary: true }
+            { label: '复制', onClick: () => { copyText(fullText(item)); return false; } },
+            { label: '关闭', primary: true }
         ]
     });
 }
@@ -143,7 +143,7 @@ function showDetail(item: any) {
    line, truncated with an ellipsis). */
 function LogRow({ item }: any) {
     return (
-        <tr className="cursor-pointer" title="Double-click for the full entry"
+        <tr className="cursor-pointer" title="双击查看完整条目"
             onDoubleClick={() => showDetail(item)}>
             <td className="mono text-text-faint whitespace-nowrap text-[11px] w-[160px]">{formatLogDate(item.date)}</td>
             <td className="whitespace-nowrap w-[76px]"><LevelTag level={item.level} style={{ verticalAlign: 'middle' }} /></td>
@@ -266,16 +266,16 @@ function ServerLogTab() {
                 <table className="dt server-log w-full">
                     <thead>
                         <tr>
-                            {headerTh('timestamp', 'Timestamp', 'w-[160px]')}
-                            {headerTh('level', 'Level', 'w-[76px]')}
-                            {headerTh('message', 'Message')}
+                            {headerTh('timestamp', '时间戳', 'w-[160px]')}
+                            {headerTh('level', '级别', 'w-[76px]')}
+                            {headerTh('message', '消息')}
                         </tr>
                     </thead>
                     <tbody>
                         {error && !items.length ? (
-                            <tr><td colSpan={3} className="text-text-faint p-3">{`Server Log unavailable: ${error}`}</td></tr>
+                            <tr><td colSpan={3} className="text-text-faint p-3">{`无法获取服务器日志：${error}`}</td></tr>
                         ) : !items.length ? (
-                            <tr><td colSpan={3} className="text-text-faint p-3">No server log entries yet.</td></tr>
+                            <tr><td colSpan={3} className="text-text-faint p-3">暂无服务器日志条目</td></tr>
                         ) : (
                             sortedItems.map((item: any) => <LogRow key={item.id} item={item} />)
                         )}
@@ -284,20 +284,20 @@ function ServerLogTab() {
             </div>
             {/* thin sticky bottom toolbar: pause | clear | … | Log Size */}
             <div className="taskbar flex items-center gap-1.5 py-[3px] px-2 flex-none text-[11px] z-[2] bg-bg2 border-t border-[var(--bg3)]">
-                <button className={"icon-btn " + btnClass} title="Pause or resume the live log" onClick={togglePause}>
+                <button className={"icon-btn " + btnClass} title="暂停或恢复实时日志" onClick={togglePause}>
                     <span className="text-[11.5px] leading-none">{paused ? '⏵' : '⏸'}</span>
                 </button>
-                <button className={"icon-btn " + btnClass} title="Clear the displayed log" onClick={clearLog}>
+                <button className={"icon-btn " + btnClass} title="清除显示的日志" onClick={clearLog}>
                     <span className="text-err font-bold">✕</span>
                 </button>
                 <span className="flex-1" />
-                <label className="text-text-faint mr-0.5">Log Size:</label>
+                <label className="text-text-faint mr-0.5">日志条数：</label>
                 <input type="number" min="1" max="99999" value={sizeText}
                     className="w-[54px] h-[20px] py-0 px-1 text-[11px]"
                     onChange={(e: any) => setSizeText(e.target.value)}
                     onBlur={applySize}
                     onKeyDown={(e: any) => { if (e.key === 'Enter') applySize(); }} />
-                <button className={"icon-btn " + btnClass} title="Apply log size" onClick={applySize}>
+                <button className={"icon-btn " + btnClass} title="应用日志条数" onClick={applySize}>
                     <span className="text-ok font-bold">✓</span>
                 </button>
             </div>
@@ -308,7 +308,7 @@ function ServerLogTab() {
 export function register(platform: Platform) {
     platform.registerDashboardTab({
         id: 'server-log',
-        label: 'Server Log',
+        label: '服务器日志',
         order: 10,
         component: ServerLogTab
     });

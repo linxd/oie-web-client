@@ -226,7 +226,7 @@ async function fetchEngineManifests() {
             // Neither engine-native endpoints nor the websupport plugin: engine-served
             // plugin UIs (and message trees / validation) are off. Say so once, visibly,
             // instead of plugin UIs silently not appearing.
-            ui.toast('The Web Support plugin is not installed on this engine — plugin UIs, message trees, and script validation are disabled. Install "websupport" from the Extensions page.', 'warn');
+            ui.toast('此引擎未安装 Web Support 插件——插件界面、消息树与脚本校验均已停用。请在“插件”页面安装 “websupport”。', 'warn');
             return [];
         }
         paths = apiModule.asList(await apiModule.get(`${wsBase}/webplugins`), 'string').map(String).filter(Boolean);
@@ -306,7 +306,7 @@ export async function loadPlugins() {
     manifests = manifests.filter((m) => {
         if (apiCompatible(OIE_API_VERSION, m.apiMin))
             return true;
-        const message = `requires @oie API ${m.apiMin}, but this web administrator provides ${OIE_API_VERSION}`;
+        const message = `需要 @oie API ${m.apiMin}，而当前网页管理员提供的版本为 ${OIE_API_VERSION}`;
         console.warn(`[plugins] ${m.id} skipped — ${message}`);
         incompatible.push({ ...m, status: 'incompatible', error: message });
         return false;
@@ -378,7 +378,7 @@ export async function loadPlugins() {
             }
         }
         else {
-            loaded.push({ ...manifest, status: 'error', error: 'entry module has no register(platform) export' });
+            loaded.push({ ...manifest, status: 'error', error: '入口模块未导出 register(platform)。' });
         }
     }
     // Include the version-skipped plugins so the mismatch is visible in the UI.

@@ -15,7 +15,7 @@ import { confirmDialog } from '@oie/web-ui';
 const baselines = new WeakMap<object, string>();
 export async function loadAlertForEdit(alertId: string) {
     const model = await api.alerts.get(alertId);
-    if (!model || model.id !== alertId) throw new Error('Alert not found');
+    if (!model || model.id !== alertId) throw new Error('未找到警报');
     baselines.set(model, JSON.stringify(model));
     return model;
 }
@@ -30,12 +30,12 @@ export function alertBaseline(model: object): string | null {
  * not silently disable conflict checking.
  */
 export async function confirmIfAlertChanged(alertId: any, baseline: any) {
-    if (!baseline) throw new Error('Cannot verify the original alert. Reopen it before saving.');
+    if (!baseline) throw new Error('无法校验原始警报，请重新打开后再保存');
     const model = await api.alerts.get(alertId);
-    if (!model || model.id !== alertId) throw new Error('The alert was removed. Reopen the alert list before saving.');
+    if (!model || model.id !== alertId) throw new Error('该警报已被删除，请重新打开警报列表后再保存');
     const current = JSON.stringify(model);
     if (current === baseline) return true;
-    return confirmDialog('Alert Modified',
-        'This alert has been modified since you first opened it. Are you sure you want to overwrite it?',
-        { danger: true, okLabel: 'Overwrite' });
+    return confirmDialog('警报已被修改',
+        '自您打开该警报后它已被修改，确定要覆盖吗？',
+        { danger: true, okLabel: '覆盖' });
 }

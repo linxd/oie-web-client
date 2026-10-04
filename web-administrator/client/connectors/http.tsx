@@ -26,9 +26,9 @@ const DEFAULT_CHARSET = 'DEFAULT_ENCODING';
 // Custom).
 const STATIC_RESOURCE_CLASS = 'com.mirth.connect.connectors.http.HttpStaticResource';
 const RESOURCE_TYPES = [
-    { value: 'FILE', label: 'File' },
-    { value: 'DIRECTORY', label: 'Directory' },
-    { value: 'CUSTOM', label: 'Custom' }
+    { value: 'FILE', label: '文件' },
+    { value: 'DIRECTORY', label: '目录' },
+    { value: 'CUSTOM', label: '自定义' }
 ];
 
 function asArray(value: any) {
@@ -77,7 +77,7 @@ function staticResourcesTable(properties: any, onChange: any) {
         // horizontally on a narrow panel instead of overflowing (or crushing).
         const table = h('table.dt', { style: { minWidth: '520px' } });
         table.appendChild(h('thead', h('tr',
-            h('th', 'Context Path'), h('th', 'Resource Type'), h('th', 'Value'), h('th', 'Content Type'), h('th'))));
+            h('th', '上下文路径'), h('th', '资源类型'), h('th', '值'), h('th', '内容类型'), h('th'))));
         const body = h('tbody');
         rows.forEach((row: any, i: number) => {
             body.appendChild(h('tr',
@@ -88,7 +88,7 @@ function staticResourcesTable(properties: any, onChange: any) {
                 h('td', select(RESOURCE_TYPES, row.resourceType, { onChange: (e: any) => { row.resourceType = e.target.value; commit(); } })),
                 h('td', textInput(row.value, { class: 'w-full', onInput: (e: any) => { row.value = e.target.value; }, onChange: (e: any) => { row.value = e.target.value; commit(); } })),
                 h('td', textInput(row.contentType, { class: 'w-full', onInput: (e: any) => { row.contentType = e.target.value; }, onChange: (e: any) => { row.contentType = e.target.value; commit(); } })),
-                h('td', h('button.icon-btn', { type: 'button', title: 'Delete', onClick: () => { rows.splice(i, 1); commit(); paint(); } }, icon('x')))));
+                h('td', h('button.icon-btn', { type: 'button', title: '删除', onClick: () => { rows.splice(i, 1); commit(); paint(); } }, icon('x')))));
         });
         table.appendChild(body);
         wrap.appendChild(h('div.dt-wrap', table));
@@ -98,7 +98,7 @@ function staticResourcesTable(properties: any, onChange: any) {
             while (taken.has('path' + n)) n++;
             rows.push({ contextPath: 'path' + n, resourceType: 'FILE', value: '', contentType: 'text/plain' });
             paint();
-        } }, 'New'));
+        } }, '新建'));
     }
     paint();
     return wrap;
@@ -107,7 +107,7 @@ function staticResourcesTable(properties: any, onChange: any) {
 // Both HTTP connectors let headers / query parameters be entered as a Name/Value
 // table OR resolved at runtime from a single map variable — the Swing "Use Table
 // / Use Map" toggle (useXVariable=false → the table map; true → the variable name).
-const USE_TABLE_MAP = [{ value: false, label: 'Use Table' }, { value: true, label: 'Use Map' }];
+const USE_TABLE_MAP = [{ value: false, label: '使用表格' }, { value: true, label: '使用映射' }];
 
 // HTTP Sender content gating, mirroring HttpSender.checkMultipartEnabled /
 // checkContentEnabled: only POST/PUT/PATCH carry a request body, and a
@@ -153,47 +153,47 @@ const httpListener = {
     component({ properties, onChange }: any) {
         return (
             <ConnectorForm properties={properties} onChange={onChange} fields={[
-                { section: 'Listener Settings' },
-                listenerAddressField('listenerConnectorProperties.host', 'Local Address'),
-                { key: 'listenerConnectorProperties.port', label: 'Local Port', type: 'number', width: '90px', append: () => portsInUseButton() },
+                { section: '监听器设置' },
+                listenerAddressField('listenerConnectorProperties.host', '本地地址'),
+                { key: 'listenerConnectorProperties.port', label: '本地端口', type: 'number', width: '90px', append: () => portsInUseButton() },
                 // HTTP authentication is provided by the httpauth connector-properties
                 // plugin (renders as a separate "Authentication" panel).
-                { section: 'HTTP Listener Settings' },
-                { key: 'contextPath', label: 'Base Context Path', type: 'text', width: '320px', placeholder: '/' },
-                { key: 'timeout', label: 'Receive Timeout (ms)', type: 'number', width: '120px' },
-                { key: 'xmlBody', label: 'Message Content', type: 'radio', refresh: true, options: [
-                    { value: false, label: 'Plain Body' },
-                    { value: true, label: 'XML Body' }
+                { section: 'HTTP 监听器设置' },
+                { key: 'contextPath', label: '基础上下文路径', type: 'text', width: '320px', placeholder: '/' },
+                { key: 'timeout', label: '接收超时（毫秒）', type: 'number', width: '120px' },
+                { key: 'xmlBody', label: '消息内容', type: 'radio', refresh: true, options: [
+                    { value: false, label: '纯正文' },
+                    { value: true, label: 'XML 正文' }
                 ] },
-                { key: 'parseMultipart', label: 'Parse Multipart', type: 'radio', options: YES_NO, disabled: (p: any) => !asBool(p.xmlBody) },
-                { key: 'includeMetadata', label: 'Include Metadata', type: 'radio', options: YES_NO, disabled: (p: any) => !asBool(p.xmlBody) },
+                { key: 'parseMultipart', label: '解析 Multipart', type: 'radio', options: YES_NO, disabled: (p: any) => !asBool(p.xmlBody) },
+                { key: 'includeMetadata', label: '包含元数据', type: 'radio', options: YES_NO, disabled: (p: any) => !asBool(p.xmlBody) },
                 {
-                    key: 'binaryMimeTypes', label: 'Binary MIME Types', type: 'text', width: '320px',
-                    append: (p: any, ctx: any) => checkbox('Regular Expression', asBool(p.binaryMimeTypesRegex), {
+                    key: 'binaryMimeTypes', label: '二进制 MIME 类型', type: 'text', width: '320px',
+                    append: (p: any, ctx: any) => checkbox('正则表达式', asBool(p.binaryMimeTypesRegex), {
                         onChange: (e: any) => { p.binaryMimeTypesRegex = e.target.checked; ctx.onChange(); }
                     }).el
                 },
                 { type: 'display', label: 'HTTP URL', compute: httpUrl },
-                { key: 'responseContentType', label: 'Response Content Type', type: 'text', width: '220px' },
+                { key: 'responseContentType', label: '响应内容类型', type: 'text', width: '220px' },
                 {
                     // Swing forces the charset combo back to "default" (index 0)
                     // whenever Binary is selected.
-                    key: 'responseDataTypeBinary', label: 'Response Data Type', type: 'radio', refresh: true,
+                    key: 'responseDataTypeBinary', label: '响应数据类型', type: 'radio', refresh: true,
                     onSet: (p: any) => { if (asBool(p.responseDataTypeBinary)) p.charset = DEFAULT_CHARSET; },
                     options: [
-                        { value: true, label: 'Binary' },
-                        { value: false, label: 'Text' }
+                        { value: true, label: '二进制' },
+                        { value: false, label: '文本' }
                     ]
                 },
-                { key: 'charset', label: 'Charset Encoding', type: 'select', options: HTTP_CHARSETS, width: '160px', disabled: (p: any) => asBool(p.responseDataTypeBinary) },
-                { key: 'responseStatusCode', label: 'Response Status Code', type: 'text', width: '120px', placeholder: 'Default (200/500)' },
-                { key: 'useResponseHeadersVariable', label: 'Response Headers', type: 'radio', refresh: true, options: USE_TABLE_MAP },
+                { key: 'charset', label: '字符集编码', type: 'select', options: HTTP_CHARSETS, width: '160px', disabled: (p: any) => asBool(p.responseDataTypeBinary) },
+                { key: 'responseStatusCode', label: '响应状态码', type: 'text', width: '120px', placeholder: '默认（200/500）' },
+                { key: 'useResponseHeadersVariable', label: '响应头', type: 'radio', refresh: true, options: USE_TABLE_MAP },
                 // Swing useResponseHeadersVariableFieldsEnabled() greys (setEnabled) both controls while
                 // leaving both visible: the table is disabled when Use Map is selected, the variable field
                 // when Use Table is selected. Grey-both, not swap-hide.
                 { key: 'responseHeaders', type: 'keyvalue', mapShape: 'list', disabled: (p: any) => asBool(p.useResponseHeadersVariable) },
-                { key: 'responseHeadersVariable', label: 'Map Variable', type: 'text', width: '320px', placeholder: 'e.g. RESTResponseHeaders', disabled: (p: any) => !asBool(p.useResponseHeadersVariable) },
-                { type: 'custom', label: 'Static Resources', span: true, render: (p: any, ctx: any) => staticResourcesTable(p, ctx.onChange) }
+                { key: 'responseHeadersVariable', label: '映射变量', type: 'text', width: '320px', placeholder: '如 RESTResponseHeaders', disabled: (p: any) => !asBool(p.useResponseHeadersVariable) },
+                { type: 'custom', label: '静态资源', span: true, render: (p: any, ctx: any) => staticResourcesTable(p, ctx.onChange) }
             ]} />
         );
     },
@@ -203,11 +203,11 @@ const httpListener = {
     // Variable required when Use Map is selected (isUseHeadersVariable + blank variable).
     validate(properties: any) {
         return requireFields(properties, [
-            { key: 'listenerConnectorProperties.host', label: 'Local Address' },
-            { key: 'listenerConnectorProperties.port', label: 'Local Port' },
-            { key: 'timeout', label: 'Receive Timeout' },
-            { key: 'responseContentType', label: 'Response Content Type', when: (p: any) => String((p.sourceConnectorProperties || {}).responseVariable || '').toLowerCase() !== 'none' },
-            { key: 'responseHeadersVariable', label: 'Response Headers Map Variable', when: (p: any) => asBool(p.useResponseHeadersVariable) }
+            { key: 'listenerConnectorProperties.host', label: '本地地址' },
+            { key: 'listenerConnectorProperties.port', label: '本地端口' },
+            { key: 'timeout', label: '接收超时' },
+            { key: 'responseContentType', label: '响应内容类型', when: (p: any) => String((p.sourceConnectorProperties || {}).responseVariable || '').toLowerCase() !== 'none' },
+            { key: 'responseHeadersVariable', label: '响应头映射变量', when: (p: any) => asBool(p.useResponseHeadersVariable) }
         ]);
     }
 };
@@ -252,18 +252,18 @@ const httpSender = {
         const usingAuth = (p: any) => asBool(p.useAuthentication);
         return (
             <ConnectorForm properties={properties} onChange={onChange} fields={[
-                { section: 'HTTP Sender Settings' },
+                { section: 'HTTP 发送器设置' },
                 {
                     key: 'host', label: 'URL', type: 'text', width: '420px', placeholder: 'https://host:port/path',
                     append: () => connectorTestButton({ path: '/connectors/http/_testConnection', channel, properties })
                 },
-                { key: 'useProxyServer', label: 'Use Proxy Server', type: 'radio', refresh: true, options: YES_NO },
-                { key: 'proxyAddress', label: 'Proxy Address', type: 'text', width: '320px', disabled: (p: any) => !asBool(p.useProxyServer) },
-                { key: 'proxyPort', label: 'Proxy Port', type: 'number', width: '90px', disabled: (p: any) => !asBool(p.useProxyServer) },
+                { key: 'useProxyServer', label: '使用代理服务器', type: 'radio', refresh: true, options: YES_NO },
+                { key: 'proxyAddress', label: '代理地址', type: 'text', width: '320px', disabled: (p: any) => !asBool(p.useProxyServer) },
+                { key: 'proxyPort', label: '代理端口', type: 'number', width: '90px', disabled: (p: any) => !asBool(p.useProxyServer) },
                 {
                     // Method=POST is the only one that allows Multipart; switching
                     // away forces it off, matching the Swing checkMultipartEnabled.
-                    key: 'method', label: 'Method', type: 'radio', refresh: true,
+                    key: 'method', label: '方法', type: 'radio', refresh: true,
                     onSet: (p: any) => { if (String(p.method) !== 'post') p.multipart = false; },
                     options: [
                         { value: 'post', label: 'POST' },
@@ -274,53 +274,53 @@ const httpSender = {
                     ]
                 },
                 { key: 'multipart', label: 'Multipart', type: 'radio', options: YES_NO, disabled: (p: any) => String(p.method) !== 'post' || httpFormUrlEncoded(p) },
-                { key: 'socketTimeout', label: 'Send Timeout (ms)', type: 'number', width: '120px' },
+                { key: 'socketTimeout', label: '发送超时（毫秒）', type: 'number', width: '120px' },
                 {
-                    key: 'responseXmlBody', label: 'Response Content', type: 'radio', refresh: true,
+                    key: 'responseXmlBody', label: '响应内容', type: 'radio', refresh: true,
                     options: [
-                        { value: false, label: 'Plain Body' },
-                        { value: true, label: 'XML Body' }
+                        { value: false, label: '纯正文' },
+                        { value: true, label: 'XML 正文' }
                     ]
                 },
-                { key: 'responseParseMultipart', label: 'Parse Multipart', type: 'radio', options: YES_NO, disabled: (p: any) => !asBool(p.responseXmlBody) },
-                { key: 'responseIncludeMetadata', label: 'Include Metadata', type: 'radio', options: YES_NO, disabled: (p: any) => !asBool(p.responseXmlBody) },
+                { key: 'responseParseMultipart', label: '解析 Multipart', type: 'radio', options: YES_NO, disabled: (p: any) => !asBool(p.responseXmlBody) },
+                { key: 'responseIncludeMetadata', label: '包含元数据', type: 'radio', options: YES_NO, disabled: (p: any) => !asBool(p.responseXmlBody) },
                 {
-                    key: 'responseBinaryMimeTypes', label: 'Binary MIME Types', type: 'text', width: '320px',
-                    append: (p: any, ctx: any) => checkbox('Regular Expression', asBool(p.responseBinaryMimeTypesRegex), {
+                    key: 'responseBinaryMimeTypes', label: '二进制 MIME 类型', type: 'text', width: '320px',
+                    append: (p: any, ctx: any) => checkbox('正则表达式', asBool(p.responseBinaryMimeTypesRegex), {
                         onChange: (e: any) => { p.responseBinaryMimeTypesRegex = e.target.checked; ctx.onChange(); }
                     }).el
                 },
-                { section: 'HTTP Authentication' },
+                { section: 'HTTP 认证' },
                 {
                     // Swing's setAuthenticationEnabled(false) blanks the
                     // username/password fields in addition to disabling them.
-                    key: 'useAuthentication', label: 'Authentication', type: 'radio', options: YES_NO, refresh: true,
+                    key: 'useAuthentication', label: '认证', type: 'radio', options: YES_NO, refresh: true,
                     onSet: (p: any) => { if (!asBool(p.useAuthentication)) { p.username = ''; p.password = ''; } }
                 },
                 {
                     // Swing adds authenticationPreemptiveCheckBox inline on the Authentication Type row
                     // (add(basicRadio,"split 3"); add(digestRadio); add(preemptiveCheckBox)). Mirror that as
                     // an appended checkbox rather than a separate row.
-                    key: 'authenticationType', label: 'Authentication Type', type: 'radio', options: ['Basic', 'Digest'], disabled: (p: any) => !usingAuth(p),
-                    append: (p: any, ctx: any) => checkbox('Preemptive', asBool(p.usePreemptiveAuthentication), {
+                    key: 'authenticationType', label: '认证类型', type: 'radio', options: ['Basic', 'Digest'], disabled: (p: any) => !usingAuth(p),
+                    append: (p: any, ctx: any) => checkbox('抢占式', asBool(p.usePreemptiveAuthentication), {
                         disabled: !usingAuth(p),
                         onChange: (e: any) => { p.usePreemptiveAuthentication = e.target.checked; ctx.onChange(); }
                     }).el
                 },
-                { key: 'username', label: 'Username', type: 'text', width: '220px', disabled: (p: any) => !usingAuth(p) },
-                { key: 'password', label: 'Password', type: 'password', width: '220px', disabled: (p: any) => !usingAuth(p) },
-                { section: 'Request Settings' },
-                { key: 'useParametersVariable', label: 'Query Parameters', type: 'radio', refresh: true, options: USE_TABLE_MAP },
+                { key: 'username', label: '用户名', type: 'text', width: '220px', disabled: (p: any) => !usingAuth(p) },
+                { key: 'password', label: '密码', type: 'password', width: '220px', disabled: (p: any) => !usingAuth(p) },
+                { section: '请求设置' },
+                { key: 'useParametersVariable', label: '查询参数', type: 'radio', refresh: true, options: USE_TABLE_MAP },
                 // Swing useQueryParamsVariableFieldsEnabled() greys (setEnabled) both controls while leaving
                 // both visible: table disabled at Use Map, variable field disabled at Use Table. Grey-both.
                 { key: 'parameters', type: 'keyvalue', mapShape: 'list', disabled: (p: any) => asBool(p.useParametersVariable) },
-                { key: 'parametersVariable', label: 'Map Variable', type: 'text', width: '320px', placeholder: 'e.g. RESTParams', disabled: (p: any) => !asBool(p.useParametersVariable) },
-                { key: 'useHeadersVariable', label: 'Headers', type: 'radio', refresh: true, options: USE_TABLE_MAP },
+                { key: 'parametersVariable', label: '映射变量', type: 'text', width: '320px', placeholder: '如 RESTParams', disabled: (p: any) => !asBool(p.useParametersVariable) },
+                { key: 'useHeadersVariable', label: '请求头', type: 'radio', refresh: true, options: USE_TABLE_MAP },
                 // Swing useHeadersVariableFieldsEnabled() greys both, same as query parameters above.
                 { key: 'headers', type: 'keyvalue', mapShape: 'list', disabled: (p: any) => asBool(p.useHeadersVariable) },
-                { key: 'headersVariable', label: 'Map Variable', type: 'text', width: '320px', placeholder: 'e.g. RESTHeaders', disabled: (p: any) => !asBool(p.useHeadersVariable) },
+                { key: 'headersVariable', label: '映射变量', type: 'text', width: '320px', placeholder: '如 RESTHeaders', disabled: (p: any) => !asBool(p.useHeadersVariable) },
                 {
-                    key: 'contentType', label: 'Content Type', type: 'text', width: '220px', refresh: true,
+                    key: 'contentType', label: '内容类型', type: 'text', width: '220px', refresh: true,
                     disabled: (p: any) => !httpHasBody(p),
                     // A form-urlencoded body is built from the query-parameter map,
                     // so Swing forces Multipart off + Data Type to Text here.
@@ -329,20 +329,20 @@ const httpSender = {
                 {
                     // Swing forces the charset combo back to "default" (index 0)
                     // whenever Data Type=Binary is selected.
-                    key: 'dataTypeBinary', label: 'Data Type', type: 'radio', refresh: true,
+                    key: 'dataTypeBinary', label: '数据类型', type: 'radio', refresh: true,
                     disabled: (p: any) => !httpHasBody(p) || httpFormUrlEncoded(p),
                     onSet: (p: any) => { if (asBool(p.dataTypeBinary)) p.charset = DEFAULT_CHARSET; },
                     options: [
-                        { value: true, label: 'Binary' },
-                        { value: false, label: 'Text' }
+                        { value: true, label: '二进制' },
+                        { value: false, label: '文本' }
                     ]
                 },
                 // Charset applies to the form-urlencoded body too (HttpDispatcher
                 // builds the UrlEncodedFormEntity with it), so keep it settable for
                 // form-urlencoded — only disable with no body or Binary data type
                 // (matching Swing's dataTypeTextRadioActionPerformed re-enable).
-                { key: 'charset', label: 'Charset Encoding', type: 'select', options: HTTP_CHARSETS, width: '160px', disabled: (p: any) => !httpHasBody(p) || asBool(p.dataTypeBinary) },
-                { key: 'content', label: 'Content', type: 'textarea', rows: 8, tooltip: 'The HTTP message body.', disabled: (p: any) => !httpHasBody(p) || httpFormUrlEncoded(p) }
+                { key: 'charset', label: '字符集编码', type: 'select', options: HTTP_CHARSETS, width: '160px', disabled: (p: any) => !httpHasBody(p) || asBool(p.dataTypeBinary) },
+                { key: 'content', label: '正文', type: 'textarea', rows: 8, tooltip: 'HTTP 消息正文。', disabled: (p: any) => !httpHasBody(p) || httpFormUrlEncoded(p) }
             ]} />
         );
     },
@@ -351,9 +351,9 @@ const httpSender = {
     validate(properties: any) {
         return requireFields(properties, [
             { key: 'host', label: 'URL' },
-            { key: 'socketTimeout', label: 'Send Timeout' },
-            { key: 'proxyAddress', label: 'Proxy Address', when: (p: any) => asBool(p.useProxyServer) },
-            { key: 'proxyPort', label: 'Proxy Port', when: (p: any) => asBool(p.useProxyServer) }
+            { key: 'socketTimeout', label: '发送超时' },
+            { key: 'proxyAddress', label: '代理地址', when: (p: any) => asBool(p.useProxyServer) },
+            { key: 'proxyPort', label: '代理端口', when: (p: any) => asBool(p.useProxyServer) }
         ]);
     }
 };

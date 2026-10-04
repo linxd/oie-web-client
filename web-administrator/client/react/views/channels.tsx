@@ -56,14 +56,14 @@ import type { ViewMode, TagMode } from './channel-display.jsx';
 // default widths. Order/visibility/widths are persisted by TreeTable's column
 // manager under the same 'channels' key the legacy grid used.
 const CHANNEL_COLUMNS = [
-    { key: 'status', label: 'Status', width: 140 },   // tree column: carries the depth indent + twisty spacer + pip, so needs room for "Disabled"/"Invalid"
-    { key: 'dataType', label: 'Data Type', width: 95 },
-    { key: 'name', label: 'Name', width: 280 },
-    { key: 'id', label: 'Id', width: 250 },
-    { key: 'description', label: 'Description', width: 240 },
-    { key: 'revDelta', label: 'Rev Δ', width: 60 },
-    { key: 'lastDeployed', label: 'Last Deployed', width: 150 },
-    { key: 'lastModified', label: 'Last Modified', width: 150 }
+    { key: 'status', label: '状态', width: 140 },   // tree column: carries the depth indent + twisty spacer + pip, so needs room for "Disabled"/"Invalid"
+    { key: 'dataType', label: '数据类型', width: 95 },
+    { key: 'name', label: '名称', width: 280 },
+    { key: 'id', label: 'ID', width: 250 },
+    { key: 'description', label: '描述', width: 240 },
+    { key: 'revDelta', label: '版本 Δ', width: 60 },
+    { key: 'lastDeployed', label: '上次部署', width: 150 },
+    { key: 'lastModified', label: '上次修改', width: 150 }
 ];
 const CHANNEL_COL_WIDTHS = Object.fromEntries(CHANNEL_COLUMNS.map(c => [c.key, c.width]));
 
@@ -79,8 +79,8 @@ const ENGINE_DEFAULT_GROUP_NAME = '[Default Group]';
 // OK-only warning (Swing alertWarning).
 function alertWarning(message: any) {
     return new Promise(resolve => modal({
-        title: 'Warning', body: h('div', String(message)), onClose: resolve as any,
-        buttons: [{ label: 'OK', primary: true, onClick: resolve as any }]
+        title: '警告', body: h('div', String(message)), onClose: resolve as any,
+        buttons: [{ label: '确定', primary: true, onClick: resolve as any }]
     }));
 }
 
@@ -88,10 +88,10 @@ function alertWarning(message: any) {
 // message's \n line breaks the way JOptionPane does.
 function alertInformation(message: any) {
     return new Promise(resolve => modal({
-        title: 'Information',
+        title: '信息',
         body: h('div', { style: 'white-space: pre-line' }, String(message)),
         onClose: resolve as any,
-        buttons: [{ label: 'OK', primary: true, onClick: resolve as any }]
+        buttons: [{ label: '确定', primary: true, onClick: resolve as any }]
     }));
 }
 
@@ -100,8 +100,8 @@ function optionYesNo(title: any, message: any) {
     return new Promise(resolve => modal({
         title, body: h('div', { style: 'white-space: pre-line' }, String(message)), onClose: () => resolve(false),
         buttons: [
-            { label: 'No', onClick: () => resolve(false) },
-            { label: 'Yes', primary: true, onClick: () => resolve(true) }
+            { label: '否', onClick: () => resolve(false) },
+            { label: '是', primary: true, onClick: () => resolve(true) }
         ]
     }));
 }
@@ -109,27 +109,25 @@ function optionYesNo(title: any, message: any) {
 // "Channel/Group X has code template libraries included — import them?" — Yes/No/Cancel
 // with an "always" checkbox that persists the importLibrariesWithChannels pref.
 // Returns 'yes' | 'no' | 'cancel'.
-function promptImportLibraries(objectName: any, count: any, objectType = 'Channel') {
+function promptImportLibraries(objectName: any, count: any, objectType = '通道') {
     const pref = getPref('importLibrariesWithChannels');
     if (pref === 'yes') return Promise.resolve('yes');
     if (pref === 'no') return Promise.resolve('no');
-    const plural = count === 1 ? 'y' : 'ies';
-    const them = count === 1 ? 'it' : 'them';
     return new Promise(resolve => {
         const always = h('input', { type: 'checkbox' });
         const remember = (choice: any) => { if ((always as any).checked) setPrefs({ importLibrariesWithChannels: choice }); return choice; };
         modal({
-            title: `Import ${objectType}`,
+            title: `导入${objectType}`,
             body: h('div',
                 h('div', { class: 'mb-2.5' },
-                    `${objectType} "${objectName}" has code template librar${plural} included with it. Would you like to import ${them}?`),
+                    `${objectType}“${objectName}”包含 ${count} 个代码模板库，是否导入`),
                 h('label', { class: 'flex items-center gap-1.5 text-[11px]' },
-                    always, 'Always choose this option by default in the future (may be changed in Settings)')),
+                    always, '以后默认始终选择此选项（可在设置中修改）')),
             onClose: () => resolve('cancel'),
             buttons: [
-                { label: 'Cancel', onClick: () => resolve('cancel') },
-                { label: 'No', onClick: () => resolve(remember('no')) },
-                { label: 'Yes', primary: true, onClick: () => resolve(remember('yes')) }
+                { label: '取消', onClick: () => resolve('cancel') },
+                { label: '否', onClick: () => resolve(remember('no')) },
+                { label: '是', primary: true, onClick: () => resolve(remember('yes')) }
             ]
         });
     });
@@ -146,7 +144,7 @@ async function linkedLibraryNames(channelIds: any[]) {
         const disabled = new Set(idSet(lib.disabledChannelIds));
         return ids.some(id => enabled.has(id) || (lib.includeNewChannels === true && !disabled.has(id)));
     })
-        .map(lib => lib.name || '(unnamed library)');
+        .map(lib => lib.name || '（未命名库）');
 }
 
 // Swing channel-export dialog: lists the linked libraries and asks whether to
@@ -157,19 +155,19 @@ function promptExportLibraries(names: any) {
         const always = h('input', { type: 'checkbox' });
         const remember = (choice: any) => { if ((always as any).checked) setPrefs({ exportLibrariesWithChannels: choice }); return choice; };
         modal({
-            title: 'Export Channel',
+            title: '导出通道',
             body: h('div',
-                h('div', { class: 'mb-1.5' }, 'The following code template libraries are linked to this channel:'),
+                h('div', { class: 'mb-1.5' }, '以下代码模板库已与此通道关联：'),
                 h('div', { class: 'border border-line rounded-[4px] bg-bg1 py-1.5 px-2.5 max-h-[126px] overflow-auto' },
                     h('ul', { class: 'm-0 pl-[16px]' }, names.map((n: any) => h('li', n)))),
-                h('div', { class: 'mt-2.5 mx-0 mb-2' }, 'Do you wish to include these libraries in the channel export?'),
+                h('div', { class: 'mt-2.5 mx-0 mb-2' }, '是否将这些库一并包含在通道导出文件中？'),
                 h('label', { class: 'flex items-center gap-1.5 text-[11px]' },
-                    always, 'Always choose this option by default in the future (may be changed in Settings)')),
+                    always, '以后默认始终选择此选项（可在设置中修改）')),
             onClose: () => resolve('cancel'),
             buttons: [
-                { label: 'Cancel', onClick: () => resolve('cancel') },
-                { label: 'No', onClick: () => resolve(remember('no')) },
-                { label: 'Yes', primary: true, onClick: () => resolve(remember('yes')) }
+                { label: '取消', onClick: () => resolve('cancel') },
+                { label: '否', onClick: () => resolve(remember('no')) },
+                { label: '是', primary: true, onClick: () => resolve(remember('yes')) }
             ]
         });
     });
@@ -188,7 +186,7 @@ async function chooseExportLibraries(channelIds: any[], assertSession: () => voi
         // Code-template viewing is independently authorized. Swing consults its
         // cache and still exports the channel when that data is unavailable; keep
         // the backup usable while making the omitted libraries explicit.
-        toast(`Could not check linked code template libraries: ${e.message || e}. Exporting without them.`, 'warn');
+        toast(`无法检查关联的代码模板库：${e.message || e}，导出不包含这些库`, 'warn');
         return false;
     }
     if (!names.length) return false;
@@ -205,7 +203,9 @@ function exportFileName(name: any, fallback: string, used: Set<string>) {
     return candidate;
 }
 
-const CHANNEL_NAME_RE = /^[a-zA-Z_0-9\-\s]*$/;
+// Swing Frame.checkChannelName parity: letters/digits/underscore/hyphen/space
+// PLUS CJK (the YYT fork's pattern is "^[a-zA-Z_0-9 \-\u4e00-\u9fa5]*$").
+const CHANNEL_NAME_RE = /^[A-Za-z0-9_\-\s.\()\u4e00-\u9fa5\u3001\u3002\u300a\u300b\u3010\u3011\uff08\uff09\uff0c\uff1a\uff1b\uff1f\uff01\u2014\u2018\u2019\u201c\u201d\u00b7]*$/;
 
 /* Resolve a name/id collision on channel import, mirroring Swing's
    ChannelPanel.importChannel + Frame.checkChannelName: warn that the channel
@@ -227,22 +227,22 @@ async function resolveImportName(name: any, id: any, existing: any, assertSessio
         String(c.name || '').toLowerCase() === String(n).toLowerCase() && c.id !== candidateId);
 
     async function checkName(n: any, candidateId: any) {
-        if (!n) { await alertWarning('Channel name cannot be empty.'); assertSession(); return false; }
-        if (n.length > 40) { await alertWarning('Channel name cannot be longer than 40 characters.'); assertSession(); return false; }
-        if (!CHANNEL_NAME_RE.test(n)) { await alertWarning('Channel name cannot have special characters besides hyphen, underscore, and space.'); assertSession(); return false; }
-        if (nameClash(n, candidateId)) { await alertWarning(`Channel "${n}" already exists.`); assertSession(); return false; }
+        if (!n) { await alertWarning('通道名称不能为空'); assertSession(); return false; }
+        if (n.length > 40) { await alertWarning('通道名称长度不能超过 40 个字符'); assertSession(); return false; }
+        if (!CHANNEL_NAME_RE.test(n)) { await alertWarning('通道名称只能包含中文、字母、数字、空格、连字符、下划线、括号、点号及常用中文标点。'); assertSession(); return false; }
+        if (nameClash(n, candidateId)) { await alertWarning(`通道“${n}”已存在`); assertSession(); return false; }
         return true;
     }
 
     const validName = await checkName(name, tempId);
     assertSession();
     if (!validName) {
-        const overwrite = await optionYesNo('Import Channel', "Would you like to overwrite the existing channel?  Choose 'No' to create a new channel.");
+        const overwrite = await optionYesNo('导入通道', '确定要覆盖已有通道吗？选择“否”将新建一个通道');
         assertSession();
         if (!overwrite) {
             let newName = name;
             do {
-                newName = await promptDialog('Import Channel', 'Please enter a new name for the channel.', newName);
+                newName = await promptDialog('导入通道', '请输入该通道的新名称', newName);
                 assertSession();
                 if (newName == null) return null;             // Cancel → abort
             } while (!(await checkName(newName, tempId)));
@@ -324,7 +324,7 @@ async function importChannelXml(xml: any, existing: any, { checkVersion = true, 
     assertSession();
     const doc = new DOMParser().parseFromString(xml, 'text/xml');
     if (doc.querySelector('parsererror') || doc.documentElement.nodeName !== 'channel') {
-        throw new Error('Not a valid channel XML file');
+        throw new Error('不是有效的通道 XML 文件');
     }
     const channelEl = doc.documentElement;
     // Swing promptObjectMigration: block newer-than-server exports (alertInformation),
@@ -336,7 +336,7 @@ async function importChannelXml(xml: any, existing: any, { checkVersion = true, 
             await alertInformation(verdict.message);
             return false;
         }
-        if (verdict.action === 'confirm' && !await optionYesNo('Select an Option', verdict.message)) {
+        if (verdict.action === 'confirm' && !await optionYesNo('选择操作', verdict.message)) {
             return false;
         }
     }
@@ -406,7 +406,7 @@ async function importChannelXml(xml: any, existing: any, { checkVersion = true, 
             assertSession();
             // Swing reports this failure but still allows the channel import to
             // continue, so retain that partial-completion behavior explicitly.
-            toast(`Unable to save channel dependencies: ${e.message || e}`, 'error');
+            toast(`无法保存通道依赖：${e.message || e}`, 'error');
         }
     }
     dependentIdsEl?.remove();
@@ -460,7 +460,7 @@ async function importLibraryObjectsJson(imported: any[], assertSession: () => vo
         invalidateCompletions();
         try { await api.codeTemplates.libraries(true); } catch { /* Preserve the original save failure. */ }
         assertSession();
-        throw new Error(`${error.message || error}. Code template libraries may have been partly saved; review them before retrying.`);
+        throw new Error(`${error.message || error}，代码模板库可能已部分保存，请在重试前检查`);
     }
     invalidateCompletions();
 }
@@ -562,8 +562,8 @@ export function ChannelsView() {
         }
         rows.push({
             id: DEFAULT_GROUP_ID,
-            name: 'Default Group',
-            description: 'Channels not part of a group will appear here.',
+            name: '[缺省组]',
+            description: '未加入任何组的通道会显示在这里',
             channels: channels.filter(c => !claimed.has(c.id))
         });
         return rows;
@@ -591,10 +591,10 @@ export function ChannelsView() {
     }
 
     function statusCell(channel: any) {
-        if (isInvalid(channel)) return <span className="status-cell"><span className="pip err" />Invalid</span>;
+        if (isInvalid(channel)) return <span className="status-cell"><span className="pip err" />无效</span>;
         return isEnabled(channel)
-            ? <span className="status-cell"><span className="pip ok" />Enabled</span>
-            : <span className="status-cell"><span className="pip" /><span className="text-text-dim">Disabled</span></span>;
+            ? <span className="status-cell"><span className="pip ok" />已启用</span>
+            : <span className="status-cell"><span className="pip" /><span className="text-text-dim">已禁用</span></span>;
     }
 
     // Channel name + tag chips (names, icons, or none per the Tags toggle). The
@@ -633,9 +633,9 @@ export function ChannelsView() {
         const outOfSync = delta! > 0 || ctChanged;
         if (delta === null) return '--';
         if (!outOfSync) return '0';
-        const revTitle = delta > 0 && ctChanged ? 'Channel and code templates changed since last deployment'
-            : delta > 0 ? 'Channel changed since last deployment'
-                : 'Code templates changed since last deployment';
+        const revTitle = delta > 0 && ctChanged ? '通道与代码模板自上次部署后均已更改'
+            : delta > 0 ? '通道自上次部署后已更改'
+                : '代码模板自上次部署后已更改';
         return <span className="cell-flag" title={revTitle}>{String(delta)}</span>;
     }
 
@@ -664,7 +664,7 @@ export function ChannelsView() {
                         ? String(n.group.name || '').toLowerCase()
                         : String(n.channel.name || '').toLowerCase();
                     case 'id': return isGroup
-                        ? String(n.group.id === DEFAULT_GROUP_ID ? 'Default Group' : (n.group.id || '')).toLowerCase()
+                        ? String(n.group.id === DEFAULT_GROUP_ID ? '缺省组' : (n.group.id || '')).toLowerCase()
                         : String(n.channel.id || '').toLowerCase();
                     case 'description': return isGroup
                         ? String(firstLine(n.group.description) || '').toLowerCase()
@@ -693,7 +693,7 @@ export function ChannelsView() {
                         ? <span className="font-bold">{`[${n.group.name}]`}</span>
                         : nameCell(n.channel);
                     case 'id': return isGroup
-                        ? <span className="text-text-faint">{n.group.id === DEFAULT_GROUP_ID ? 'Default Group' : (n.group.id || '--')}</span>
+                        ? <span className="text-text-faint">{n.group.id === DEFAULT_GROUP_ID ? '[缺省组]' : (n.group.id || '--')}</span>
                         : <span className="text-text-faint">{n.channel.id || ''}</span>;
                     case 'description': return isGroup
                         ? <span className="text-text-dim">{descriptionCell(n.group.description)}</span>
@@ -770,16 +770,16 @@ export function ChannelsView() {
         // Group tasks exist only in Group view (Swing drops the Group Tasks pane
         // in channel mode).
         contextMenu(e.clientX, e.clientY, [
-            { label: 'Refresh', icon: 'refresh', task: 'doRefreshChannels', group: 'channel', onClick: () => refresh() },
+            { label: '刷新', icon: 'refresh', task: 'doRefreshChannels', group: 'channel', onClick: () => refresh() },
             '-',
-            { label: 'New Channel', icon: 'plus', task: 'doNewChannel', group: 'channel', onClick: () => newTask() },
-            { label: 'Import Channel', icon: 'import', task: 'doImportChannel', group: 'channel', onClick: () => importTask() },
-            { label: 'Export All Channels', icon: 'export', task: 'doExportAllChannels', group: 'channel', onClick: () => exportAllTask() },
+            { label: '新建通道', icon: 'plus', task: 'doNewChannel', group: 'channel', onClick: () => newTask() },
+            { label: '导入通道', icon: 'import', task: 'doImportChannel', group: 'channel', onClick: () => importTask() },
+            { label: '导出全部通道', icon: 'export', task: 'doExportAllChannels', group: 'channel', onClick: () => exportAllTask() },
             ...(groupView ? [
                 '-' as const,
-                { label: 'New Group', icon: 'plus', task: 'doNewGroup', group: 'channelGroup', onClick: () => newGroupTask() },
-                { label: 'Import Group', icon: 'import', task: 'doImportGroup', group: 'channelGroup', onClick: () => importGroupTask() },
-                { label: 'Export All Groups', icon: 'export', task: 'doExportAllGroups', group: 'channelGroup', onClick: () => exportGroupsTask() }
+                { label: '新建通道组', icon: 'plus', task: 'doNewGroup', group: 'channelGroup', onClick: () => newGroupTask() },
+                { label: '导入通道组', icon: 'import', task: 'doImportGroup', group: 'channelGroup', onClick: () => importGroupTask() },
+                { label: '导出全部通道组', icon: 'export', task: 'doExportAllGroups', group: 'channelGroup', onClick: () => exportGroupsTask() }
             ] : [])
         ]);
     }
@@ -791,17 +791,17 @@ export function ChannelsView() {
             const isRealGroup = node.group.id !== DEFAULT_GROUP_ID;
             const group = node.group.group || node.group;   // the raw engine group object
             contextMenu(e.clientX, e.clientY, [
-                { label: 'Refresh', icon: 'refresh', task: 'doRefreshChannels', group: 'channel', onClick: () => refresh() },
+                { label: '刷新', icon: 'refresh', task: 'doRefreshChannels', group: 'channel', onClick: () => refresh() },
                 '-',
-                { label: 'New Group', icon: 'plus', task: 'doNewGroup', group: 'channelGroup', onClick: () => newGroupTask() },
-                { label: 'Edit Group Details', icon: 'edit', task: 'doEditGroupDetails', group: 'channelGroup', hidden: !isRealGroup, onClick: () => editGroupTask(group) },
-                { label: 'Delete Group', icon: 'trash', danger: true, task: 'doDeleteGroup', group: 'channelGroup', hidden: !isRealGroup, onClick: () => deleteGroupTask(group) },
+                { label: '新建通道组', icon: 'plus', task: 'doNewGroup', group: 'channelGroup', onClick: () => newGroupTask() },
+                { label: '编辑通道组详情', icon: 'edit', task: 'doEditGroupDetails', group: 'channelGroup', hidden: !isRealGroup, onClick: () => editGroupTask(group) },
+                { label: '删除通道组', icon: 'trash', danger: true, task: 'doDeleteGroup', group: 'channelGroup', hidden: !isRealGroup, onClick: () => deleteGroupTask(group) },
                 '-',
-                { label: 'Import Group', icon: 'import', task: 'doImportGroup', group: 'channelGroup', onClick: () => importGroupTask() },
-                { label: 'Export Group', icon: 'export', task: 'doExportGroup', group: 'channelGroup', onClick: () => exportGroupTask(group) },
-                { label: 'Export All Groups', icon: 'export', task: 'doExportAllGroups', group: 'channelGroup', onClick: () => exportGroupsTask() },
+                { label: '导入通道组', icon: 'import', task: 'doImportGroup', group: 'channelGroup', onClick: () => importGroupTask() },
+                { label: '导出通道组', icon: 'export', task: 'doExportGroup', group: 'channelGroup', onClick: () => exportGroupTask(group) },
+                { label: '导出全部通道组', icon: 'export', task: 'doExportAllGroups', group: 'channelGroup', onClick: () => exportGroupsTask() },
                 '-',
-                { label: 'New Channel', icon: 'plus', task: 'doNewChannel', group: 'channel', onClick: () => newTask() }
+                { label: '新建通道', icon: 'plus', task: 'doNewChannel', group: 'channel', onClick: () => newTask() }
             ]);
             return;
         }
@@ -836,26 +836,26 @@ export function ChannelsView() {
         const anyEnabled = rows.some(isEnabled);
         const anyDisabled = rows.some((c: any) => !isEnabled(c));
         contextMenu(e.clientX, e.clientY, [
-            { label: 'Refresh', icon: 'refresh', task: 'doRefreshChannels', group: 'channel', onClick: () => refresh() },
-            { label: 'Redeploy All', icon: 'deploy', task: 'doRedeployAll', group: 'channel', onClick: () => redeployAllTask() },
+            { label: '刷新', icon: 'refresh', task: 'doRefreshChannels', group: 'channel', onClick: () => refresh() },
+            { label: '全部重新部署', icon: 'deploy', task: 'doRedeployAll', group: 'channel', onClick: () => redeployAllTask() },
             '-',
-            { label: 'New Channel', icon: 'plus', task: 'doNewChannel', group: 'channel', onClick: () => newTask() },
-            { label: 'Import Channel', icon: 'import', task: 'doImportChannel', group: 'channel', onClick: () => importTask() },
-            { label: 'Export All Channels', icon: 'export', task: 'doExportAllChannels', group: 'channel', onClick: () => exportAllTask() },
+            { label: '新建通道', icon: 'plus', task: 'doNewChannel', group: 'channel', onClick: () => newTask() },
+            { label: '导入通道', icon: 'import', task: 'doImportChannel', group: 'channel', onClick: () => importTask() },
+            { label: '导出全部通道', icon: 'export', task: 'doExportAllChannels', group: 'channel', onClick: () => exportAllTask() },
             '-',
-            { label: 'Edit Channel', icon: 'edit', task: 'doEditChannel', group: 'channel', onClick: () => router.navigate(`/channels/${channel.id}/edit`) },
-            { label: 'View Messages', icon: 'messages', task: 'doViewMessages', group: 'channel', onClick: () => messagesTask(rows) },
+            { label: '编辑通道', icon: 'edit', task: 'doEditChannel', group: 'channel', onClick: () => router.navigate(`/channels/${channel.id}/edit`) },
+            { label: '查看消息', icon: 'messages', task: 'doViewMessages', group: 'channel', onClick: () => messagesTask(rows) },
             '-',
-            { label: 'Deploy Channel', icon: 'deploy', task: 'doDeployChannel', group: 'channel', hidden: !anyEnabled, onClick: () => deployTask(rows) },
-            { label: 'Enable Channel', icon: 'check', task: 'doEnableChannel', group: 'channel', hidden: !anyDisabled, onClick: () => setEnabledTask(true, rows) },
-            { label: 'Disable Channel', icon: 'x', task: 'doDisableChannel', group: 'channel', hidden: !anyEnabled, onClick: () => setEnabledTask(false, rows) },
+            { label: '部署通道', icon: 'deploy', task: 'doDeployChannel', group: 'channel', hidden: !anyEnabled, onClick: () => deployTask(rows) },
+            { label: '启用通道', icon: 'check', task: 'doEnableChannel', group: 'channel', hidden: !anyDisabled, onClick: () => setEnabledTask(true, rows) },
+            { label: '禁用通道', icon: 'x', task: 'doDisableChannel', group: 'channel', hidden: !anyEnabled, onClick: () => setEnabledTask(false, rows) },
             '-',
-            { label: 'Clone Channel', icon: 'copy', task: 'doCloneChannel', group: 'channel', onClick: () => cloneTask(rows) },
-            { label: 'Export Channel', icon: 'export', task: 'doExportChannel', group: 'channel', onClick: () => exportTask(rows) },
-            { label: 'Move to Group…', icon: 'folder', task: 'doAssignChannelToGroup', group: 'channelGroup', hidden: !groupView, onClick: () => moveToGroupTask(rows) },
+            { label: '克隆通道', icon: 'copy', task: 'doCloneChannel', group: 'channel', onClick: () => cloneTask(rows) },
+            { label: '导出通道', icon: 'export', task: 'doExportChannel', group: 'channel', onClick: () => exportTask(rows) },
+            { label: '移动到通道组…', icon: 'folder', task: 'doAssignChannelToGroup', group: 'channelGroup', hidden: !groupView, onClick: () => moveToGroupTask(rows) },
             ...(pluginItems.length ? ['-', ...pluginItems] : []),
             '-',
-            { label: 'Delete Channel', icon: 'trash', danger: true, task: 'doDeleteChannel', group: 'channel', onClick: () => deleteTask(rows) }
+            { label: '删除通道', icon: 'trash', danger: true, task: 'doDeleteChannel', group: 'channel', onClick: () => deleteTask(rows) }
         ]);
     }
 
@@ -868,9 +868,9 @@ export function ChannelsView() {
         if (!id) return;
         const ids = selected.has(id) ? new Set(selected) : new Set([id]);
         const names = channels.filter(c => ids.has(c.id)).map(c => c.name).join(', ');
-        if (await confirmDialog('Move to Group',
-            `Move ${ids.size === 1 ? `"${names}"` : ids.size + ' channels'} to [${toNode.group.name}]?`,
-            { okLabel: 'Move' })) {
+        if (await confirmDialog('移动到通道组',
+            `确定将${ids.size === 1 ? `“${names}”` : ` ${ids.size} 个通道 `}移动到 [${toNode.group.name}]？`,
+            { okLabel: '移动' })) {
             await moveChannelsToGroup(ids, toNode.group.id);
         }
     }
@@ -902,10 +902,10 @@ export function ChannelsView() {
         if (gen !== refreshGenRef.current) return;
         const [channelResult, groupResult, tagResult, statusResult] = results;
         const failures = [
-            ['channels', channelResult],
-            ['groups', groupResult],
-            ['tags', tagResult],
-            ['statuses', statusResult]
+            ['通道', channelResult],
+            ['通道组', groupResult],
+            ['标签', tagResult],
+            ['状态', statusResult]
         ].filter(([, result]: any) => result.status === 'rejected')
             .map(([label, result]: any) => `${label}: ${result.reason?.message || result.reason}`);
 
@@ -937,7 +937,7 @@ export function ChannelsView() {
         if (failures.length) {
             const message = failures.join('; ');
             setLoadError(message);
-            toast(`Failed to load ${message}`, 'error');
+            toast(`加载失败：${message}`, 'error');
         } else {
             setLoadError(null);
         }
@@ -961,25 +961,25 @@ export function ChannelsView() {
     }
 
     const requireSingle = (rows: any) => {
-        if (rows.length !== 1) { toast('Select a single channel', 'warn'); return null; }
+        if (rows.length !== 1) { toast('请选择单个通道', 'warn'); return null; }
         return rows[0];
     };
 
     const requireAny = (rows: any) => {
-        if (!rows.length) { toast('Select a channel first', 'warn'); return null; }
+        if (!rows.length) { toast('请先选择通道', 'warn'); return null; }
         return rows;
     };
 
     /* ---- channel tasks ----------------------------------------------------------- */
 
     async function redeployAllTask() {
-        if (!await confirmDialog('Redeploy All', 'Undeploy and redeploy all channels?', { okLabel: 'Redeploy' })) return;
+        if (!await confirmDialog('全部重新部署', '取消部署并重新部署所有通道？', { okLabel: '重新部署' })) return;
         try {
             await api.engine.redeployAll();
-            toast('Redeploying all channels');
+            toast('正在重新部署所有通道');
             router.navigate('/dashboard');
         } catch (e: any) {
-            errorModal('Redeploy Failed', e);
+            errorModal('重新部署失败', e);
         }
     }
 
@@ -1016,14 +1016,14 @@ export function ChannelsView() {
         }, icon(iconName, 20),
             h('div', h('div', { class: 'font-semibold' }, title), h('div.hint', desc)));
         const m = modal({
-            title: 'New Channel',
+            title: '新建通道',
             body: h('div', { class: 'flex flex-col gap-2.5 min-w-[396px]' },
-                card('classic', 'edit', 'Classic editor', 'The full tabbed editor — every option on one screen.'),
-                card('guided', 'wand', 'Wizard', 'A step-by-step guided builder: dependencies, options, source, destinations, filters and transforms.'),
+                card('classic', 'edit', '经典编辑器', '完整的选项卡编辑器，所有选项集中在一屏'),
+                card('guided', 'wand', '向导', '分步引导式创建器：依赖、选项、源连接器、目的地、过滤器与转换器'),
                 h('label', { class: 'flex items-center gap-2 mt-2 text-text-dim' },
                     h('input', { type: 'checkbox', onChange: (e: any) => { remember = e.target.checked; } }),
-                    'Remember my choice (set as default)')),
-            buttons: [{ label: 'Cancel' }]
+                    '记住我的选择（设为默认）')),
+            buttons: [{ label: '取消' }]
         });
     }
 
@@ -1075,7 +1075,7 @@ export function ChannelsView() {
                 if (!saved) return;
             }
             pendingImportRef.current = null;
-            toast(`Imported ${file.name}`);
+            toast(`已导入 ${file.name}`);
             await refresh();
         } catch (e: any) {
             try { assertSession(); } catch { return; }
@@ -1113,7 +1113,7 @@ export function ChannelsView() {
     async function exportAllTask() {
         let assertSession: () => void;
         try { assertSession = captureEngineSession(); } catch { return; }
-        if (!channels.length) { toast('No channels to export', 'warn'); return; }
+        if (!channels.length) { toast('没有可导出的通道', 'warn'); return; }
         try {
             const includeLibs = await chooseExportLibraries(channels.map(channel => channel.id), assertSession);
             assertSession();
@@ -1121,13 +1121,13 @@ export function ChannelsView() {
             await saveFile('channels.zip', 'application/zip', async () => {
                 const xml = await api.getXml('/channels', includeLibs ? { includeCodeTemplateLibraries: true } : undefined, { timeoutMs: null });
                 const doc = new DOMParser().parseFromString(xml, 'text/xml');
-                if (doc.querySelector('parsererror')) throw new Error('Engine returned invalid channel XML');
+                if (doc.querySelector('parsererror')) throw new Error('引擎返回的通道 XML 无效');
                 const root = doc.documentElement;
                 const elements = channelXmlElements(root);
                 const returnedIds = new Set(elements.map(element =>
                     [...element.children].find(c => c.tagName === 'id')?.textContent).filter(Boolean));
                 const missing = channels.filter(channel => !returnedIds.has(String(channel.id)));
-                if (missing.length) throw new Error(`The engine omitted ${missing.length} channel${missing.length === 1 ? '' : 's'} from the export`);
+                if (missing.length) throw new Error(`引擎在导出中遗漏了 ${missing.length} 个通道`);
                 const zip = createZip();
                 const used = new Set<string>();
                 for (const element of elements) {
@@ -1152,7 +1152,7 @@ export function ChannelsView() {
             copy.name = `${channel.name} copy`;
             copy.revision = 0;
             await api.channels.create(copy);
-            toast(`Cloned ${channel.name}`);
+            toast(`已克隆 ${channel.name}`);
             refresh();
         } catch (e: any) {
             toast(e.message, 'error');
@@ -1162,7 +1162,7 @@ export function ChannelsView() {
     async function deleteTask(selRows: any) {
         const rows = requireAny(selRows);
         if (!rows) return;
-        if (!await confirmDialog('Delete channels', `Permanently delete ${rows.length} channel(s)? This cannot be undone.`, { danger: true, okLabel: 'Delete' })) return;
+        if (!await confirmDialog('删除通道', `确定要永久删除 ${rows.length} 个通道吗？此操作无法撤销`, { danger: true, okLabel: '删除' })) return;
         for (const channel of rows) {
             try { await api.channels.remove(channel.id); } catch (e: any) { toast(e.message, 'error'); }
         }
@@ -1170,7 +1170,7 @@ export function ChannelsView() {
     }
 
     async function setEnabledTask(enabled: any, rows: any) {
-        if (!rows.length) { toast('Select a channel or group first', 'warn'); return; }
+        if (!rows.length) { toast('请先选择通道或通道组', 'warn'); return; }
         for (const channel of rows) {
             try { await api.channels.setEnabled(channel.id, enabled); } catch (e: any) { toast(e.message, 'error'); }
         }
@@ -1178,17 +1178,17 @@ export function ChannelsView() {
     }
 
     async function deployTask(rows: any) {
-        if (!rows.length) { toast('Select a channel or group first', 'warn'); return; }
+        if (!rows.length) { toast('请先选择通道或通道组', 'warn'); return; }
         try {
             if (!await runLifecycle('deploy', rows.map((c: any) => c.id))) return;
             // Move to the Dashboard to watch deployment (matches Swing).
-            toast(rows.length === 1 ? `Deploying ${rows[0].name}` : `Deploying ${rows.length} channels`);
+            toast(rows.length === 1 ? `正在部署 ${rows[0].name}` : `正在部署 ${rows.length} 个通道`);
             router.navigate('/dashboard');
         } catch (e: any) {
             // Deploy compile failures return the engine's full exception — show it
             // in the readable/copyable detail modal, not a giant corner toast.
-            errorModal('Channel Deployment Failed', e,
-                rows.length === 1 ? rows[0].name : `${rows.length} channels`);
+            errorModal('通道部署失败', e,
+                rows.length === 1 ? rows[0].name : `${rows.length} 个通道`);
             refresh();
         }
     }
@@ -1201,9 +1201,9 @@ export function ChannelsView() {
 
     function saveGroupChanges(change: (groups: any[]) => any[], removedIds: string[] = [], expectedGroup?: any) {
         return mutateChannelGroups(change, removedIds, { expectedGroup,
-            confirmOverwrite: () => confirmDialog('Channel Groups Modified',
-                'One or more channel groups have been modified since you last refreshed. Do you want to overwrite the changes?',
-                { danger: true, okLabel: 'Overwrite' }) });
+            confirmOverwrite: () => confirmDialog('通道组已更改',
+                '自上次刷新后，一个或多个通道组已被修改，确定要覆盖这些更改吗？',
+                { danger: true, okLabel: '覆盖' }) });
     }
 
     /* Move channels between groups (used by the modal task and drag/drop).
@@ -1212,7 +1212,7 @@ export function ChannelsView() {
         try {
             if (!await saveGroupChanges((updated: any[]) => {
                 if (targetId !== DEFAULT_GROUP_ID && !updated.some(g => g.id === targetId)) {
-                    throw new Error('The destination group was removed. Refresh and choose another group.');
+                    throw new Error('目标通道组已被删除，请刷新后选择其他通道组');
                 }
                 for (const group of updated) {
                     let members = api.asList(group.channels, 'channel').filter(m => m && m.id && !ids.has(m.id));
@@ -1221,7 +1221,7 @@ export function ChannelsView() {
                 }
                 return updated;
             })) return false;
-            toast('Channels moved');
+            toast('通道已移动');
             refresh();
             return true;
         } catch (e: any) {
@@ -1235,17 +1235,17 @@ export function ChannelsView() {
         if (!rows) return;
         const ids = new Set(rows.map((c: any) => c.id));
         const picker = select(
-            [{ value: DEFAULT_GROUP_ID, label: '[Default Group]' },
+            [{ value: DEFAULT_GROUP_ID, label: '[缺省组]' },
              ...groups.map(g => ({ value: g.id, label: g.name }))],
             DEFAULT_GROUP_ID);
         modal({
-            title: 'Move to Group',
+            title: '移动到通道组',
             body: h('div.field',
-                h('label', `Move ${rows.length} channel(s) to:`), picker),
+                h('label', `将 ${rows.length} 个通道移动到：`), picker),
             buttons: [
-                { label: 'Cancel' },
+                { label: '取消' },
                 {
-                    label: 'Move', primary: true,
+                    label: '移动', primary: true,
                     onClick: async () => !(await moveChannelsToGroup(ids, picker.value)) && false
                 }
             ]
@@ -1255,12 +1255,12 @@ export function ChannelsView() {
     /* ---- group tasks --------------------------------------------------------------- */
 
     async function newGroupTask() {
-        const name = await promptDialog('New Group', 'Group name');
+        const name = await promptDialog('新建通道组', '通道组名称');
         if (name === null || !name.trim()) return;
         try {
             const created = { id: uuid(), name: name.trim(), revision: 0, description: '', channels: null };
             if (!await saveGroupChanges((updated: any[]) => [...updated, created])) return;
-            toast(`Created group ${name.trim()}`);
+            toast(`已创建通道组 ${name.trim()}`);
             refresh();
         } catch (e: any) {
             toast(e.message, 'error');
@@ -1271,17 +1271,17 @@ export function ChannelsView() {
        render-resolved current group; the context menu passes its row's group).
        The synthetic Default Group never reaches them — its items are hidden. */
     const requireGroup = (group: any) => {
-        if (!group || group.id === DEFAULT_GROUP_ID) { toast('Select a group row first', 'warn'); return null; }
+        if (!group || group.id === DEFAULT_GROUP_ID) { toast('请先选择通道组', 'warn'); return null; }
         return group;
     };
 
     async function deleteGroupTask(g: any) {
         const group = requireGroup(g);
         if (!group) return;
-        if (!await confirmDialog('Delete Group', `Delete group "${group.name}"? Its channels move to the Default Group.`, { danger: true, okLabel: 'Delete' })) return;
+        if (!await confirmDialog('删除通道组', `确定要删除通道组“${group.name}”吗？其中的通道将移入缺省组`, { danger: true, okLabel: '删除' })) return;
         try {
             if (!await saveGroupChanges((updated: any[]) => updated.filter(x => x.id !== group.id), [group.id], group)) return;
-            toast(`Deleted group ${group.name}`);
+            toast(`已删除通道组 ${group.name}`);
             setLastGroupId(null);
             refresh();
         } catch (e: any) {
@@ -1296,15 +1296,15 @@ export function ChannelsView() {
         const descArea = h('textarea', { rows: 4 });
         (descArea as any).value = group.description || '';
         modal({
-            title: 'Edit Group Details',
-            body: h('div', field('Name', nameInput), field('Description', descArea)),
+            title: '编辑通道组详情',
+            body: h('div', field('名称', nameInput), field('描述', descArea)),
             buttons: [
-                { label: 'Cancel' },
+                { label: '取消' },
                 {
-                    label: 'Save', primary: true,
+                    label: '保存', primary: true,
                     onClick: async () => {
                         const name = nameInput.value.trim();
-                        if (!name) { toast('Group name is required', 'warn'); return false; }
+                        if (!name) { toast('通道组名称为必填项', 'warn'); return false; }
                         try {
                             if (!await saveGroupChanges((updated: any[]) => {
                                 const target = updated.find(current => current.id === group.id);
@@ -1312,7 +1312,7 @@ export function ChannelsView() {
                                 target.description = (descArea as any).value;
                                 return updated;
                             }, [], group)) return false;
-                            toast(`Group "${name}" updated`);
+                            toast(`通道组“${name}”已更新`);
                             refresh();
                         } catch (e: any) {
                             toast(e.message, 'error');
@@ -1330,12 +1330,12 @@ export function ChannelsView() {
        import instead of reducing them to group membership references. */
     function parseGroupXml(text: any) {
         const doc = new DOMParser().parseFromString(String(text || '').trim(), 'text/xml');
-        if (doc.querySelector('parsererror')) throw new Error('Not a valid XML file');
+        if (doc.querySelector('parsererror')) throw new Error('不是有效的 XML 文件');
         const root = doc.documentElement;
         const els = root.tagName === 'channelGroup'
             ? [root]
             : [...root.querySelectorAll(':scope > channelGroup')];
-        if (!els.length) throw new Error('No <channelGroup> elements found in the file');
+        if (!els.length) throw new Error('文件中未找到 <channelGroup> 元素');
         return els.map(el => {
             const childText = (tag: any) => {
                 const child = [...el.children].find(c => c.tagName === tag);
@@ -1381,7 +1381,7 @@ export function ChannelsView() {
             const importIds = importIdsFor(content);
             const verdict = checkImportVersionFromDoc(new DOMParser().parseFromString(content, 'text/xml'), 'group');
             if (verdict.action === 'block') { await alertInformation(verdict.message); return; }
-            if (verdict.action === 'confirm' && !await optionYesNo('Select an Option', verdict.message)) return;
+            if (verdict.action === 'confirm' && !await optionYesNo('选择操作', verdict.message)) return;
             assertSession();
             const parsed = parseGroupXml(content);
             // All prerequisite reads finish before any library or channel write.
@@ -1429,7 +1429,7 @@ export function ChannelsView() {
             const bundledLibraries = consolidateBundledLibraries(bundles);
             if (bundledLibraries.length) {
                 const groupName = parsed.length === 1 ? parsed[0].group.name : file.name;
-                const choice = await promptImportLibraries(groupName, bundledLibraries.length, 'Group');
+                const choice = await promptImportLibraries(groupName, bundledLibraries.length, '通道组');
                 assertSession();
                 if (choice === 'cancel') return;
                 if (choice === 'yes') await importLibraryObjectsJson(bundledLibraries, assertSession, importIds);
@@ -1452,7 +1452,7 @@ export function ChannelsView() {
                         assertSession();
                         failedChannelIds.add(embedded.id);
                         failedChannelCount++;
-                        toast(`Error importing channel: ${e.message || e}`, 'error');
+                        toast(`导入通道出错：${e.message || e}`, 'error');
                         continue;
                     }
                     if (resolved === false) {
@@ -1485,12 +1485,12 @@ export function ChannelsView() {
                 let generatedIds = 0;
                 const resolved = await resolveGroupImport(plannedGroups, group, {
                     overwrite: async () => {
-                        const result = await optionYesNo('Import Group', "Would you like to overwrite the existing group? Choose 'No' to create a new group.");
+                        const result = await optionYesNo('导入通道组', '确定要覆盖已有通道组吗？选择“否”将新建一个通道组');
                         assertSession();
                         return Boolean(result);
                     },
                     rename: async name => {
-                        const result = await promptDialog('Import Group', 'Please enter a new name for the group.', name);
+                        const result = await promptDialog('导入通道组', '请输入该通道组的新名称', name);
                         assertSession();
                         return result;
                     },
@@ -1502,7 +1502,7 @@ export function ChannelsView() {
                 });
                 assertSession();
                 if (!resolved) {
-                    toast(`Group import cancelled. ${importedChannelCount} channel(s) already imported have been kept.`, 'warn');
+                    toast(`通道组导入已取消，已导入的 ${importedChannelCount} 个通道已保留`, 'warn');
                     return;
                 }
                 imported.push(resolved);
@@ -1514,14 +1514,14 @@ export function ChannelsView() {
                 const payload = applyGroupImports(latest, baselineGroups, imported);
                 const result = await api.channelGroups.bulkUpdate(payload.groups, payload.removedIds, false);
                 assertSession();
-                if (result !== true && result !== 'true') throw new Error('Channel groups changed during import or the engine did not confirm the save. Import again to review the latest groups.');
+                if (result !== true && result !== 'true') throw new Error('导入期间通道组已发生变化，或引擎未确认保存，请重新导入以核对最新的通道组');
             }
             pendingImportRef.current = null;
-            if (failedChannelCount) toast(`Imported ${parsed.length} group(s) from ${file.name}; ${failedChannelCount} channel(s) were skipped or failed.`, 'warn');
-            else toast(`Imported ${parsed.length} group(s) from ${file.name}`);
+            if (failedChannelCount) toast(`已从 ${file.name} 导入 ${parsed.length} 个通道组，其中 ${failedChannelCount} 个通道被跳过或失败`, 'warn');
+            else toast(`已从 ${file.name} 导入 ${parsed.length} 个通道组`);
         } catch (e: any) {
             try { assertSession(); } catch { return; }
-            toast(`${e.message}${importedChannelCount ? ` ${importedChannelCount} channel(s) already imported have been kept.` : ''}`, 'error');
+            toast(`${e.message}${importedChannelCount ? `，已导入的 ${importedChannelCount} 个通道已保留` : ''}`, 'error');
         } finally {
             importBusyRef.current = false;
             try { assertSession(); await refresh(); } catch { /* A changed session owns its own refresh. */ }
@@ -1537,7 +1537,7 @@ export function ChannelsView() {
         const groupsXml = await api.getXml('/channelgroups', undefined, { timeoutMs: null });
         assertSession();
         const groupsDoc = new DOMParser().parseFromString(groupsXml, 'text/xml');
-        if (groupsDoc.querySelector('parsererror')) throw new Error('Engine returned invalid channel group XML');
+        if (groupsDoc.querySelector('parsererror')) throw new Error('引擎返回的通道组 XML 无效');
 
         const groupsRoot = groupsDoc.documentElement;
         const allGroups = groupsRoot.tagName === 'channelGroup'
@@ -1551,7 +1551,7 @@ export function ChannelsView() {
                 : allGroups.filter(groupEl =>
                     [...groupEl.children].find(c => c.tagName === 'id')?.textContent === groupId);
         if (groupId != null && groupId !== DEFAULT_GROUP_ID && !exportGroups.length) {
-            throw new Error('Channel group not found in the engine XML');
+            throw new Error('引擎 XML 中未找到该通道组');
         }
 
         const refsByGroup = new Map<any, { container: any; refs: string[] }>();
@@ -1586,7 +1586,7 @@ export function ChannelsView() {
             const channelsXml = await api.getXml('/channels', channelParams, { timeoutMs: null });
             assertSession();
             const channelsDoc = new DOMParser().parseFromString(channelsXml, 'text/xml');
-            if (channelsDoc.querySelector('parsererror')) throw new Error('Engine returned invalid channel XML');
+            if (channelsDoc.querySelector('parsererror')) throw new Error('引擎返回的通道 XML 无效');
             const channelsRoot = channelsDoc.documentElement;
             const fullChannels = channelXmlElements(channelsRoot);
             for (const channelEl of fullChannels) {
@@ -1595,7 +1595,7 @@ export function ChannelsView() {
             }
             if (wantsDefault) {
                 const missing = channels.filter(channel => !channelById.has(String(channel.id)));
-                if (missing.length) throw new Error(`The engine omitted ${missing.length} channel${missing.length === 1 ? '' : 's'} from the group export`);
+                if (missing.length) throw new Error(`引擎在通道组导出中遗漏了 ${missing.length} 个通道`);
             }
         }
 
@@ -1609,7 +1609,7 @@ export function ChannelsView() {
             container.replaceChildren();
             for (const id of entry.refs) {
                 const channelEl = channelById.get(id);
-                if (!channelEl) throw new Error(`Channel ${id} was not returned while exporting its group`);
+                if (!channelEl) throw new Error(`导出通道组时未返回通道 ${id}`);
                 container.appendChild(groupsDoc.importNode(channelEl, true));
             }
         }
@@ -1644,7 +1644,7 @@ export function ChannelsView() {
     async function exportGroupTask(g: any) {
         let assertSession: () => void;
         try { assertSession = captureEngineSession(); } catch { return; }
-        if (!g) { toast('Select a group row first', 'warn'); return; }
+        if (!g) { toast('请先选择通道组', 'warn'); return; }
         const group = g.id === DEFAULT_GROUP_ID ? g : requireGroup(g);
         if (!group) return;
         try {
@@ -1670,7 +1670,7 @@ export function ChannelsView() {
             await saveFile('channel-groups.zip', 'application/zip', async () => {
                 const xml = await channelGroupExportXml(undefined, includeLibs, assertSession);
                 const doc = new DOMParser().parseFromString(xml, 'text/xml');
-                if (doc.querySelector('parsererror')) throw new Error('Engine returned invalid channel group XML');
+                if (doc.querySelector('parsererror')) throw new Error('引擎返回的通道组 XML 无效');
                 const root = doc.documentElement;
                 const elements = root.tagName === 'channelGroup' ? [root] : [...root.querySelectorAll(':scope > channelGroup')];
                 const zip = createZip();
@@ -1763,27 +1763,27 @@ export function ChannelsView() {
         .filter((g: any) => g.channels.length > 0 || !hasFilter);
     const shownChannels = channels.filter((c: any) => !hasFilter || matchesFilter(c));
     const enabledCount = shownChannels.filter(isEnabled).length;
-    const countsText = (groupView ? `${shownGroups.length} Group${shownGroups.length === 1 ? '' : 's'}, ` : '')
-        + `${shownChannels.length} Channel${shownChannels.length === 1 ? '' : 's'}, `
-        + `${enabledCount} Enabled`;
+    const countsText = (groupView ? `${shownGroups.length} 个通道组，` : '')
+        + `${shownChannels.length} 个通道，`
+        + `${enabledCount} 个已启用`;
 
     return (
         <div className="view">
             <ViewTasks>
-                <RailPane title="Channel Tasks" paneKey="tasks:Channel Tasks" group="channel">
+                <RailPane title="通道任务" paneKey="tasks:Channel Tasks" group="channel">
                     <div className="taskbar" data-pane-title="Channel Tasks">
-                        <TaskButton label="Refresh" icon="refresh" task="doRefreshChannels" onClick={() => refresh()} />
-                        <TaskButton label="Redeploy All" icon="deploy" task="doRedeployAll" onClick={redeployAllTask} />
-                        {showDeploy && <TaskButton label="Deploy Channel" icon="deploy" task="doDeployChannel" onClick={() => deployTask(effectiveChannels())} />}
-                        <TaskButton label="New Channel" icon="plus" primary task="doNewChannel" onClick={newTask} />
-                        <TaskButton label="Import Channel" icon="import" task="doImportChannel" onClick={importTask} />
-                        {showExport && <TaskButton label="Export Channel" icon="export" task="doExportChannel" onClick={() => exportTask(selectedChannels())} />}
-                        {showDelete && <TaskButton label="Delete Channel" icon="trash" danger task="doDeleteChannel" onClick={() => deleteTask(selectedChannels())} />}
-                        {showClone && <TaskButton label="Clone Channel" icon="copy" task="doCloneChannel" onClick={() => cloneTask(selectedChannels())} />}
-                        {showEdit && <TaskButton label="Edit Channel" icon="edit" task="doEditChannel" onClick={() => { const c = requireSingle(selectedChannels()); if (c) router.navigate(`/channels/${c.id}/edit`); }} />}
-                        {showEnable && <TaskButton label="Enable Channel" icon="check" task="doEnableChannel" onClick={() => setEnabledTask(true, effectiveChannels())} />}
-                        {showDisable && <TaskButton label="Disable Channel" icon="x" task="doDisableChannel" onClick={() => setEnabledTask(false, effectiveChannels())} />}
-                        {showMessages && <TaskButton label="View Messages" icon="messages" task="doViewMessages" onClick={() => messagesTask(selectedChannels())} />}
+                        <TaskButton label="刷新" icon="refresh" task="doRefreshChannels" onClick={() => refresh()} />
+                        <TaskButton label="全部重新部署" icon="deploy" task="doRedeployAll" onClick={redeployAllTask} />
+                        {showDeploy && <TaskButton label="部署通道" icon="deploy" task="doDeployChannel" onClick={() => deployTask(effectiveChannels())} />}
+                        <TaskButton label="新建通道" icon="plus" primary task="doNewChannel" onClick={newTask} />
+                        <TaskButton label="导入通道" icon="import" task="doImportChannel" onClick={importTask} />
+                        {showExport && <TaskButton label="导出通道" icon="export" task="doExportChannel" onClick={() => exportTask(selectedChannels())} />}
+                        {showDelete && <TaskButton label="删除通道" icon="trash" danger task="doDeleteChannel" onClick={() => deleteTask(selectedChannels())} />}
+                        {showClone && <TaskButton label="克隆通道" icon="copy" task="doCloneChannel" onClick={() => cloneTask(selectedChannels())} />}
+                        {showEdit && <TaskButton label="编辑通道" icon="edit" task="doEditChannel" onClick={() => { const c = requireSingle(selectedChannels()); if (c) router.navigate(`/channels/${c.id}/edit`); }} />}
+                        {showEnable && <TaskButton label="启用通道" icon="check" task="doEnableChannel" onClick={() => setEnabledTask(true, effectiveChannels())} />}
+                        {showDisable && <TaskButton label="禁用通道" icon="x" task="doDisableChannel" onClick={() => setEnabledTask(false, effectiveChannels())} />}
+                        {showMessages && <TaskButton label="查看消息" icon="messages" task="doViewMessages" onClick={() => messagesTask(selectedChannels())} />}
                         {singleChannel && (() => {
                             const c = selectedChannels()[0];
                             const ctx = { platform, channel: c, selectedIds: new Set(selected) };
@@ -1795,21 +1795,21 @@ export function ChannelsView() {
                     </div>
                 </RailPane>
                 {/* Swing shows the Group Tasks pane only in Group view. */}
-                {groupView && <RailPane title="Group Tasks" paneKey="tasks:Group Tasks" group="channelGroup">
+                {groupView && <RailPane title="通道组任务" paneKey="tasks:Group Tasks" group="channelGroup">
                     <div className="taskbar" data-pane-title="Group Tasks">
-                        {showAssign && <TaskButton label="Assign To Group" icon="folder" task="doAssignChannelToGroup" onClick={() => moveToGroupTask(selectedChannels())} />}
-                        <TaskButton label="New Group" icon="plus" task="doNewGroup" onClick={newGroupTask} />
-                        {showGroupEdit && <TaskButton label="Edit Group Details" icon="edit" task="doEditGroupDetails" onClick={() => editGroupTask(currentGroup)} />}
-                        <TaskButton label="Import Group" icon="import" task="doImportGroup" onClick={importGroupTask} />
-                        <TaskButton label="Export All Groups" icon="export" task="doExportAllGroups" onClick={exportGroupsTask} />
-                        {showGroupExport && <TaskButton label="Export Group" icon="export" task="doExportGroup" onClick={() => exportGroupTask(currentGroup)} />}
-                        {showGroupDelete && <TaskButton label="Delete Group" icon="trash" danger task="doDeleteGroup" onClick={() => deleteGroupTask(currentGroup)} />}
+                        {showAssign && <TaskButton label="分配到通道组" icon="folder" task="doAssignChannelToGroup" onClick={() => moveToGroupTask(selectedChannels())} />}
+                        <TaskButton label="新建通道组" icon="plus" task="doNewGroup" onClick={newGroupTask} />
+                        {showGroupEdit && <TaskButton label="编辑通道组详情" icon="edit" task="doEditGroupDetails" onClick={() => editGroupTask(currentGroup)} />}
+                        <TaskButton label="导入通道组" icon="import" task="doImportGroup" onClick={importGroupTask} />
+                        <TaskButton label="导出全部通道组" icon="export" task="doExportAllGroups" onClick={exportGroupsTask} />
+                        {showGroupExport && <TaskButton label="导出通道组" icon="export" task="doExportGroup" onClick={() => exportGroupTask(currentGroup)} />}
+                        {showGroupDelete && <TaskButton label="删除通道组" icon="trash" danger task="doDeleteGroup" onClick={() => deleteGroupTask(currentGroup)} />}
                     </div>
                 </RailPane>}
             </ViewTasks>
             <div className="view-body flush flex flex-col overflow-hidden">
                 {loadError && <div className="mx-[13px] mt-3 panel border-danger text-danger" role="alert">
-                    Failed to load channels: {loadError}
+                    加载通道失败：{loadError}
                 </div>}
                 {/* Grid so the TreeTable's own .dt-wrap stretches to fill the
                     region (a flex child wouldn't grow on the main axis); this
@@ -1840,22 +1840,22 @@ export function ChannelsView() {
                         emptyText={(
                             <>
                                 <div className="empty-icon"><Icon name="channels" size={30} /></div>
-                                <div>No channels</div>
-                                <div className="text-text-faint mt-[13px]">Create a channel with &quot;New Channel&quot; in the Channels Tasks pane.</div>
+                                <div>暂无通道</div>
+                                <div className="text-text-faint mt-[13px]">可在“通道任务”面板中使用“新建通道”创建通道</div>
                             </>
                         )} />
                 </div>
                 <div className="filterbar panel overflow-visible mx-[13px] mb-3">
-                    <label>Filter:</label>
-                    <input type="text" placeholder="Enter channel tag or name" value={filterText}
+                    <label>筛选：</label>
+                    <input type="text" placeholder="输入通道标签或名称" value={filterText}
                         onChange={(e: any) => setFilterText(e.target.value)} />
                     <span className="counts">{countsText}</span>
                     {/* The same View / Tags toggles as the Dashboard filter bar. */}
                     <div className="flex items-center gap-x-3.5 gap-y-1.5 flex-wrap ml-auto">
-                        <SegPill value={viewMode} onChange={setViewMode} label="Row grouping" options={VIEW_MODE_OPTIONS} />
+                        <SegPill value={viewMode} onChange={setViewMode} label="行分组方式" options={VIEW_MODE_OPTIONS} />
                         <span className="inline-flex items-center gap-[4px]">
-                            <span className="text-text-faint text-[10px]">Tags:</span>
-                            <SegPill value={tagMode} onChange={setTagMode} label="Tag display" options={TAG_MODE_OPTIONS} />
+                            <span className="text-text-faint text-[10px]">标签：</span>
+                            <SegPill value={tagMode} onChange={setTagMode} label="标签显示方式" options={TAG_MODE_OPTIONS} />
                         </span>
                     </div>
                 </div>

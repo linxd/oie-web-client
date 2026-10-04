@@ -108,7 +108,7 @@ export function NavRail({ collapsed, onPeek, onLogout }: any) {
     const renameGroup = (id: any, name: any) => { setRenamingGroup(null); apply(withGroupLabel(layout, id, name)); };
     const renameItem = (item: any, name: any) => { setRenamingItem(null); apply(withItemLabel(layout, item.id, name, item.declaredLabel)); };
     const addGroup = () => {
-        const made = withNewGroup(layout, groups, 'New group');
+        const made = withNewGroup(layout, groups, '新分组');
         apply(made.layout);
         setRenamingGroup(made.id);       // straight into the name field
     };
@@ -203,32 +203,32 @@ export function NavRail({ collapsed, onPeek, onLogout }: any) {
         const entries: any[] = [];
         if (item) {
             entries.push({
-                label: item.hidden ? `Show “${item.label}”` : `Hide “${item.label}”`,
+                label: item.hidden ? `显示“${item.label}”` : `隐藏“${item.label}”`,
                 icon: item.hidden ? 'check' : 'x',
                 onClick: () => toggleHidden(item)
             });
             entries.push({
-                label: `Rename “${item.label}”…`,
+                label: `重命名“${item.label}”…`,
                 icon: 'edit',
                 onClick: () => { setEditing(true); setRenamingItem(item.id); }
             });
         }
         if (group && !item) {
             entries.push({
-                label: 'Rename this group…',
+                label: '重命名此分组…',
                 icon: 'edit',
                 onClick: () => { setEditing(true); setRenamingGroup(group.id); }
             });
         }
         if (entries.length) entries.push('-');
         entries.push({
-            label: editing ? 'Done customizing' : 'Customize navigation…',
+            label: editing ? '完成自定义' : '自定义导航…',
             icon: 'settings',
             onClick: () => setEditing((v: any) => !v)
         });
         entries.push('-');
         entries.push({
-            label: 'Reset navigation to default',
+            label: '将导航重置为默认',
             icon: 'undo',
             onClick: reset
         });
@@ -266,20 +266,20 @@ export function NavRail({ collapsed, onPeek, onLogout }: any) {
                         headerExtra={editing ? (
                             <span className="rail-pane-tools">
                                 {group.custom ? (
-                                    <button type="button" className="rail-tool" title="Delete group"
-                                        aria-label={`Delete group ${group.label}`}
+                                    <button type="button" className="rail-tool" title="删除分组"
+                                        aria-label={`删除分组 ${group.label}`}
                                         onClick={(e: any) => { e.stopPropagation(); apply(withoutGroup(layout, group.id)); }}>✕</button>
                                 ) : null}
                                 {group.renamed ? (
-                                    <button type="button" className="rail-tool" title="Reset name"
-                                        aria-label={`Reset name of ${group.label}`}
+                                    <button type="button" className="rail-tool" title="重置名称"
+                                        aria-label={`重置 ${group.label} 的名称`}
                                         onClick={(e: any) => { e.stopPropagation(); apply(withGroupLabel(layout, group.id, '')); }}>↺</button>
                                 ) : null}
                             </span>
                         ) : null}
                         headerTitle={renamingGroup === group.id ? (
                             <input className="rail-name-input" autoFocus defaultValue={group.label}
-                                aria-label="Group name"
+                                aria-label="分组名称"
                                 onClick={(e: any) => e.stopPropagation()}
                                 onKeyDown={(e: any) => {
                                     e.stopPropagation();
@@ -304,7 +304,7 @@ export function NavRail({ collapsed, onPeek, onLogout }: any) {
                                     <span key={item.id} className="rail-item">
                                         <Icon name={item.icon || 'puzzle'} size={15} />
                                         <input className="rail-name-input" autoFocus defaultValue={item.label}
-                                            aria-label="Item name"
+                                            aria-label="条目名称"
                                             onKeyDown={(e: any) => {
                                                 e.stopPropagation();
                                                 if (e.key === 'Enter') renameItem(item, e.currentTarget.value);
@@ -338,8 +338,8 @@ export function NavRail({ collapsed, onPeek, onLogout }: any) {
                                     </button>
                                     {editing ? (
                                         <button type="button" className="rail-eye"
-                                            title={`${item.hidden ? 'Show' : 'Hide'} ${item.label}`}
-                                            aria-label={`${item.hidden ? 'Show' : 'Hide'} ${item.label}`}
+                                            title={`${item.hidden ? '显示' : '隐藏'} ${item.label}`}
+                                            aria-label={`${item.hidden ? '显示' : '隐藏'} ${item.label}`}
                                             aria-pressed={String(!item.hidden) as any}
                                             onClick={(e: any) => { e.stopPropagation(); toggleHidden(item); }}>
                                             <Icon name={item.hidden ? 'eyeOff' : 'eye'} size={14} />
@@ -348,7 +348,7 @@ export function NavRail({ collapsed, onPeek, onLogout }: any) {
                                 </span>
                             );
                         })}
-                        {editing && !shown.length ? <div className="rail-empty-slot">drop items here</div> : null}
+                        {editing && !shown.length ? <div className="rail-empty-slot">将条目拖放到此处</div> : null}
                     </RailPane>
                 );
             })}
@@ -359,30 +359,30 @@ export function NavRail({ collapsed, onPeek, onLogout }: any) {
                 {editing ? (
                     <>
                         <button type="button" className="rail-item rail-chrome" id="rail-add-group"
-                            onClick={addGroup} {...peek('New group')}>
-                            <Icon name="plus" size={15} /><span className="rail-label">New group</span>
+                            onClick={addGroup} {...peek('新建分组')}>
+                            <Icon name="plus" size={15} /><span className="rail-label">新建分组</span>
                         </button>
                         <button type="button" className="rail-item rail-chrome" id="rail-reset-nav"
-                            onClick={reset} {...peek('Reset to default')}>
-                            <Icon name="undo" size={15} /><span className="rail-label">Reset to default</span>
+                            onClick={reset} {...peek('恢复默认')}>
+                            <Icon name="undo" size={15} /><span className="rail-label">恢复默认</span>
                         </button>
                     </>
                 ) : null}
                 <button type="button" className={'rail-item rail-chrome' + (editing ? ' on' : '')}
                     id="rail-customize" aria-pressed={String(editing) as any}
                     onClick={() => setEditing((v: any) => !v)}
-                    {...peek(editing ? 'Done' : 'Customize')}>
+                    {...peek(editing ? '完成' : '自定义')}>
                     <Icon name={editing ? 'check' : 'sliders'} size={15} />
-                    <span className="rail-label">{editing ? 'Done' : 'Customize'}</span>
+                    <span className="rail-label">{editing ? '完成' : '自定义'}</span>
                 </button>
                 {/* Sign-out is chrome too, and last: it must be in the same place
                     every time, which is exactly what a configurable entry cannot
                     promise. Still RBAC-gated like every other "other" task. */}
                 {platform.checkTask('other', 'doLogout') && (
                     <button type="button" className="rail-item rail-chrome" id="rail-logout"
-                        onClick={() => onLogout && onLogout()} {...peek('Logout')}>
+                        onClick={() => onLogout && onLogout()} {...peek('退出登录')}>
                         <Icon name="logout" size={15} />
-                        <span className="rail-label">Logout</span>
+                        <span className="rail-label">退出登录</span>
                     </button>
                 )}
             </div>

@@ -19,7 +19,7 @@ import type { Platform } from '@oie/web-shell';
 import { toDisplayString } from '@oie/web-api';
 const React = platform.React;
 
-const GLOBAL_MAP_LABEL = '<Global Map>';
+const GLOBAL_MAP_LABEL = '<全局映射>';
 
 export function register(platform: Platform) {
     const { h, modal } = platform.ui;
@@ -71,17 +71,17 @@ export function register(platform: Platform) {
        React tree), matching the original. */
     function showValue(row: any) {
         modal({
-            title: 'Global Map Value',
+            title: '全局映射值',
             size: 'wide',
             body: h('div', { class: 'flex flex-col gap-2 min-w-[558px]' },
                 h('div', { class: 'flex gap-[13px] flex-wrap text-[11px]' },
-                    h('span.mono.text-text-faint', `Server ${row.serverId}`),
+                    h('span.mono.text-text-faint', `服务器 ${row.serverId}`),
                     h('span.mono', row.channel),
                     h('span.mono', { class: 'font-[650]' }, row.key)),
                 h('pre', {
                     class: 'm-0 whitespace-pre-wrap [word-break:break-word] max-h-[60vh] overflow-x-hidden overflow-y-auto bg-bg0 text-text border border-[var(--bg3)] p-2 rounded-[4px]'
                 }, row.value)),
-            buttons: [{ label: 'Close', primary: true }]
+            buttons: [{ label: '关闭', primary: true }]
         });
     }
 
@@ -163,13 +163,13 @@ export function register(platform: Platform) {
         if (error) {
             body = (
                 <tr><td colSpan={4} className="text-text-faint p-3">
-                    {`Global maps unavailable: ${error}`}
+                    {`无法获取全局映射：${error}`}
                 </td></tr>
             );
         } else if (!filtered.length) {
             body = (
                 <tr><td colSpan={4} className="text-text-faint p-3">
-                    No global map variables are set.
+                    未设置任何全局映射变量
                 </td></tr>
             );
         } else {
@@ -177,7 +177,7 @@ export function register(platform: Platform) {
                 const value = r.value.replace(/\s+/g, ' ').trim();
                 return (
                     <tr key={`${r.serverId}|${r.channelId}|${r.key}|${i}`}
-                        className="cursor-pointer" title="Double-click for the full value"
+                        className="cursor-pointer" title="双击查看完整值"
                         onDoubleClick={() => showValue(r)}>
                         <td className="mono text-text-faint">{r.serverId}</td>
                         <td>{r.channel}</td>
@@ -193,10 +193,10 @@ export function register(platform: Platform) {
                 <table className="dt global-maps">
                     <thead>
                         <tr>
-                            <th className="sortable" style={{ cursor: 'pointer' }} onClick={() => toggleSort('serverId')}>Server Id<span className="sort-arrow">{arrow('serverId')}</span></th>
-                            <th className="sortable" style={{ cursor: 'pointer' }} onClick={() => toggleSort('channel')}>Channel<span className="sort-arrow">{arrow('channel')}</span></th>
-                            <th className="sortable" style={{ cursor: 'pointer' }} onClick={() => toggleSort('key')}>Key<span className="sort-arrow">{arrow('key')}</span></th>
-                            <th className="sortable" style={{ cursor: 'pointer' }} onClick={() => toggleSort('value')}>Value<span className="sort-arrow">{arrow('value')}</span></th>
+                            <th className="sortable" style={{ cursor: 'pointer' }} onClick={() => toggleSort('serverId')}>服务器 ID<span className="sort-arrow">{arrow('serverId')}</span></th>
+                            <th className="sortable" style={{ cursor: 'pointer' }} onClick={() => toggleSort('channel')}>通道<span className="sort-arrow">{arrow('channel')}</span></th>
+                            <th className="sortable" style={{ cursor: 'pointer' }} onClick={() => toggleSort('key')}>键<span className="sort-arrow">{arrow('key')}</span></th>
+                            <th className="sortable" style={{ cursor: 'pointer' }} onClick={() => toggleSort('value')}>值<span className="sort-arrow">{arrow('value')}</span></th>
                         </tr>
                     </thead>
                     <tbody>{body}</tbody>
@@ -207,7 +207,7 @@ export function register(platform: Platform) {
 
     platform.registerDashboardTab({
         id: 'global-maps',
-        label: 'Global Maps',
+        label: '全局映射',
         order: 30,
         component: GlobalMapsTab
     });

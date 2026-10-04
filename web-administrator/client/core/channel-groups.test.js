@@ -23,7 +23,7 @@ await mutateChannelGroups(add);
 assert.deepEqual(writes[0].groups.set.channelGroup.map(g => g.id), ['concurrent', 'new']);
 assert.match(writes[0].url, /override=false$/);
 accepted = false;
-await assert.rejects(mutateChannelGroups(add), /not saved/);
+await assert.rejects(mutateChannelGroups(add), /未保存/);
 assert.equal(writes.length, 2, 'a conflict must not retry with override');
 accepted = true;
 await mutateChannelGroups(() => [], ['concurrent']);
@@ -50,10 +50,10 @@ assert.equal(writes.length, beforeStale);
 assert.equal(prompts, 1);
 await assert.rejects(mutateChannelGroups(groups => groups, [], { expectedGroup: stale, confirmOverwrite: async () => {
     latest = []; return true;
-} }), /removed/);
+} }), /已被删除/);
 assert.equal(writes.length, beforeStale, 'a removal during the overwrite prompt must not resurrect the target');
 accepted = false;
-await assert.rejects(mutateChannelGroups(add, [], { confirmOverwrite: async () => true }), /did not confirm/);
+await assert.rejects(mutateChannelGroups(add, [], { confirmOverwrite: async () => true }), /未确认/);
 console.log('channel-groups: Swing overwrite/cancel, prompt-time additions, removed targets and rejected override passed');
 
 const beforeFailedRefresh = writes.length;

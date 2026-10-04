@@ -65,59 +65,59 @@ const ISSUES_URL = 'https://github.com/OpenIntegrationEngine/engine/issues';
  * a template literal here would silently produce a second framework instance.
  */
 const VIEW_ROUTES = [
-    { path: '/dashboard', meta: { title: 'Dashboard' },
-        nav: { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', path: '/dashboard', section: 'Monitor', order: 0, task: 'doShowDashboard' },
+    { path: '/dashboard', meta: { title: '仪表盘' },
+        nav: { id: 'dashboard', label: '仪表盘', icon: 'dashboard', path: '/dashboard', section: 'Monitor', order: 0, task: 'doShowDashboard' },
         load: () => import('./views/dashboard.jsx'), pick: (m: any) => m.DashboardHost },
-    { path: '/channels', meta: { title: 'Channels' },
-        nav: { id: 'channels', label: 'Channels', icon: 'channels', path: '/channels', section: 'Design', order: 0, task: 'doShowChannel' },
+    { path: '/channels', meta: { title: '通道' },
+        nav: { id: 'channels', label: '通道', icon: 'channels', path: '/channels', section: 'Design', order: 0, task: 'doShowChannel' },
         load: () => import('./views/channels.jsx'), pick: (m: any) => m.ChannelsView },
-    { path: '/channels/:channelId/edit', meta: { title: 'Edit Channel' },
+    { path: '/channels/:channelId/edit', meta: { title: '编辑通道' },
         load: () => import('./views/channel-editor.jsx'), pick: (m: any) => m.ChannelEditorView },
-    { path: '/channels/:channelId/filter/:metaDataId', meta: { title: 'Filter' },
+    { path: '/channels/:channelId/filter/:metaDataId', meta: { title: '过滤器' },
         load: () => import('./views/filter-transformer.jsx'), pick: (m: any) => m.FilterView },
-    { path: '/channels/:channelId/transformer/:metaDataId', meta: { title: 'Transformer' },
+    { path: '/channels/:channelId/transformer/:metaDataId', meta: { title: '转换器' },
         load: () => import('./views/filter-transformer.jsx'), pick: (m: any) => m.TransformerView },
-    { path: '/channels/:channelId/response/:metaDataId', meta: { title: 'Response Transformer' },
+    { path: '/channels/:channelId/response/:metaDataId', meta: { title: '响应转换器' },
         load: () => import('./views/filter-transformer.jsx'), pick: (m: any) => m.ResponseTransformerView },
-    { path: '/channels/new/guided', meta: { title: 'New Channel — Wizard' },
+    { path: '/channels/new/guided', meta: { title: '新建通道 — 向导' },
         load: () => import('./views/channel-wizard.jsx'), pick: (m: any) => m.ChannelWizardView },
-    { path: '/channels/:channelId/guided', meta: { title: 'Channel — Wizard' },
+    { path: '/channels/:channelId/guided', meta: { title: '通道 — 向导' },
         load: () => import('./views/channel-wizard.jsx'), pick: (m: any) => m.ChannelWizardView },
     /* Channel-less entry to the message browser: the same view, with its channel
        picker as the way in. Registered BEFORE the parameterised route so
        '/messages' cannot be read as a channel id. */
-    { path: '/messages', meta: { title: 'Messages' },
-        nav: { id: 'messages', label: 'Messages', icon: 'messages', path: '/messages',
+    { path: '/messages', meta: { title: '消息' },
+        nav: { id: 'messages', label: '消息', icon: 'messages', path: '/messages',
             section: 'Monitor', order: 1, task: 'doShowMessages' },
         load: () => import('./views/messages.jsx'), pick: (m: any) => m.MessagesView },
-    { path: '/messages/:channelId', meta: { title: 'Messages' },
+    { path: '/messages/:channelId', meta: { title: '消息' },
         load: () => import('./views/messages.jsx'), pick: (m: any) => m.MessagesView },
-    { path: '/events', meta: { title: 'Events' },
-        nav: { id: 'events', label: 'Events', icon: 'events', path: '/events', section: 'Monitor', order: 3, task: 'doShowEvents' },
+    { path: '/events', meta: { title: '事件' },
+        nav: { id: 'events', label: '事件', icon: 'events', path: '/events', section: 'Monitor', order: 3, task: 'doShowEvents' },
         load: () => import('./views/events.jsx'), pick: (m: any) => m.EventsView },
-    { path: '/alerts', meta: { title: 'Alerts' },
-        nav: { id: 'alerts', label: 'Alerts', icon: 'alerts', path: '/alerts', section: 'Monitor', order: 2, task: 'doShowAlerts' },
+    { path: '/alerts', meta: { title: '警报' },
+        nav: { id: 'alerts', label: '警报', icon: 'alerts', path: '/alerts', section: 'Monitor', order: 2, task: 'doShowAlerts' },
         load: () => import('./views/alerts.jsx'), pick: (m: any) => m.AlertsList },
-    { path: '/alerts/:alertId/edit', meta: { title: 'Edit Alert' },
+    { path: '/alerts/:alertId/edit', meta: { title: '编辑警报' },
         load: () => import('./views/alert-editor.jsx'), pick: (m: any) => m.AlertEditor },
-    { path: '/alerts/new/guided', meta: { title: 'New Alert — Wizard' },
+    { path: '/alerts/new/guided', meta: { title: '新建警报 — 向导' },
         load: () => import('./views/alert-wizard.jsx'), pick: (m: any) => m.AlertWizardView },
-    { path: '/alerts/:alertId/guided', meta: { title: 'Alert — Wizard' },
+    { path: '/alerts/:alertId/guided', meta: { title: '警报 — 向导' },
         load: () => import('./views/alert-wizard.jsx'), pick: (m: any) => m.AlertWizardView },
-    { path: '/users', meta: { title: 'Users' },
-        nav: { id: 'users', label: 'Users', icon: 'users', path: '/users', section: 'Manage', order: 0, task: 'doShowUsers' },
+    { path: '/users', meta: { title: '用户' },
+        nav: { id: 'users', label: '用户', icon: 'users', path: '/users', section: 'Manage', order: 0, task: 'doShowUsers' },
         load: () => import('./views/users.jsx'), pick: (m: any) => m.UsersView },
-    { path: '/settings', meta: { title: 'Settings' },
-        nav: { id: 'settings', label: 'Settings', icon: 'settings', path: '/settings', section: 'Manage', order: 1, task: 'doShowSettings' },
+    { path: '/settings', meta: { title: '设置' },
+        nav: { id: 'settings', label: '设置', icon: 'settings', path: '/settings', section: 'Manage', order: 1, task: 'doShowSettings' },
         load: () => import('./views/settings.jsx'), pick: (m: any) => m.SettingsView },
-    { path: '/code-templates', meta: { title: 'Code Templates' },
-        nav: { id: 'code-templates', label: 'Code Templates', icon: 'code', path: '/code-templates', section: 'Design', order: 1 },
+    { path: '/code-templates', meta: { title: '代码模板' },
+        nav: { id: 'code-templates', label: '代码模板', icon: 'code', path: '/code-templates', section: 'Design', order: 1 },
         load: () => import('./views/code-templates.jsx'), pick: (m: any) => m.CodeTemplatesView },
-    { path: '/global-scripts', meta: { title: 'Global Scripts' },
-        nav: { id: 'global-scripts', label: 'Global Scripts', icon: 'scripts', path: '/global-scripts', section: 'Design', order: 2 },
+    { path: '/global-scripts', meta: { title: '全局脚本' },
+        nav: { id: 'global-scripts', label: '全局脚本', icon: 'scripts', path: '/global-scripts', section: 'Design', order: 2 },
         load: () => import('./views/global-scripts.jsx'), pick: (m: any) => m.GlobalScriptsView },
-    { path: '/extensions', meta: { title: 'Extensions' },
-        nav: { id: 'extensions', label: 'Extensions', icon: 'extensions', path: '/extensions', section: 'Manage', order: 2, task: 'doShowExtensions' },
+    { path: '/extensions', meta: { title: '插件' },
+        nav: { id: 'extensions', label: '插件', icon: 'extensions', path: '/extensions', section: 'Manage', order: 2, task: 'doShowExtensions' },
         load: () => import('./views/extensions.jsx'), pick: (m: any) => m.ExtensionsView },
 ];
 
@@ -149,13 +149,13 @@ function lazyView(load: any, pick: any) {
  * while views are gated as "view".
  */
 const OTHER_ACTIONS = [
-    { id: 'rest-api', label: 'View REST API', icon: 'apiDoc', section: 'Other', order: 0,
+    { id: 'rest-api', label: '查看 REST API', icon: 'apiDoc', section: 'Other', order: 0,
         task: 'goToUserAPI', rbac: 'other', action: () => openApiDocs() },
-    { id: 'about', label: 'About', icon: 'info', section: 'Other', order: 1,
+    { id: 'about', label: '关于', icon: 'info', section: 'Other', order: 1,
         task: 'goToAbout', rbac: 'other', action: () => showAbout() },
-    { id: 'homepage', label: 'Visit homepage', icon: 'globe', section: 'Other', order: 2,
+    { id: 'homepage', label: '访问主页', icon: 'globe', section: 'Other', order: 2,
         task: 'goToMirth', rbac: 'other', action: () => window.open(HOMEPAGE_URL, '_blank') },
-    { id: 'report-issue', label: 'Report issue', icon: 'bug', section: 'Other', order: 3,
+    { id: 'report-issue', label: '报告问题', icon: 'bug', section: 'Other', order: 3,
         task: 'doReportIssue', rbac: 'other', action: () => window.open(ISSUES_URL, '_blank') }
     /* Logout is deliberately NOT here. It is chrome, like the customize control:
        both must stay exactly where they are, so neither is hideable, renameable or
@@ -172,29 +172,42 @@ const SETTINGS_TABS = [
     ['Resources', 'resources'], ['Data Pruner', 'datapruner']
 ];
 
+/* Display-only captions, mirroring views/settings.tsx's TAB_LABELS_ZH: the tab
+   label above is the settings_<Tab> RBAC key and the /settings?tab= deep link,
+   so only the palette caption is localized. */
+const SETTINGS_TAB_LABELS_ZH: any = {
+    Server: '服务器',
+    Administrator: '管理员',
+    Tags: '标签',
+    'Configuration Map': '配置映射',
+    'Database Tasks': '数据库任务',
+    Resources: '资源',
+    'Data Pruner': '数据修剪器'
+};
+
 function registerCommands(plat: any) {
     /* The wizard routes, which are reachable from anywhere. "New Channel" in the
        Channels view is a chooser (classic vs guided) whose classic path builds a
        channel object the view owns — reproducing that here would fork it, so the
        palette offers the route it can honestly navigate to and says which it is. */
-    plat.registerCommand({ id: 'new-channel', label: 'New Channel (Wizard)', icon: 'plus',
-        section: 'Create', order: 0, task: 'doNewChannel', rbac: 'channel',
-        keywords: 'create add channel', path: '/channels/new/guided' });
-    plat.registerCommand({ id: 'new-alert', label: 'New Alert (Wizard)', icon: 'plus',
-        section: 'Create', order: 1, task: 'doNewAlert', rbac: 'alert',
-        keywords: 'create add alert', path: '/alerts/new/guided' });
+    plat.registerCommand({ id: 'new-channel', label: '新建通道（向导）', icon: 'plus',
+        section: '新建', order: 0, task: 'doNewChannel', rbac: 'channel',
+        keywords: 'create add channel 新建 通道', path: '/channels/new/guided' });
+    plat.registerCommand({ id: 'new-alert', label: '新建警报（向导）', icon: 'plus',
+        section: '新建', order: 1, task: 'doNewAlert', rbac: 'alert',
+        keywords: 'create add alert 新建 警报', path: '/alerts/new/guided' });
 
     SETTINGS_TABS.forEach(([label, tab], i) => plat.registerCommand({
-        id: 'settings-' + tab, label: 'Settings: ' + label, icon: 'settings', section: 'Settings',
-        order: i, task: 'doShowSettings', rbac: 'view', keywords: label,
+        id: 'settings-' + tab, label: '设置：' + (SETTINGS_TAB_LABELS_ZH[label] || label), icon: 'settings', section: '设置',
+        order: i, task: 'doShowSettings', rbac: 'view', keywords: `${label} ${SETTINGS_TAB_LABELS_ZH[label] || ''}`,
         path: '/settings?tab=' + tab
     }));
 
-    plat.registerCommand({ id: 'toggle-theme', label: 'Toggle light/dark mode', icon: 'sun',
-        section: 'Session', order: 0, keywords: 'dark light theme',
+    plat.registerCommand({ id: 'toggle-theme', label: '切换浅色/深色主题', icon: 'sun',
+        section: '会话', order: 0, keywords: 'dark light theme 深色 浅色 主题',
         run: () => store.setTheme(store.getState('theme') === 'light' ? 'dark' : 'light') });
-    plat.registerCommand({ id: 'customize-nav', label: 'Customize navigation', icon: 'settings',
-        section: 'Session', order: 1, keywords: 'rail sidebar reorder rename',
+    plat.registerCommand({ id: 'customize-nav', label: '自定义导航', icon: 'settings',
+        section: '会话', order: 1, keywords: 'rail sidebar reorder rename 导航 侧栏 排序 重命名',
         run: () => window.dispatchEvent(new CustomEvent('webadmin:customize-nav')) });
 }
 
@@ -234,7 +247,7 @@ function startEngine() {
         registerViewRoutes(platform);
 
         router.setNotFound(() => h('div.view', h('div.view-body',
-            h('div.dt-empty', h('div.empty-icon', icon('search', 30)), 'View not found'))));
+            h('div.dt-empty', h('div.empty-icon', icon('search', 30)), '未找到该视图'))));
 
         router.setGuard(async (ctx: any) => {
             if (store.getState('editorSave')) return false;
@@ -279,7 +292,7 @@ function webAdminIdentity() {
     const cfg: any = store.getState('webadminConfig') || {};
     const build = cfg.build || {};
     const commit = build.commit ? String(build.commit).slice(0, 7) + (build.dirty ? '-dirty' : '') : '';
-    const built = build.date ? `built ${String(build.date).slice(0, 10)}` : '';
+    const built = build.date ? `构建 ${String(build.date).slice(0, 10)}` : '';
     const detail = [commit, built].filter(Boolean).join(', ');
     return `${cfg.version || '?'}${detail ? ` (${detail})` : ''}`;
 }
@@ -302,15 +315,15 @@ async function showAbout() {
        Unreachable engine: the list still renders, carrying the row we can
        always answer plus a note for the one we can't. */
     entries.push(['Web Administrator', webAdminIdentity()]);
-    if (!about) entries.unshift(['Engine', `v${store.getState('serverVersion') || '?'} — details unavailable`]);
+    if (!about) entries.unshift(['引擎', `v${store.getState('serverVersion') || '?'} — 详细信息不可用`]);
     const kv = h('dl.kv');
     entries.forEach(([k, v]) => { kv.appendChild(h('dt', String(k))); kv.appendChild(h('dd', String(v ?? ''))); });
     modal({
-        title: 'About Open Integration Engine',
+        title: '关于 Open Integration Engine',
         body: h('div',
             h('div.flex.items-center.gap-2.mb-[13px]', h('img', { src: appUrl('/assets/oie_logo_bottom_text.svg'), alt: 'Open Integration Engine', style: { width: '120px', margin: '0 auto', display: 'block' } })),
             kv),
-        buttons: [{ label: 'Close', primary: true }]
+        buttons: [{ label: '关闭', primary: true }]
     });
 }
 
@@ -350,21 +363,25 @@ const CONN_PIP = { ok: 'ok', offline: 'err', unreachable: 'warn', reconnecting: 
  */
 function ServerChip({ info }: any) {
     if (!info) return <div className="server-chip"><span>…</span></div>;
-    if (info.error) return <div className="server-chip"><span>engine details unavailable</span></div>;
-    const identity = `${info.settings?.environmentName ? info.settings.environmentName + ' · ' : ''}${info.settings?.serverName || 'engine'} · v${info.version}`;
+    if (info.error) return <div className="server-chip"><span>引擎信息不可用</span></div>;
+    const identity = `${info.settings?.environmentName ? info.settings.environmentName + ' · ' : ''}${info.settings?.serverName || '引擎'} · v${info.version}`;
     return <div className="server-chip"><span>{identity}</span></div>;
 }
+
+/* Display-only captions for the timezone modes (core/timezone.ts returns the
+   identifiers 'server' | 'local' | 'utc', which are also the storage keys). */
+const TZ_LABEL: any = { server: '服务器', local: '本地', utc: 'UTC' };
 
 function TopBar({ user, onLogout, serverInfo }: any) {
     const title = useViewTitle();
     const { theme, toggle } = useTheme();
     const tz = useTimezone();
-    const tzLabel = tz.mode.charAt(0).toUpperCase() + tz.mode.slice(1);
+    const tzLabel = TZ_LABEL[tz.mode] || tz.mode;
     const railCollapsed = useStoreKey('railCollapsed');
     return (
         <header className="topbar">
             <button className="icon-btn rail-toggle"
-                title={railCollapsed ? 'Show navigation' : 'Hide navigation'}
+                title={railCollapsed ? '显示导航' : '隐藏导航'}
                 onClick={() => store.setRailCollapsed(!railCollapsed)}>
                 {/* Plain hamburger when collapsed ("open it"), fold/collapse glyph when expanded.
                     size=24 sets the svg attr; `.topbar .rail-toggle svg` reinforces via CSS. */}
@@ -374,11 +391,11 @@ function TopBar({ user, onLogout, serverInfo }: any) {
             <div className="topbar-spacer" />
             <ServerChip info={serverInfo} />
             <button className="btn tz-toggle"
-                title={`Timestamps shown in ${tzLabel} time (${tz.abbr}). Click to cycle Server / Local / UTC.`}
+                title={`时间戳以${tzLabel}时间显示（${tz.abbr}）。点击可在 服务器 / 本地 / UTC 之间切换。`}
                 onClick={() => { tz.cycle(); router.navigate(router.currentPath()); }}>
                 <Icon name="clock" /><span>{tzLabel} · {tz.abbr}</span>
             </button>
-            <button className="icon-btn" title="Toggle light/dark mode" onClick={toggle}>
+            <button className="icon-btn" title="切换浅色/深色主题" onClick={toggle}>
                 <Icon name={theme === 'light' ? 'moon' : 'sun'} />
             </button>
             <UserMenu user={user} onLogout={onLogout} />
@@ -403,7 +420,7 @@ function currentEngineLabel(config: any) {
     // A custom selection is only routable in devMode; without it the proxy
     // ignores the cookie, so don't claim the typed URL as this session's engine
     // — fall through to what the proxy actually resolves.
-    if (sel === 'custom' && config.devMode) return getCookie('oie-engine-url') || 'custom engine';
+    if (sel === 'custom' && config.devMode) return getCookie('oie-engine-url') || '自定义引擎';
     const engines = Array.isArray(config.engines) ? config.engines : [];
     // The server sends key+name only (name host-derived when unset), so the label
     // is just the name — no engine URL is exposed to the browser. Mirror
@@ -473,26 +490,26 @@ function UserMenu({ user, onLogout }: any) {
     return (
         <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
-                <button className="user-chip" title="Account">
-                    <Icon name="users" /><span>{user?.username || 'user'}</span><Icon name="chevD" size={14} />
+                <button className="user-chip" title="账户">
+                    <Icon name="users" /><span>{user?.username || '用户'}</span><Icon name="chevD" size={14} />
                 </button>
             </DropdownMenu.Trigger>
             <DropdownMenu.Portal>
                 <DropdownMenu.Content className="ctx-surface" align="end" sideOffset={4} collisionPadding={8}>
                     <DropdownMenu.Label className="ctx-head">
-                        <div className="ctx-head-name">{me?.username || 'user'}</div>
+                        <div className="ctx-head-name">{me?.username || '用户'}</div>
                         {fullName ? <div className="ctx-head-sub">{fullName}</div> : null}
                     </DropdownMenu.Label>
                     <DropdownMenu.Separator className="ctx-sep" />
-                    {item('Edit Account', 'edit', () => openEditUserModal(store.getState('user') || me, { onSaved: refreshMe }))}
+                    {item('编辑账户', 'edit', () => openEditUserModal(store.getState('user') || me, { onSaved: refreshMe }))}
                     {/* An SSO session has no engine password to change — offering it
                         would set a local credential that SSO never consults. Omitted
                         rather than greyed: a disabled row in a short menu is noise. */}
-                    {!isSsoSession() && item('Change Password', 'key', () => openChangePasswordModal(store.getState('user') || me))}
-                    {can('view', 'doShowSettings') && item('Settings', 'settings', () => router.navigate('/settings?tab=administrator'))}
+                    {!isSsoSession() && item('修改密码', 'key', () => openChangePasswordModal(store.getState('user') || me))}
+                    {can('view', 'doShowSettings') && item('设置', 'settings', () => router.navigate('/settings?tab=administrator'))}
                     <DropdownMenu.Separator className="ctx-sep" />
-                    {engineChoiceAvailable(config) && item('Switch Engine', 'link', () => switchEngine(onLogout))}
-                    {can('other', 'doLogout') && item('Sign out', 'logout', () => onLogout())}
+                    {engineChoiceAvailable(config) && item('切换引擎', 'link', () => switchEngine(onLogout))}
+                    {can('other', 'doLogout') && item('退出登录', 'logout', () => onLogout())}
                 </DropdownMenu.Content>
             </DropdownMenu.Portal>
         </DropdownMenu.Root>
@@ -529,20 +546,20 @@ function StatusBar({ user, serverInfo, conn }: any) {
         : (configName && identity && identity !== configName
             ? `${configName} | ${identity}`
             : configName || identity || apiUrl());
-    let left = 'Connecting…';
+    let left = '正在连接…';
     // Live connection state outranks the one-shot identity fetch: the identity is
     // from load time, whereas this is how the last request actually went.
     if (conn.state === 'offline') {
-        left = 'No network connection — showing the last data received';
+        left = '网络已断开 — 显示最后接收到的数据';
     } else if (conn.state === 'reconnecting') {
-        left = `Reconnecting to ${engine}…`;
+        left = `正在重新连接 ${engine}…`;
     } else if (conn.state === 'unreachable') {
-        left = `Engine unreachable at ${engine}` + (conn.retryIn != null ? ` — retrying in ${conn.retryIn}s` : '');
+        left = `引擎不可达：${engine}` + (conn.retryIn != null ? ` — ${conn.retryIn} 秒后重试` : '');
     } else if (serverInfo && !serverInfo.error) {
         const name = [user?.firstName, user?.lastName].filter(Boolean).join(' ');
-        left = `Connected to: ${engine} as ${user?.username || ''}` + (name ? ` (${name})` : '');
+        left = `已连接：${engine}，登录用户 ${user?.username || ''}` + (name ? `（${name}）` : '');
     } else if (serverInfo && serverInfo.error) {
-        left = `Engine unreachable at ${engine}`;
+        left = `引擎不可达：${engine}`;
     }
     /* Still waiting on the first identity fetch: pulse rather than claim a state. */
     const pip = conn.state === 'ok' && !serverInfo ? 'busy' : (CONN_PIP as any)[conn.state];
@@ -557,12 +574,12 @@ function StatusBar({ user, serverInfo, conn }: any) {
                 <span className={'pip ' + pip} aria-hidden="true" />
                 {canRetry
                     ? <button type="button" className="status-text status-retry" onClick={conn.retryNow}
-                        title="Retry the connection now instead of waiting for the countdown.">{left}</button>
+                        title="立即重试连接，不必等待倒计时结束。">{left}</button>
                     : <span className="status-text">{left}</span>}
             </span>
             {compareAnchor && (
                 <span className="status-compare ml-auto" title={describeRef(compareAnchor)}>
-                    <span aria-hidden="true">⇄</span> selected for compare
+                    <span aria-hidden="true">⇄</span> 已选择用于比较
                 </span>
             )}
             <span className={compareAnchor ? '' : 'ml-auto'}>{clock}</span>
@@ -579,18 +596,18 @@ function RestartBanner() {
         <div className={'restart-banner' + (state === 'done' ? ' success' : '')}>
             {state === 'waiting' && <>
                 <span className="spinner" style={{ width: 13, height: 13 }} />
-                <span>Extension change staged — restart the engine to apply. Watching for the engine to come back…</span>
+                <span>插件变更已暂存 — 重启引擎后生效。正在等待引擎恢复…</span>
             </>}
             {state === 'offline' && <>
                 <span className="spinner" style={{ width: 13, height: 13 }} />
-                <span>Engine is restarting…</span>
+                <span>引擎正在重启…</span>
             </>}
             {state === 'done' && <>
                 <Icon name="check" size={14} />
-                <span>Engine restarted with updated extensions.</span>
-                <button className="btn btn-sm btn-primary" onClick={() => location.reload()}>Reload UI</button>
+                <span>引擎已重启并加载更新的插件。</span>
+                <button className="btn btn-sm btn-primary" onClick={() => location.reload()}>重新加载界面</button>
             </>}
-            <button className="icon-btn" style={{ marginLeft: 'auto' }} title="Dismiss" onClick={dismiss}>
+            <button className="icon-btn" style={{ marginLeft: 'auto' }} title="关闭" onClick={dismiss}>
                 <Icon name="x" size={13} />
             </button>
         </div>
@@ -629,7 +646,7 @@ function AppShell({ user, onLogout }: any) {
         return () => { cancelled = true; router.setOutlet(null); };
     }, []);
 
-    const railVersion = serverInfo && !serverInfo.error ? `engine v${serverInfo.version}` : '';
+    const railVersion = serverInfo && !serverInfo.error ? `引擎 v${serverInfo.version}` : '';
     const railCollapsed = useStoreKey('railCollapsed');
     const [peek, setPeek] = useState<any>(null);
 
@@ -717,12 +734,12 @@ function BootSplash() {
 function loginNotificationDialog(message: any) {
     return new Promise((resolve: any) => {
         modal({
-            title: 'Login Notification',
+            title: '登录通知',
             body: h('div', { style: { whiteSpace: 'pre-wrap', maxWidth: '540px', maxHeight: '55vh', overflow: 'auto', lineHeight: '1.55' } }, String(message ?? '')),
             onClose: () => resolve(false),
             buttons: [
-                { label: 'I Decline', onClick: () => resolve(false) },
-                { label: 'I Accept', primary: true, onClick: () => resolve(true) }
+                { label: '我拒绝', onClick: () => resolve(false) },
+                { label: '我接受', primary: true, onClick: () => resolve(true) }
             ]
         });
     });
@@ -786,7 +803,7 @@ export function App() {
             try {
                 if (isIdleLocked()) {
                     holdAutoRedirect();
-                    store.setState('loginNotice', 'You were signed out after a period of inactivity.');
+                    store.setState('loginNotice', '长时间未操作，您已被退出登录。');
                     return;
                 }
                 const u = await api.auth.current();
@@ -829,12 +846,12 @@ export function App() {
             // bar over the login card for the next person to read (#24).
             history.replaceState(null, '', routeUrl('/'));
         };
-        const off = onSessionExpired(() => dropToLogin('Your session expired — please sign in again.'));
+        const off = onSessionExpired(() => dropToLogin('您的会话已过期 — 请重新登录。'));
         // The server refuses to route for this tab's remembered engine (421
         // ENGINE_UNKNOWN: the engine was removed or renamed — issue #53). Same
         // exit as expiry; the login screen's picker then demands an explicit
         // re-pick instead of guessing an engine.
-        const offEngine = onEngineUnknown(() => dropToLogin('The engine you were signed in to is no longer available — choose an engine and sign in again.'));
+        const offEngine = onEngineUnknown(() => dropToLogin('您登录的引擎已不可用 — 请选择引擎后重新登录。'));
         return () => {
             alive = false; off(); offEngine();
             window.removeEventListener('oie-session-changed', sessionChanged);
@@ -857,7 +874,7 @@ export function App() {
                 const u = await api.auth.current();
                 if (!alive || !u || !u.username) return;
                 if (String(u.id) !== String(user.id)) {
-                    toast(`This browser is now signed in as ${u.username} — reloading`, 'warn');
+                    toast(`此浏览器已切换为以 ${u.username} 登录 — 正在重新加载`, 'warn');
                     setTimeout(() => window.location.reload(), 800);
                 }
             } catch { /* expired/unreachable — the session-expiry flow handles it */ }
@@ -913,7 +930,7 @@ export function App() {
         try { await api.auth.logout(); }
         catch (e: any) {
             if (e.status !== 401) {
-                toast('Sign-out failed. Your session may still be active. Please try again.', 'error');
+                toast('退出登录失败，您的会话可能仍然有效，请重试。', 'error');
                 return false;
             }
         }
@@ -948,7 +965,7 @@ export function App() {
                 if (!accepted) {
                     await api.auth.logout().catch(() => {});
                     // Inline on the login screen, like the other reasons we send someone back.
-                    store.setState('loginNotice', 'Sign-in canceled — the notification must be accepted to continue.');
+                    store.setState('loginNotice', '登录已取消 — 必须接受该通知才能继续。');
                     return;
                 }
                 if (u && u.id != null) api.users.acknowledgeNotification(u.id).catch(() => {});
@@ -973,9 +990,9 @@ export function App() {
         // Password grace period (Swing LoginPanel → ChangePasswordDialog): login was
         // accepted but the password is expiring — the engine's message says when.
         if (graceMessage != null) {
-            const change = await confirmDialog('Password Expiring',
-                graceMessage || 'Your password is expiring soon. Do you want to change it now?',
-                { okLabel: 'Change Password' });
+            const change = await confirmDialog('密码即将过期',
+                graceMessage || '您的密码即将过期，要现在修改吗？',
+                { okLabel: '修改密码' });
             if (change) openChangePasswordModal(u);
         }
 
@@ -1017,7 +1034,7 @@ export function App() {
             store.setPrefScope(null, null);
             resetSessionExpired();
             history.replaceState(null, '', routeUrl('/'));
-            store.setState('loginNotice', 'You were signed out after a period of inactivity.');
+            store.setState('loginNotice', '长时间未操作，您已被退出登录。');
             try { await revoked; } catch { /* local lock persists until a new sign-in */ }
             finally { setIdleRevoking(false); }
         });
@@ -1026,7 +1043,7 @@ export function App() {
     }, [user]);
 
     if (!authChecked) return <BootSplash />;
-    if (idleRevoking) return <div className="boot-splash" role="status">Session locked after inactivity. Finishing sign-out…</div>;
+    if (idleRevoking) return <div className="boot-splash" role="status">会话因长时间未操作已锁定，正在完成退出登录…</div>;
     if (!user) return <LoginForm onSuccess={onLoginSuccess} />;
     return <AppShell user={user} onLogout={onLogout} />;
 }

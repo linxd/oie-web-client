@@ -44,6 +44,26 @@ import { DESTINATION_MAPPINGS } from '../../core/mappings.js';
 
 const STEPS = ['Basics', 'Dependencies', 'Channel Options', 'Source', 'Destinations', 'Scripts', 'Review'];
 
+/* Display-only captions. The step name doubles as the key compared against
+   stepName, and the connector tab name doubles as the Radix activation value, so
+   the names stay English and only the rendered caption is localised — same
+   pattern as TAB_LABELS_ZH in channel-editor.tsx. */
+const STEP_LABELS_ZH: any = {
+    Basics: '基本信息',
+    Dependencies: '依赖项',
+    'Channel Options': '通道选项',
+    Source: '源连接器',
+    Destinations: '目的地',
+    Scripts: '脚本',
+    Review: '确认'
+};
+const TAB_LABELS_ZH: any = {
+    Settings: '设置',
+    Filter: '过滤器',
+    Transformer: '转换器',
+    Response: '响应'
+};
+
 /* ---- small model helpers ------------------------------------------------------ */
 
 function connectorIcon(name: any) {
@@ -75,7 +95,7 @@ const STEP_KEYS: any = { Filter: 'filter', Transformer: 'transformer', Response:
 function CountBadge({ icon, n, what }: any) {
     if (!n) return null;
     return (
-        <span className="dest-badge" title={`${n} ${what}${n === 1 ? '' : 's'}`}>
+        <span className="dest-badge" title={`${n} ${what}`}>
             <Icon name={icon} size={9} />{n}
         </span>
     );
@@ -121,7 +141,7 @@ function defaultDataType(types: any) {
 function applyTransport(connector: any, mode: any, name: any, version: any, onChange: any) {
     if (name === connector.transportName) return;
     const def = platform.connectorPanel(name, mode);
-    if (!def || typeof def.defaults !== 'function') { toast(`"${name}" has no web configuration panel.`, 'warn'); return; }
+    if (!def || typeof def.defaults !== 'function') { toast(`“${name}”没有网页配置面板。`, 'warn'); return; }
     connector.transportName = name;
     connector.properties = def.defaults(version);
     onChange();
@@ -209,17 +229,17 @@ function EmbeddedElementEditor({ channel, metaDataId, kind, onChange, viewportOf
 
     const t = ctx && ctx.handlers;
     const ts = (ctx && ctx.taskState && ctx.taskState()) || { onStep: false, assign: false, remove: false };
-    const noun = kind === 'filter' ? 'Rule' : 'Step';
+    const noun = kind === 'filter' ? '规则' : '步骤';
     return (
         <div className="flex flex-col gap-2">
             <div className="flex flex-wrap gap-1.5">
-                {t && <button type="button" className="btn btn-sm" onClick={t.addElement}><Icon name="plus" size={13} />Add {noun}</button>}
-                {t && ts.onStep && <button type="button" className="btn btn-sm btn-danger" onClick={t.deleteElement}><Icon name="trash" size={13} />Delete</button>}
-                {t && ts.assign && <button type="button" className="btn btn-sm" onClick={t.assignToIterator}><Icon name="plus" size={13} />Assign to Iterator</button>}
-                {t && ts.remove && <button type="button" className="btn btn-sm" onClick={t.removeFromIterator}><Icon name="minus" size={13} />Remove from Iterator</button>}
-                {t && <button type="button" className="btn btn-sm" onClick={t.importElements}><Icon name="import" size={13} />Import</button>}
-                {t && <button type="button" className="btn btn-sm" onClick={t.exportElements}><Icon name="export" size={13} />Export</button>}
-                {t && <button type="button" className="btn btn-sm" onClick={t.validateElements}><Icon name="check" size={13} />Validate</button>}
+                {t && <button type="button" className="btn btn-sm" onClick={t.addElement}><Icon name="plus" size={13} />添加{noun}</button>}
+                {t && ts.onStep && <button type="button" className="btn btn-sm btn-danger" onClick={t.deleteElement}><Icon name="trash" size={13} />删除</button>}
+                {t && ts.assign && <button type="button" className="btn btn-sm" onClick={t.assignToIterator}><Icon name="plus" size={13} />加入迭代器</button>}
+                {t && ts.remove && <button type="button" className="btn btn-sm" onClick={t.removeFromIterator}><Icon name="minus" size={13} />从迭代器移除</button>}
+                {t && <button type="button" className="btn btn-sm" onClick={t.importElements}><Icon name="import" size={13} />导入</button>}
+                {t && <button type="button" className="btn btn-sm" onClick={t.exportElements}><Icon name="export" size={13} />导出</button>}
+                {t && <button type="button" className="btn btn-sm" onClick={t.validateElements}><Icon name="check" size={13} />校验</button>}
             </div>
             {/* Grow with the window instead of a fixed 576px box — the wizard's
                 steps otherwise leave the space under the editor dead. The offset
@@ -333,24 +353,24 @@ function DestinationMappingsRail({ hostRef }: any) {
         // No known target — fall back to the clipboard, like the classic editor.
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(token).then(
-                () => toast(`Copied ${token}`),
-                () => toast('Focus a text field first', 'warn'));
+                () => toast(`已复制 ${token}`),
+                () => toast('请先聚焦一个文本框', 'warn'));
         } else {
-            toast('Focus a text field first', 'warn');
+            toast('请先聚焦一个文本框', 'warn');
         }
     };
 
     if (collapsed) {
-        return <CollapsedSideStrip className="panel-strip wiz-mappings-strip" label="Destination Mappings"
+        return <CollapsedSideStrip className="panel-strip wiz-mappings-strip" label="目的地映射"
             onExpand={() => setCollapsed(false)} />;
     }
 
     return (
         <div className="panel !mt-0 w-full lg:w-[216px] flex-none self-stretch">
             <div className="panel-header">
-                Destination Mappings
+                目的地映射
                 <div className="panel-tools">
-                    <SideCollapseButton label="Destination Mappings" onCollapse={() => setCollapsed(true)} />
+                    <SideCollapseButton label="目的地映射" onCollapse={() => setCollapsed(true)} />
                 </div>
             </div>
             <div className="panel-body flex flex-col gap-2">
@@ -370,7 +390,7 @@ function DestinationMappingsRail({ hostRef }: any) {
                         </div>
                     ))}
                 </div>
-                <div className="hint">Click to insert into the focused field, or drag into a text field.</div>
+                <div className="hint">点击可插入到当前聚焦的文本框，也可拖放到文本框中。</div>
             </div>
         </div>
     );
@@ -389,14 +409,14 @@ function ConnectorTabs({ channel, connector, mode, version, onChange, destIndex 
             {/* m-0 drops .tabs' built-in 7x13 margins so the pill left-aligns
                 with the section content below (the Root's gap spaces the rows). */}
             <TabsPrimitive.List className="tabs overflow-x-auto m-0"
-                aria-label={isDest ? 'Destination sections' : 'Source sections'}>
+                aria-label={isDest ? '目的地分区' : '源连接器分区'}>
                 {TABS.map((t: any) => (
                     <TabsPrimitive.Trigger key={t} value={t}
                         className={`tab whitespace-nowrap ${tab === t ? 'active' : ''}`}>
                         {/* "Filter (2)" at a glance; zero-count labels stay bare. An
                             edit in the embedded editor bumps the wizard, so the
                             counts track live. */}
-                        {STEP_KEYS[t] ? withCount(t, stepCount(connector, STEP_KEYS[t])) : t}
+                        {STEP_KEYS[t] ? withCount(TAB_LABELS_ZH[t] || t, stepCount(connector, STEP_KEYS[t])) : (TAB_LABELS_ZH[t] || t)}
                     </TabsPrimitive.Trigger>
                 ))}
             </TabsPrimitive.List>
@@ -406,7 +426,7 @@ function ConnectorTabs({ channel, connector, mode, version, onChange, destIndex 
             <TabsPrimitive.Content value="Settings">{tab === 'Settings' && (
                 <div className="flex flex-col gap-4">
                     <div>
-                        <div className="cform-section-title mb-2">Connector type</div>
+                        <div className="cform-section-title mb-2">连接器类型</div>
                         <TransportPicker mode={mode} current={connector.transportName}
                             onPick={(name: any) => applyTransport(connector, mode, name, version, onChange)} />
                     </div>
@@ -419,7 +439,7 @@ function ConnectorTabs({ channel, connector, mode, version, onChange, destIndex 
                         <label className="flex items-center gap-2">
                             <input type="checkbox" checked={connector.waitForPrevious !== false}
                                 onChange={(e: any) => { connector.waitForPrevious = e.target.checked; onChange(); }} />
-                            Wait for previous destination
+                            等待上一个目的地
                         </label>
                     )}
                     {/* Destination Settings (queue) sit above the connector panel, like the classic editor. */}
@@ -430,7 +450,7 @@ function ConnectorTabs({ channel, connector, mode, version, onChange, destIndex 
                         connector settings (styled like the alert wizard's Variables panel). */}
                     <div className="flex flex-col lg:flex-row gap-4 items-stretch">
                         <div ref={settingsHostRef} className="panel !mt-0 flex-1 min-w-0">
-                            <div className="panel-header">{connector.transportName} settings</div>
+                            <div className="panel-header">{connector.transportName} 设置</div>
                             <div className="panel-body">
                                 <ConnectorPanelMount key={connector.transportName} channel={channel} connector={connector} mode={mode} onChange={onChange} />
                             </div>
@@ -464,31 +484,31 @@ function BasicsStep({ channel, types, inbound, outbound, onChange, onNameChange,
         <div className="panel !mt-0 max-w-[648px]">
             <div className="panel-body flex flex-col gap-4">
                 <label className="flex flex-col gap-1">
-                    <span className="text-text-dim">Channel name</span>
+                    <span className="text-text-dim">通道名称</span>
                     <input autoFocus className={`w-full ${nameError ? 'cform-invalid' : ''}`} value={channel.name}
-                        placeholder="My Channel" onChange={(e: any) => { channel.name = e.target.value; onNameChange(); }} />
+                        placeholder="我的通道" onChange={(e: any) => { channel.name = e.target.value; onNameChange(); }} />
                     {nameError ? <span className="text-err text-[10px]">{nameError}</span> : null}
                 </label>
                 <label className="flex flex-col gap-1">
-                    <span className="text-text-dim">Description</span>
+                    <span className="text-text-dim">描述</span>
                     <textarea className="w-full" rows={3} value={channel.description || ''}
                         onChange={(e: any) => { channel.description = e.target.value; onChange(); }} />
                 </label>
                 <div className="flex flex-col sm:flex-row gap-4">
                     <label className="flex flex-col gap-1 flex-1">
-                        <span className="text-text-dim">Inbound data type</span>
+                        <span className="text-text-dim">入站数据类型</span>
                         <select value={inbound} onChange={(e: any) => onInbound(e.target.value)}>
                             {types.map((t: any) => <option key={t.name} value={t.name}>{t.label}</option>)}
                         </select>
                     </label>
                     <label className="flex flex-col gap-1 flex-1">
-                        <span className="text-text-dim">Outbound data type</span>
+                        <span className="text-text-dim">出站数据类型</span>
                         <select value={outbound} onChange={(e: any) => onOutbound(e.target.value)}>
                             {types.map((t: any) => <option key={t.name} value={t.name}>{t.label}</option>)}
                         </select>
                     </label>
                 </div>
-                <div className="hint">These seed each connector's data types. Per-connector inbound/outbound types &amp; their properties live on each connector's <b>Transformer</b> tab (Message Templates panel). Channel-level options are in the <b>Dependencies</b>, <b>Channel Options</b>, and <b>Scripts</b> steps.</div>
+                <div className="hint">这些设置将为各连接器的数据类型提供初始值。每个连接器的入站/出站类型及其属性在各连接器的 <b>转换器</b> 页签（消息模板面板）中设置。通道级选项位于 <b>依赖项</b>、<b>通道选项</b> 和 <b>脚本</b> 步骤中。</div>
             </div>
         </div>
     );
@@ -504,7 +524,7 @@ function DestinationsStep({ channel, version, selected, onSelect, onAdd, onRemov
                 growing past the viewport. Both only make sense side-by-side, so
                 they gate on the same lg breakpoint that stacks the layout. */}
             <div className="w-full lg:w-[216px] flex-none flex flex-col gap-2 lg:sticky lg:top-0">
-                <div className="cform-section-title">Destinations</div>
+                <div className="cform-section-title">目的地</div>
                 <div className="step-list panel overflow-auto p-1.5 min-h-[126px] lg:max-h-[calc(100dvh_-_290px)]">
                     {dests.map((d: any, i: any) => (
                         /* Two-line card (name / connector type), not the one cramped
@@ -526,24 +546,24 @@ function DestinationsStep({ channel, version, selected, onSelect, onAdd, onRemov
                                 <Icon name={connectorIcon(d.transportName)} size={12} />
                                 <span className="truncate">{d.transportName}</span>
                                 <span className="ml-auto flex-none flex items-center gap-1">
-                                    <CountBadge icon="filter" n={stepCount(d, 'filter')} what="filter rule" />
-                                    <CountBadge icon="transform" n={stepCount(d, 'transformer')} what="transformer step" />
-                                    <CountBadge icon="undo" n={stepCount(d, 'responseTransformer')} what="response transformer step" />
+                                    <CountBadge icon="filter" n={stepCount(d, 'filter')} what="个过滤器规则" />
+                                    <CountBadge icon="transform" n={stepCount(d, 'transformer')} what="个转换器步骤" />
+                                    <CountBadge icon="undo" n={stepCount(d, 'responseTransformer')} what="个响应转换器步骤" />
                                 </span>
                             </div>
                         </div>
                     ))}
                 </div>
                 <div className="flex gap-2">
-                    <button type="button" className="btn btn-sm" onClick={onAdd}><Icon name="plus" size={13} />Add</button>
-                    <button type="button" className="btn btn-sm btn-danger" onClick={() => onRemove(selected)}><Icon name="trash" size={13} />Remove</button>
+                    <button type="button" className="btn btn-sm" onClick={onAdd}><Icon name="plus" size={13} />添加</button>
+                    <button type="button" className="btn btn-sm btn-danger" onClick={() => onRemove(selected)}><Icon name="trash" size={13} />移除</button>
                 </div>
             </div>
             <div className="flex-1 min-w-0 flex flex-col gap-4">
                 {sel && (
                     <>
                         <label className="flex items-center gap-3">
-                            <span className="w-[108px] text-text-dim">Destination name</span>
+                            <span className="w-[108px] text-text-dim">目的地名称</span>
                             <input className="flex-1" value={sel.name} onChange={(e: any) => onRename(sel, e.target.value)} />
                         </label>
                         <ConnectorTabs key={sel.metaDataId} channel={channel} connector={sel} mode="DESTINATION" version={version} onChange={onChange} destIndex={selected} />
@@ -571,14 +591,18 @@ function dtSummary(connector: any, label: any) {
 function handlingSummary(connector: any) {
     const tx = oie.elementsToArray(connector.transformer && connector.transformer.elements);
     const fl = oie.elementsToArray(connector.filter && connector.filter.elements);
-    const f = fl.length ? `Filter: ${fl.length} rule${fl.length > 1 ? 's' : ''}` : 'Filter: accept all';
-    const t = tx.length ? `Transform: ${tx.length} step${tx.length > 1 ? 's' : ''}` : 'Transform: passthrough';
+    const f = fl.length ? `过滤：${fl.length} 条规则` : '过滤：全部接受';
+    const t = tx.length ? `转换：${tx.length} 个步骤` : '转换：直接通过';
     return `${f} · ${t}`;
 }
 
-const STATE_LABELS = { STARTED: 'Started', PAUSED: 'Paused', STOPPED: 'Stopped' };
-const STORAGE_LABELS = { DEVELOPMENT: 'Development', PRODUCTION: 'Production', RAW: 'Raw', METADATA: 'Metadata', DISABLED: 'Disabled' };
-const SCRIPT_LABELS = { deployScript: 'Deploy', undeployScript: 'Undeploy', preprocessingScript: 'Preprocessor', postprocessingScript: 'Postprocessor' };
+const STATE_LABELS = { STARTED: '已启动', PAUSED: '已暂停', STOPPED: '已停止' };
+const STORAGE_LABELS = { DEVELOPMENT: '开发', PRODUCTION: '生产', RAW: '原始', METADATA: '元数据', DISABLED: '已禁用' };
+const SCRIPT_LABELS = { deployScript: '部署', undeployScript: '取消部署', preprocessingScript: '预处理', postprocessingScript: '后处理' };
+/* Display-only captions for the stored attachmentProperties.type enum — the value
+   itself is never rewritten (classic editor's attachment type labels use the same
+   wording; DICOM / JavaScript stay as technical names). */
+const ATTACHMENT_LABELS = { 'Entire Message': '整条消息', 'Regex': '正则表达式', 'DICOM': 'DICOM', 'JavaScript': 'JavaScript' };
 
 function ReviewStep({ channel, inbound, outbound }: any) {
     const dests = oie.destinationsOf(channel);
@@ -588,29 +612,29 @@ function ReviewStep({ channel, inbound, outbound }: any) {
     const scripts = Object.keys(SCRIPT_LABELS).filter((k: any) => String(channel[k] || '').trim());
     const cols = ((p.metaDataColumns && (Array.isArray(p.metaDataColumns.metaDataColumn) ? p.metaDataColumns.metaDataColumn : (p.metaDataColumns.metaDataColumn ? [p.metaDataColumns.metaDataColumn] : []))) || []).filter((c: any) => c && c.name);
     const encFlags = [
-        p.encryptData && 'content', p.encryptAttachments && 'attachments', p.encryptCustomMetaData && 'metadata'
+        p.encryptData && '内容', p.encryptAttachments && '附件', p.encryptCustomMetaData && '元数据'
     ].filter(Boolean);
     const pruneText = (prune.pruneMetaDataDays == null && prune.pruneContentDays == null)
-        ? 'Stored indefinitely'
-        : `Metadata ${prune.pruneMetaDataDays == null ? 'kept' : prune.pruneMetaDataDays + ' days'} · Content ${prune.pruneContentDays == null ? 'with metadata' : prune.pruneContentDays + ' days'}`;
+        ? '无限期存储'
+        : `元数据 ${prune.pruneMetaDataDays == null ? '保留' : prune.pruneMetaDataDays + ' 天'} · 内容 ${prune.pruneContentDays == null ? '随元数据一并清除' : prune.pruneContentDays + ' 天'}`;
     const tags = api.asList(channel.exportData && channel.exportData.channelTags, 'channelTag').map((t: any) => t && t.name).filter(Boolean);
     const attType = channel.properties && channel.properties.attachmentProperties && channel.properties.attachmentProperties.type;
     return (
         <div className="panel !mt-0 max-w-[738px]">
             <div className="panel-body">
-                <ReviewLine label="Name" value={channel.name || <span className="text-err">(required)</span>} />
-                {channel.description ? <ReviewLine label="Description" value={channel.description} /> : null}
-                <ReviewLine label="Data types" value={`${label(inbound)} → ${label(outbound)}`} />
-                <ReviewLine label="Initial state" value={(STATE_LABELS as any)[p.initialState] || 'Started'} />
-                <ReviewLine label="Message storage" value={
-                    <span>{(STORAGE_LABELS as any)[p.messageStorageMode] || 'Development'}{encFlags.length ? <span className="hint"> · encrypting {encFlags.join(', ')}</span> : null}</span>} />
-                <ReviewLine label="Pruning" value={pruneText} />
-                {attType && attType !== 'None' ? <ReviewLine label="Attachments" value={attType} /> : null}
-                {tags.length ? <ReviewLine label="Tags" value={tags.join(', ')} /> : null}
-                {cols.length ? <ReviewLine label="Metadata columns" value={cols.map((c: any) => c.name).join(', ')} /> : null}
-                <ReviewLine label="Scripts" value={scripts.length ? scripts.map((k: any) => (SCRIPT_LABELS as any)[k]).join(', ') : 'None'} />
-                <ReviewLine label="Source" value={<div><div>{channel.sourceConnector.transportName}</div><div className="hint">{dtSummary(channel.sourceConnector, label)} · {handlingSummary(channel.sourceConnector)}</div></div>} />
-                <ReviewLine label={`Destinations (${dests.length})`} value={
+                <ReviewLine label="通道名称" value={channel.name || <span className="text-err">（必填）</span>} />
+                {channel.description ? <ReviewLine label="描述" value={channel.description} /> : null}
+                <ReviewLine label="数据类型" value={`${label(inbound)} → ${label(outbound)}`} />
+                <ReviewLine label="初始状态" value={(STATE_LABELS as any)[p.initialState] || '已启动'} />
+                <ReviewLine label="消息存储" value={
+                    <span>{(STORAGE_LABELS as any)[p.messageStorageMode] || '开发'}{encFlags.length ? <span className="hint"> · 加密{encFlags.join('、')}</span> : null}</span>} />
+                <ReviewLine label="消息清除" value={pruneText} />
+                {attType && attType !== 'None' ? <ReviewLine label="附件" value={(ATTACHMENT_LABELS as any)[attType] || attType} /> : null}
+                {tags.length ? <ReviewLine label="标签" value={tags.join(', ')} /> : null}
+                {cols.length ? <ReviewLine label="自定义元数据列" value={cols.map((c: any) => c.name).join(', ')} /> : null}
+                <ReviewLine label="脚本" value={scripts.length ? scripts.map((k: any) => (SCRIPT_LABELS as any)[k]).join('、') : '无'} />
+                <ReviewLine label="源连接器" value={<div><div>{channel.sourceConnector.transportName}</div><div className="hint">{dtSummary(channel.sourceConnector, label)} · {handlingSummary(channel.sourceConnector)}</div></div>} />
+                <ReviewLine label={`目的地（${dests.length}）`} value={
                     <div className="flex flex-col gap-2">
                         {dests.map((d: any) => <div key={d.metaDataId}><div>{d.name} — {d.transportName}</div><div className="hint">{dtSummary(d, label)} · {handlingSummary(d)}</div></div>)}
                     </div>} />
@@ -639,7 +663,7 @@ function ChannelWizardView({ params }: any) {
         fetch: (id: any) => loadChannelForEdit(id),
         backPath: '/channels'
     });
-    if (!ready || !model) return <div className="view"><div className="view-body"><div className="dt-empty">Loading channel…</div></div></div>;
+    if (!ready || !model) return <div className="view"><div className="view-body"><div className="dt-empty">正在加载通道…</div></div></div>;
     return <ChannelWizardInner key={model.id} channel={model} isNew={isNew} version={version} />;
 }
 
@@ -706,10 +730,11 @@ function ChannelWizardInner({ channel, isNew, version }: any) {
     /* ---- validation ---- */
     function nameError() {
         const name = String(channel.name || '').trim();
-        if (!name) return 'A channel name is required.';
-        if (name.length > 40) return 'Channel name cannot be longer than 40 characters.';
-        if (!/^[A-Za-z0-9_\s-]*$/.test(name)) return 'Only letters, numbers, spaces, hyphens and underscores are allowed.';
-        if (existingNames && existingNames.includes(name.toLowerCase())) return `A channel named “${name}” already exists.`;
+        if (!name) return '请填写通道名称。';
+        if (name.length > 40) return '通道名称不能超过 40 个字符。';
+        // Frame.checkChannelName parity: the fork's pattern also allows CJK.
+        if (!/^[A-Za-z0-9_\-\s.\()\u4e00-\u9fa5\u3001\u3002\u300a\u300b\u3010\u3011\uff08\uff09\uff0c\uff1a\uff1b\uff1f\uff01\u2014\u2018\u2019\u201c\u201d\u00b7]*$/.test(name)) return '通道名称只能包含中文、字母、数字、空格、连字符、下划线、括号、点号及常用中文标点。';
+        if (existingNames && existingNames.includes(name.toLowerCase())) return `名为“${name}”的通道已存在。`;
         return null;
     }
     // Connector validation, mirroring the classic editor's "Validate Connector":
@@ -721,7 +746,7 @@ function ChannelWizardInner({ channel, isNew, version }: any) {
         try { return def.validate(connector.properties) || []; } catch { return []; }
     }
     function connectorProblems(connector: any, mode: any, label: any) {
-        return connectorErrors(connector, mode).map((e: any) => `${label}: ${e.label} is required`);
+        return connectorErrors(connector, mode).map((e: any) => `${label}：${e.label}为必填项`);
     }
     const cssEsc = (s: any) => (window.CSS && CSS.escape) ? CSS.escape(String(s)) : String(s).replace(/["\\]/g, '\\$&');
     function clearHighlights() {
@@ -735,8 +760,8 @@ function ChannelWizardInner({ channel, isNew, version }: any) {
     function stepProblems(i: any) {
         const name = STEPS[i];
         if (name === 'Basics') return nameError() ? [nameError()] : [];
-        if (name === 'Source') return connectorProblems(channel.sourceConnector, 'SOURCE', 'Source');
-        if (name === 'Destinations') return oie.destinationsOf(channel).flatMap((d: any) => connectorProblems(d, 'DESTINATION', d.name || 'Destination'));
+        if (name === 'Source') return connectorProblems(channel.sourceConnector, 'SOURCE', '源连接器');
+        if (name === 'Destinations') return oie.destinationsOf(channel).flatMap((d: any) => connectorProblems(d, 'DESTINATION', d.name || '目的地'));
         return [];
     }
     // First step (by index) with a problem — used to jump the user there on Create.
@@ -778,7 +803,7 @@ function ChannelWizardInner({ channel, isNew, version }: any) {
         const dests = oie.destinationsOf(channel);
         const id = channel.nextMetaDataId || (dests.length + 1);
         channel.nextMetaDataId = id + 1;
-        const dest = oie.defaultDestinationConnector(version, id, `Destination ${dests.length + 1}`);
+        const dest = oie.defaultDestinationConnector(version, id, `目的地 ${dests.length + 1}`);
         setTransformerTypes(dest.transformer, outbound, outbound, version);
         oie.setDestinations(channel, [...dests, dest]);
         setSelectedDest(dests.length);
@@ -786,7 +811,7 @@ function ChannelWizardInner({ channel, isNew, version }: any) {
     };
     const removeDestination = (i: any) => {
         const dests = oie.destinationsOf(channel);
-        if (dests.length <= 1) { toast('A channel needs at least one destination.', 'warn'); return; }
+        if (dests.length <= 1) { toast('通道必须至少包含一个目的地', 'warn'); return; }
         oie.setDestinations(channel, dests.filter((_, idx) => idx !== i));
         setSelectedDest(Math.max(0, i - 1));
         bump();
@@ -841,12 +866,12 @@ function ChannelWizardInner({ channel, isNew, version }: any) {
             return true;
         } catch (e: any) {
             if (!isCurrent()) return false;
-            const detail = e?.message || 'The engine did not confirm this operation.';
-            const message = stage === 'deployment' ? `Channel saved. Deployment failed: ${detail}`
-                : stage === 'channel' ? `Channel save failed: ${detail}`
-                    : `Channel saved; ${stage} are still pending: ${detail}`;
+            const detail = e?.message || '引擎未确认此操作。';
+            const message = stage === 'deployment' ? `通道已保存，但部署失败：${detail}`
+                : stage === 'channel' ? `通道保存失败：${detail}`
+                    : `通道已保存；${({ 'code template libraries': '代码模板库', 'deploy/start dependencies': '部署/启动依赖' } as any)[stage] || stage}尚未完成：${detail}`;
             setStageFailure({ stage, message });
-            if (stage === 'deployment') errorModal('Channel Deployment Failed', e, channel.name);
+            if (stage === 'deployment') errorModal('通道部署失败', e, channel.name);
             else toast(message, 'error');
             return false;
         } finally {
@@ -857,7 +882,7 @@ function ChannelWizardInner({ channel, isNew, version }: any) {
     }
 
     const busy = saving || deploying;
-    const deployLabel = stageFailure?.stage === 'deployment' ? 'Retry Deploy' : 'Deploy';
+    const deployLabel = stageFailure?.stage === 'deployment' ? '重试部署' : '部署';
     async function finish(deploy: any) {
         const isCurrent = channelSessionActive();
         if (!isCurrent()) return;
@@ -869,8 +894,8 @@ function ChannelWizardInner({ channel, isNew, version }: any) {
             const saved = await saveChannel(deploy);
             if (!isCurrent() || !saved) return;
             store.setState('navGuard', null);
-            const verb = wasNew ? 'created' : 'saved';
-            toast(deploy ? `Channel “${channel.name}” saved; deployment requested.` : `Channel “${channel.name}” ${verb}.`, 'info');
+            const verb = wasNew ? '已创建' : '已保存';
+            toast(deploy ? `通道“${channel.name}”已保存，并已请求部署。` : `通道“${channel.name}”${verb}。`, 'info');
             router.navigate(deploy ? '/dashboard' : '/channels');
         } finally {
             actionRef.current = false;
@@ -889,16 +914,16 @@ function ChannelWizardInner({ channel, isNew, version }: any) {
             const ok = await withEditorSave(async () => {
                 await api.engine.deploy(channel.id);
                 return isCurrent();
-            }, 'Deploying channel…');
+            }, '正在部署通道…');
             if (!isCurrent() || !ok) return;
             setStageFailure(null);
             store.setState('navGuard', null);
-            toast(`Deployment requested for “${channel.name}”.`, 'info');
+            toast(`已请求部署通道“${channel.name}”。`, 'info');
             router.navigate('/dashboard');
         } catch (e: any) {
             if (!isCurrent()) return;
-            setStageFailure({ stage: 'deployment', message: `Deployment failed: ${e?.message || e}` });
-            errorModal('Channel Deployment Failed', e, channel.name);
+            setStageFailure({ stage: 'deployment', message: `部署失败：${e?.message || e}` });
+            errorModal('通道部署失败', e, channel.name);
         } finally {
             actionRef.current = false;
             if (isCurrent()) setDeploying(false);
@@ -918,18 +943,18 @@ function ChannelWizardInner({ channel, isNew, version }: any) {
                 and an exit. An EXISTING channel adds Save (when dirty) and Deploy, so
                 they're reachable from any step. */}
             <ViewTasks>
-                <RailPane title="Channel Tasks" paneKey="tasks:Channel Tasks" group="channelEdit">
+                <RailPane title="通道任务" paneKey="tasks:Channel Tasks" group="channelEdit">
                     <div className="taskbar" data-pane-title="Channel Tasks">
-                        {getPref('showViewSwitch') !== false && <TaskButton label="Classic editor" icon="edit" onClick={switchToClassic} />}
-                        {!isNew && dirtyRef.current && <TaskButton label="Save Changes" icon="save" primary task="doSaveChannel" onClick={() => finish(false)} />}
-                        {!isNew && <TaskButton label={dirtyRef.current ? 'Save & Deploy' : deployLabel} icon="deploy" task="doDeployFromChannelView" onClick={() => (dirtyRef.current ? finish(true) : deployOnly())} />}
-                        <TaskButton label="Back to Channels" icon="channels" onClick={() => router.navigate('/channels')} />
+                        {getPref('showViewSwitch') !== false && <TaskButton label="经典编辑器" icon="edit" onClick={switchToClassic} />}
+                        {!isNew && dirtyRef.current && <TaskButton label="保存更改" icon="save" primary task="doSaveChannel" onClick={() => finish(false)} />}
+                        {!isNew && <TaskButton label={dirtyRef.current ? '保存并部署' : deployLabel} icon="deploy" task="doDeployFromChannelView" onClick={() => (dirtyRef.current ? finish(true) : deployOnly())} />}
+                        <TaskButton label="返回通道列表" icon="channels" onClick={() => router.navigate('/channels')} />
                     </div>
                 </RailPane>
             </ViewTasks>
-            <WizardHeader icon="channels" title={isNew ? 'New Channel — Wizard' : `${channel.name || 'Channel'} — Wizard`} />
+            <WizardHeader icon="channels" title={isNew ? '新建通道 — 向导' : `${channel.name || '通道'} — 向导`} />
             {stageFailure && <div role="status" className="px-4 py-3 border-b border-line text-warning">{stageFailure.message}</div>}
-            <WizardStepper steps={STEPS} step={step} maxStep={maxStep} onStep={setStep} />
+            <WizardStepper steps={STEPS.map((s: any) => STEP_LABELS_ZH[s] || s)} step={step} maxStep={maxStep} onStep={setStep} />
 
             <div className="view-body overflow-x-hidden">
                 {/* keyed on step so the slide-in animation replays on each step change */}
@@ -956,30 +981,30 @@ function ChannelWizardInner({ channel, isNew, version }: any) {
 
             {/* Footer */}
             <div className="flex items-center gap-2 px-4 py-3 border-t border-line">
-                <button className="btn" disabled={step === 0} onClick={() => setStep(Math.max(0, step - 1))}>Back</button>
+                <button className="btn" disabled={step === 0} onClick={() => setStep(Math.max(0, step - 1))}>上一步</button>
                 <div className="ml-auto flex items-center gap-2">
                     {!isLast ? (
-                        <button className="btn btn-primary" disabled={stepName === 'Basics' && !!nameError()} onClick={tryNext}>Next</button>
+                        <button className="btn btn-primary" disabled={stepName === 'Basics' && !!nameError()} onClick={tryNext}>下一步</button>
                     ) : (
                         <>
                             {/* RBAC: save/deploy affordances hide without the matching
                                 channelEdit task (same gating as the classic editor). */}
                             {(isNew || dirtyRef.current) && canSave ? (
                                 <button className="btn" disabled={busy || !!nameError()} onClick={() => finish(false)}>
-                                    <Icon name="save" size={14} />{saving ? (isNew ? 'Creating…' : 'Saving…') : (isNew ? 'Create Channel' : 'Save Changes')}
+                                    <Icon name="save" size={14} />{saving ? (isNew ? '正在创建…' : '正在保存…') : (isNew ? '新建通道' : '保存更改')}
                                 </button>
                             ) : (
                                 <button className="btn" disabled={busy} onClick={() => router.navigate('/channels')}>
-                                    <Icon name="x" size={14} />Exit
+                                    <Icon name="x" size={14} />退出
                                 </button>
                             )}
                             {isNew || dirtyRef.current ? (
                                 canSave && canDeploy && <button className="btn btn-primary" disabled={busy || !!nameError()} onClick={() => finish(true)}>
-                                    <Icon name="deploy" size={14} />{deploying ? 'Deploying…' : (isNew ? 'Create & Deploy' : 'Save & Deploy')}
+                                    <Icon name="deploy" size={14} />{deploying ? '正在部署…' : (isNew ? '创建并部署' : '保存并部署')}
                                 </button>
                             ) : (
                                 canDeploy && <button className="btn btn-primary" disabled={busy} onClick={deployOnly}>
-                                    <Icon name="deploy" size={14} />{deploying ? 'Deploying…' : deployLabel}
+                                    <Icon name="deploy" size={14} />{deploying ? '正在部署…' : deployLabel}
                                 </button>
                             )}
                         </>

@@ -66,12 +66,12 @@ function attachmentsTable(properties: any, onChange: any, disabled: any) {
         clear(wrap);
         rows.forEach((row: any, i: number) => {
             wrap.appendChild(h('div', { class: 'flex gap-1.5 mb-1.5' },
-                textInput(row.name, { placeholder: 'Name', disabled, class: 'flex-1', onInput: (e: any) => { row.name = e.target.value; commit(); } }),
-                textInput(row.content, { placeholder: 'Content', disabled, class: 'flex-[2]', onInput: (e: any) => { row.content = e.target.value; commit(); } }),
-                textInput(row.mimeType, { placeholder: 'MIME type', disabled, class: 'flex-1', onInput: (e: any) => { row.mimeType = e.target.value; commit(); } }),
-                h('button.icon-btn', { type: 'button', title: 'Remove', disabled, onClick: disabled ? null : () => { rows.splice(i, 1); commit(); paint(); } }, icon('x'))));
+                textInput(row.name, { placeholder: '名称', disabled, class: 'flex-1', onInput: (e: any) => { row.name = e.target.value; commit(); } }),
+                textInput(row.content, { placeholder: '内容', disabled, class: 'flex-[2]', onInput: (e: any) => { row.content = e.target.value; commit(); } }),
+                textInput(row.mimeType, { placeholder: 'MIME 类型', disabled, class: 'flex-1', onInput: (e: any) => { row.mimeType = e.target.value; commit(); } }),
+                h('button.icon-btn', { type: 'button', title: '移除', disabled, onClick: disabled ? null : () => { rows.splice(i, 1); commit(); paint(); } }, icon('x'))));
         });
-        wrap.appendChild(h('button.btn', { type: 'button', disabled, onClick: disabled ? null : () => { rows.push({ name: '', content: '', mimeType: '' }); paint(); } }, 'New'));
+        wrap.appendChild(h('button.btn', { type: 'button', disabled, onClick: disabled ? null : () => { rows.push({ name: '', content: '', mimeType: '' }); paint(); } }, '新建'));
     }
     paint();
     return wrap;
@@ -115,46 +115,46 @@ const smtpSender = {
         return (
             <div>
                 <ConnectorForm properties={properties} onChange={onChange} fields={[
-                    { section: 'Connection Settings' },
-                    { key: 'smtpHost', label: 'SMTP Host', type: 'text', width: '200px', append: () => connectorTestButton({ label: 'Send Test Email', icon: 'mail', path: '/connectors/smtp/_sendTestEmail', channel, properties }) },
-                    { key: 'smtpPort', label: 'SMTP Port', type: 'number', width: '90px' },
-                    { key: 'overrideLocalBinding', label: 'Override Local Binding', type: 'radio', options: YES_NO, refresh: true },
-                    { key: 'localAddress', label: 'Local Address', type: 'text', width: '200px', disabled: (p: any) => !usingLocalBinding(p) },
-                    { key: 'localPort', label: 'Local Port', type: 'number', width: '90px', disabled: (p: any) => !usingLocalBinding(p) },
-                    { key: 'timeout', label: 'Send Timeout (ms)', type: 'number', width: '120px' },
-                    { key: 'encryption', label: 'Encryption', type: 'radio', options: [
-                        { value: 'none', label: 'None' },
+                    { section: '连接设置' },
+                    { key: 'smtpHost', label: 'SMTP 主机', type: 'text', width: '200px', append: () => connectorTestButton({ label: '发送测试邮件', icon: 'mail', path: '/connectors/smtp/_sendTestEmail', channel, properties }) },
+                    { key: 'smtpPort', label: 'SMTP 端口', type: 'number', width: '90px' },
+                    { key: 'overrideLocalBinding', label: '覆盖本地绑定', type: 'radio', options: YES_NO, refresh: true },
+                    { key: 'localAddress', label: '本地地址', type: 'text', width: '200px', disabled: (p: any) => !usingLocalBinding(p) },
+                    { key: 'localPort', label: '本地端口', type: 'number', width: '90px', disabled: (p: any) => !usingLocalBinding(p) },
+                    { key: 'timeout', label: '发送超时（毫秒）', type: 'number', width: '120px' },
+                    { key: 'encryption', label: '加密', type: 'radio', options: [
+                        { value: 'none', label: '无' },
                         { value: 'TLS', label: 'STARTTLS' },
                         { value: 'SSL', label: 'SSL' }
                     ] },
-                    { key: 'authentication', label: 'Use Authentication', type: 'radio', options: YES_NO, refresh: true },
-                    { key: 'username', label: 'Username', type: 'text', width: '220px', disabled: (p: any) => !usingAuth(p) },
-                    { key: 'password', label: 'Password', type: 'password', width: '220px', disabled: (p: any) => !usingAuth(p) },
-                    { section: 'Email Settings' },
-                    { key: 'to', label: 'To', type: 'text', tooltip: 'The name of the mailbox (person, usually) to which the email should be sent.' },
-                    { key: 'from', label: 'From', type: 'text', width: '220px' },
-                    { key: 'subject', label: 'Subject', type: 'text' },
-                    { key: 'charsetEncoding', label: 'Charset Encoding', type: 'select', options: CHARSETS, width: '160px' },
-                    { key: 'html', label: 'HTML Body', type: 'radio', options: YES_NO },
-                    { key: 'body', label: 'Body', type: 'code', minHeight: '260px' },
-                    { key: 'isUseHeadersVariable', label: 'Headers', type: 'radio', refresh: true, options: [
-                        { value: false, label: 'Use Table' },
-                        { value: true, label: 'Use Map:' }
+                    { key: 'authentication', label: '使用认证', type: 'radio', options: YES_NO, refresh: true },
+                    { key: 'username', label: '用户名', type: 'text', width: '220px', disabled: (p: any) => !usingAuth(p) },
+                    { key: 'password', label: '密码', type: 'password', width: '220px', disabled: (p: any) => !usingAuth(p) },
+                    { section: '邮件设置' },
+                    { key: 'to', label: '收件人', type: 'text', tooltip: '邮件要发送到的邮箱名称（通常是人）。' },
+                    { key: 'from', label: '发件人', type: 'text', width: '220px' },
+                    { key: 'subject', label: '主题', type: 'text' },
+                    { key: 'charsetEncoding', label: '字符集编码', type: 'select', options: CHARSETS, width: '160px' },
+                    { key: 'html', label: 'HTML 正文', type: 'radio', options: YES_NO },
+                    { key: 'body', label: '正文', type: 'code', minHeight: '260px' },
+                    { key: 'isUseHeadersVariable', label: '邮件头', type: 'radio', refresh: true, options: [
+                        { value: false, label: '使用表格' },
+                        { value: true, label: '使用映射：' }
                     ] },
                     // Swing useHeadersVariableFieldsEnabled() greys BOTH the table and the
                     // variable field (setEnabled) — both stay VISIBLE. Grey-both, not swap.
                     { key: 'headers', type: 'keyvalue', mapShape: 'string', disabled: (p: any) => asBool(p.isUseHeadersVariable) },
-                    { key: 'headersVariable', label: 'Map Variable', type: 'text', width: '320px', disabled: (p: any) => !asBool(p.isUseHeadersVariable) },
-                    { key: 'isUseAttachmentsVariable', label: 'Attachments', type: 'radio', refresh: true, options: [
-                        { value: false, label: 'Use Table' },
-                        { value: true, label: 'Use List:' }
+                    { key: 'headersVariable', label: '映射变量', type: 'text', width: '320px', disabled: (p: any) => !asBool(p.isUseHeadersVariable) },
+                    { key: 'isUseAttachmentsVariable', label: '附件', type: 'radio', refresh: true, options: [
+                        { value: false, label: '使用表格' },
+                        { value: true, label: '使用列表：' }
                     ] },
                     // Swing useAttachmentsVariableFieldsEnabled() greys BOTH the table and the
                     // variable field (setEnabled) — both stay VISIBLE. Grey-both, not swap. The
                     // 'custom' branch doesn't propagate disabled, so derive it inside render().
                     { type: 'custom', label: '', span: true,
                         render: (p: any) => attachmentsTable(p, onChange, asBool(p.isUseAttachmentsVariable)) },
-                    { key: 'attachmentsVariable', label: 'List Variable', type: 'text', width: '320px', disabled: (p: any) => !asBool(p.isUseAttachmentsVariable) }
+                    { key: 'attachmentsVariable', label: '列表变量', type: 'text', width: '320px', disabled: (p: any) => !asBool(p.isUseAttachmentsVariable) }
                 ]} />
             </div>
         );
@@ -165,15 +165,15 @@ const smtpSender = {
     // attachments variable is required when the matching Use Map/Use List mode is on.
     validate(properties: any) {
         return requireFields(properties, [
-            { key: 'smtpHost', label: 'SMTP Host' },
-            { key: 'smtpPort', label: 'SMTP Port' },
-            { key: 'localAddress', label: 'Local Address', when: usingLocalBinding },
-            { key: 'localPort', label: 'Local Port', when: usingLocalBinding },
-            { key: 'timeout', label: 'Send Timeout' },
-            { key: 'to', label: 'To' },
-            { key: 'from', label: 'From' },
-            { key: 'headersVariable', label: 'Headers Map Variable', when: (p: any) => asBool(p.isUseHeadersVariable) },
-            { key: 'attachmentsVariable', label: 'Attachments List Variable', when: (p: any) => asBool(p.isUseAttachmentsVariable) }
+            { key: 'smtpHost', label: 'SMTP 主机' },
+            { key: 'smtpPort', label: 'SMTP 端口' },
+            { key: 'localAddress', label: '本地地址', when: usingLocalBinding },
+            { key: 'localPort', label: '本地端口', when: usingLocalBinding },
+            { key: 'timeout', label: '发送超时' },
+            { key: 'to', label: '收件人' },
+            { key: 'from', label: '发件人' },
+            { key: 'headersVariable', label: '邮件头映射变量', when: (p: any) => asBool(p.isUseHeadersVariable) },
+            { key: 'attachmentsVariable', label: '附件列表变量', when: (p: any) => asBool(p.isUseAttachmentsVariable) }
         ]);
     }
 };

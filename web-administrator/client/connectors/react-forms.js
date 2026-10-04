@@ -137,11 +137,11 @@ function KeyValueEditor({ properties, field, onChange, disabled }) {
     };
     return (React.createElement("div", { style: disabled ? { opacity: 0.6 } : undefined },
         rows.map((row, i) => (React.createElement("div", { key: i, className: "flex gap-1.5 mb-1.5" },
-            React.createElement("input", { type: "text", value: row[0], placeholder: "Name", className: "flex-1", disabled: disabled, onChange: (e) => { row[0] = e.target.value; tick(); commit(); } }),
-            React.createElement("input", { type: "text", value: row[1], placeholder: "Value", className: "flex-[2]", disabled: disabled, onChange: (e) => { row[1] = e.target.value; tick(); commit(); } }),
-            React.createElement("button", { type: "button", className: "icon-btn", title: "Remove", disabled: disabled, onClick: () => { rows.splice(i, 1); commit(); tick(); } },
+            React.createElement("input", { type: "text", value: row[0], placeholder: "\u540D\u79F0", className: "flex-1", disabled: disabled, onChange: (e) => { row[0] = e.target.value; tick(); commit(); } }),
+            React.createElement("input", { type: "text", value: row[1], placeholder: "\u503C", className: "flex-[2]", disabled: disabled, onChange: (e) => { row[1] = e.target.value; tick(); commit(); } }),
+            React.createElement("button", { type: "button", className: "icon-btn", title: "\u79FB\u9664", disabled: disabled, onClick: () => { rows.splice(i, 1); commit(); tick(); } },
                 React.createElement(Icon, { name: "x" }))))),
-        React.createElement("button", { type: "button", className: "btn", disabled: disabled, onClick: () => { rows.push(['', '']); tick(); } }, "Add")));
+        React.createElement("button", { type: "button", className: "btn", disabled: disabled, onClick: () => { rows.push(['', '']); tick(); } }, "\u6DFB\u52A0")));
 }
 /* ---- one form row (control + label), React port of renderRow ---------------- */
 function FieldRow({ properties, field, onChange, repaint }) {
@@ -292,7 +292,7 @@ export function PortsInUseButton() {
     const ref = useRef(null);
     useEffect(() => {
         const host = ref.current;
-        const btn = taskButton('Ports in Use', 'search', async () => {
+        const btn = taskButton('使用中的端口', 'search', async () => {
             btn.disabled = true;
             try {
                 const ports = await api.channels.portsInUse();
@@ -300,9 +300,9 @@ export function PortsInUseButton() {
                     .filter((p) => p && typeof p === 'object')
                     .map((p) => h('tr', h('td.num', String(p.port ?? '')), h('td', String(p.name ?? ''))));
                 modal({
-                    title: 'Ports in Use',
-                    body: h('table.dt', h('thead', h('tr', h('th', 'Port'), h('th', 'Channel Name'))), h('tbody', rows.length ? rows : h('tr', h('td', { colSpan: 2 }, 'No listener ports in use')))),
-                    buttons: [{ label: 'Close', primary: true }]
+                    title: '使用中的端口',
+                    body: h('table.dt', h('thead', h('tr', h('th', '端口'), h('th', '通道名称'))), h('tbody', rows.length ? rows : h('tr', h('td', { colSpan: 2 }, '没有正在使用的监听端口')))),
+                    buttons: [{ label: '关闭', primary: true }]
                 });
             }
             catch (e) {
@@ -319,7 +319,7 @@ export function PortsInUseButton() {
     return React.createElement("span", { ref: ref, className: "[display:contents]" });
 }
 /* ---- 'Test Connection' style button ----------------------------------------- */
-export function ConnectorTestButton({ label = 'Test Connection', icon: iconName = 'link', path, channel, properties }) {
+export function ConnectorTestButton({ label = '连接测试', icon: iconName = 'link', path, channel, properties }) {
     const ref = useRef(null);
     // Latest props captured by ref so the button (built once) always POSTs the
     // current mutated properties.
@@ -333,7 +333,7 @@ export function ConnectorTestButton({ label = 'Test Connection', icon: iconName 
             try {
                 const result = await postConnectorProperties(s.path, s.properties, s.channel);
                 const type = result && typeof result === 'object' ? String(result.type ?? '') : '';
-                const message = (result && typeof result === 'object' && result.message) || type || 'No response received';
+                const message = (result && typeof result === 'object' && result.message) || type || '未收到响应';
                 if (type === 'SUCCESS')
                     successToast(message);
                 else
@@ -355,7 +355,7 @@ export function ConnectorTestButton({ label = 'Test Connection', icon: iconName 
 /* ---- polling schedule (PollConnectorProperties), React port ----------------- */
 export function PollSection({ properties, onChange }) {
     return (React.createElement("div", { className: "cform-section mt-4" },
-        React.createElement("div", { className: "cform-section-title" }, "Polling Settings"),
+        React.createElement("div", { className: "cform-section-title" }, "\u8F6E\u8BE2\u8BBE\u7F6E"),
         React.createElement(PollSettings, { properties: properties, onChange: onChange })));
 }
 /* Interval unit dropdown (Swing PollingSettingsPanel). The model stores
@@ -363,10 +363,10 @@ export function PollSection({ properties, onChange }) {
    is the largest one the stored ms divides into evenly (so 18000000 → 5 hours,
    5000 → 5 seconds), defaulting to milliseconds. */
 const FREQ_UNITS = [
-    { value: 'ms', label: 'milliseconds', ms: 1 },
-    { value: 's', label: 'seconds', ms: 1000 },
-    { value: 'm', label: 'minutes', ms: 60000 },
-    { value: 'h', label: 'hours', ms: 3600000 }
+    { value: 'ms', label: '毫秒', ms: 1 },
+    { value: 's', label: '秒', ms: 1000 },
+    { value: 'm', label: '分钟', ms: 60000 },
+    { value: 'h', label: '小时', ms: 3600000 }
 ];
 function deriveFreqUnit(freq) {
     const f = Number(freq) || 0;
@@ -400,13 +400,13 @@ function PollSettings({ properties, onChange }) {
     };
     return (React.createElement("div", { className: "form-grid" },
         React.createElement("div", { className: "field" },
-            React.createElement("label", null, "Schedule Type"),
+            React.createElement("label", null, "\u8C03\u5EA6\u65B9\u5F0F"),
             React.createElement("select", { value: p.pollingType, onChange: (e) => { p.pollingType = e.target.value; notify(); } },
-                React.createElement("option", { value: "INTERVAL" }, "Interval"),
-                React.createElement("option", { value: "TIME" }, "Time"),
+                React.createElement("option", { value: "INTERVAL" }, "\u6309\u95F4\u9694"),
+                React.createElement("option", { value: "TIME" }, "\u6309\u65F6\u5206"),
                 React.createElement("option", { value: "CRON" }, "Cron"))),
         p.pollingType === 'INTERVAL' && (React.createElement("div", { className: "field" },
-            React.createElement("label", null, "Polling Frequency"),
+            React.createElement("label", null, "\u8F6E\u8BE2\u9891\u7387"),
             React.createElement("div", { className: "flex items-center gap-2" },
                 React.createElement("input", { type: "number", min: 0, className: "w-[99px]", value: Math.round((Number(p.pollingFrequency ?? 5000)) / unitMs(freqUnit)), onChange: (e) => { p.pollingFrequency = (parseInt(e.target.value, 10) || 0) * unitMs(freqUnit); notify(); } }),
                 React.createElement("select", { value: freqUnit, onChange: (e) => {
@@ -421,39 +421,39 @@ function PollSettings({ properties, onChange }) {
                     } }, FREQ_UNITS.map((u) => React.createElement("option", { key: u.value, value: u.value }, u.label)))))),
         p.pollingType === 'TIME' && (React.createElement(React.Fragment, null,
             React.createElement("div", { className: "field" },
-                React.createElement("label", null, "Hour (0-23)"),
+                React.createElement("label", null, "\u5C0F\u65F6\uFF080-23\uFF09"),
                 React.createElement("input", { type: "number", min: 0, max: 23, value: p.pollingHour ?? 0, onChange: (e) => { p.pollingHour = parseInt(e.target.value, 10) || 0; notify(); } })),
             React.createElement("div", { className: "field" },
-                React.createElement("label", null, "Minute (0-59)"),
+                React.createElement("label", null, "\u5206\u949F\uFF080-59\uFF09"),
                 React.createElement("input", { type: "number", min: 0, max: 59, value: p.pollingMinute ?? 0, onChange: (e) => { p.pollingMinute = parseInt(e.target.value, 10) || 0; notify(); } })))),
         p.pollingType === 'CRON' && (React.createElement("div", { className: "field" },
-            React.createElement("label", null, "Cron Jobs"),
+            React.createElement("label", null, "Cron \u4EFB\u52A1"),
             React.createElement("div", { className: "span-2" },
                 cron.map((row, i) => (React.createElement("div", { key: i, className: "flex gap-1.5 mb-1.5" },
-                    React.createElement("input", { type: "text", value: row.expression, placeholder: "Cron expression (e.g. 0 */5 * ? * *)", className: "flex-[2]", onChange: (e) => { row.expression = e.target.value; tick(); commitCron(); } }),
-                    React.createElement("input", { type: "text", value: row.description, placeholder: "Description", className: "flex-1", onChange: (e) => { row.description = e.target.value; tick(); commitCron(); } }),
-                    React.createElement("button", { type: "button", className: "icon-btn", title: "Remove", onClick: () => { cron.splice(i, 1); commitCron(); tick(); } },
+                    React.createElement("input", { type: "text", value: row.expression, placeholder: "Cron \u8868\u8FBE\u5F0F\uFF08\u5982 0 */5 * ? * *\uFF09", className: "flex-[2]", onChange: (e) => { row.expression = e.target.value; tick(); commitCron(); } }),
+                    React.createElement("input", { type: "text", value: row.description, placeholder: "\u63CF\u8FF0", className: "flex-1", onChange: (e) => { row.description = e.target.value; tick(); commitCron(); } }),
+                    React.createElement("button", { type: "button", className: "icon-btn", title: "\u79FB\u9664", onClick: () => { cron.splice(i, 1); commitCron(); tick(); } },
                         React.createElement(Icon, { name: "x" }))))),
-                React.createElement("button", { type: "button", className: "btn", onClick: () => { cron.push({ expression: '', description: '' }); tick(); } }, "Add Cron Job")))),
+                React.createElement("button", { type: "button", className: "btn", onClick: () => { cron.push({ expression: '', description: '' }); tick(); } }, "\u6DFB\u52A0 Cron \u4EFB\u52A1")))),
         React.createElement("div", { className: "field" },
             React.createElement("label", null, "\u00A0"),
             React.createElement("div", { className: "min-h-[31px] flex items-center" },
                 React.createElement("label", { className: "check" },
                     React.createElement("input", { type: "checkbox", checked: asBool(p.pollOnStart), onChange: (e) => { p.pollOnStart = e.target.checked; notify(); } }),
-                    "Poll Once on Start"))),
+                    "\u542F\u52A8\u65F6\u8F6E\u8BE2\u4E00\u6B21"))),
         p.pollingType !== 'CRON' && (React.createElement(PollAdvancedSettings, { p: p, pollingType: p.pollingType, onChange: onChange }))));
 }
 /* Day-of-week checkboxes, ordered S M T W Th F S to match Swing's dialog. `idx`
    is the java.util.Calendar constant used to index the inactiveDays boolean[8]
    (SUNDAY=1 … SATURDAY=7; element 0 is unused). */
 const POLL_DAYS = [
-    { label: 'S', idx: 1, title: 'Sunday' },
-    { label: 'M', idx: 2, title: 'Monday' },
-    { label: 'T', idx: 3, title: 'Tuesday' },
-    { label: 'W', idx: 4, title: 'Wednesday' },
-    { label: 'Th', idx: 5, title: 'Thursday' },
-    { label: 'F', idx: 6, title: 'Friday' },
-    { label: 'S', idx: 7, title: 'Saturday' }
+    { label: '日', idx: 1, title: '星期日' },
+    { label: '一', idx: 2, title: '星期一' },
+    { label: '二', idx: 3, title: '星期二' },
+    { label: '三', idx: 4, title: '星期三' },
+    { label: '四', idx: 5, title: '星期四' },
+    { label: '五', idx: 6, title: '星期五' },
+    { label: '六', idx: 7, title: '星期六' }
 ];
 /* Port of AdvancedPollingSettingsDialog. Binds the existing
    pollConnectorPropertiesAdvanced sub-object (weekly / inactiveDays /
@@ -493,37 +493,37 @@ function PollAdvancedSettings({ p, pollingType, onChange }) {
     // round-trips to the engine as an invalid cron window.
     const numField = (value, min, max, apply) => (React.createElement("input", { type: "number", min: min, max: max, className: "w-[63px]", value: value, onChange: (e) => { apply(Math.min(max, Math.max(min, parseInt(e.target.value, 10) || 0))); notify(); } }));
     return (React.createElement("div", { className: "span-2 my-2.5" },
-        React.createElement("button", { type: "button", className: "btn", onClick: () => setOpen((o) => !o) }, open ? 'Hide Advanced Settings' : 'Advanced Settings'),
+        React.createElement("button", { type: "button", className: "btn", onClick: () => setOpen((o) => !o) }, open ? '隐藏高级设置' : '高级设置'),
         open && (React.createElement("div", { className: "cform-section mt-2" },
-            React.createElement("div", { className: "cform-section-title" }, "Advanced Settings"),
+            React.createElement("div", { className: "cform-section-title" }, "\u9AD8\u7EA7\u8BBE\u7F6E"),
             React.createElement("div", { className: "form-grid" },
                 React.createElement("div", { className: "field" },
-                    React.createElement("label", null, "Active Days"),
+                    React.createElement("label", null, "\u6D3B\u52A8\u65E5\u671F"),
                     React.createElement("div", { className: "radio-group inline-row" },
                         React.createElement("label", { className: "check" },
                             React.createElement("input", { type: "radio", name: `poll-days-${uid}`, checked: weekly, onChange: () => { adv.weekly = true; notify(); } }),
-                            "Weekly"),
+                            "\u6BCF\u5468"),
                         React.createElement("label", { className: "check" },
                             React.createElement("input", { type: "radio", name: `poll-days-${uid}`, checked: !weekly, onChange: () => { adv.weekly = false; notify(); } }),
-                            "Monthly"))),
+                            "\u6BCF\u6708"))),
                 weekly ? (React.createElement("div", { className: "field" },
-                    React.createElement("label", null, "Days of Week"),
+                    React.createElement("label", null, "\u6BCF\u5468\u6D3B\u52A8\u65E5"),
                     React.createElement("div", { className: "radio-group inline-row min-h-[31px] items-center" }, POLL_DAYS.map((d) => (React.createElement("label", { className: "check", key: d.idx, title: d.title },
                         React.createElement("input", { type: "checkbox", checked: !asBool(inactive[d.idx]), onChange: (e) => { inactive[d.idx] = !e.target.checked; notify(); } }),
                         d.label)))))) : (React.createElement("div", { className: "field" },
-                    React.createElement("label", null, "Day of Month (1-31)"),
+                    React.createElement("label", null, "\u6BCF\u6708\u6D3B\u52A8\u65E5\uFF081-31\uFF09"),
                     numField(adv.dayOfMonth ?? 1, 1, 31, (v) => { adv.dayOfMonth = Math.min(31, Math.max(1, v || 1)); }))),
                 React.createElement("div", { className: "field" },
-                    React.createElement("label", null, "Active Time"),
+                    React.createElement("label", null, "\u6D3B\u52A8\u65F6\u95F4"),
                     React.createElement("div", { className: "radio-group inline-row" },
                         React.createElement("label", { className: "check" },
                             React.createElement("input", { type: "radio", name: `poll-time-${uid}`, disabled: !timeEnabled, checked: allDay, onChange: () => { adv.allDay = true; notify(); } }),
-                            "All Day"),
+                            "\u5168\u5929"),
                         React.createElement("label", { className: "check" },
                             React.createElement("input", { type: "radio", name: `poll-time-${uid}`, disabled: !timeEnabled, checked: !allDay, onChange: () => { adv.allDay = false; notify(); } }),
-                            "Range"))),
+                            "\u6307\u5B9A\u65F6\u6BB5"))),
                 rangeEnabled && (React.createElement("div", { className: "field span-2" },
-                    React.createElement("label", null, "Time Range (Start - End, H:M 24h)"),
+                    React.createElement("label", null, "\u65F6\u95F4\u8303\u56F4\uFF08\u5F00\u59CB - \u7ED3\u675F\uFF0C\u65F6:\u5206\uFF0C24 \u5C0F\u65F6\u5236\uFF09"),
                     React.createElement("div", { className: "flex gap-1.5 items-center" },
                         numField(adv.startingHour ?? 0, 0, 23, (v) => { adv.startingHour = v; }),
                         React.createElement("span", null, ":"),
@@ -562,9 +562,9 @@ export function TransmissionModePanel({ properties, onChange }) {
     return (React.createElement("div", { className: "mb-4" },
         React.createElement("div", { className: "cform" },
             React.createElement("div", { className: "cform-section" },
-                React.createElement("div", { className: "cform-section-title" }, "Transmission Mode"),
+                React.createElement("div", { className: "cform-section-title" }, "\u4F20\u8F93\u6A21\u5F0F"),
                 React.createElement("div", { className: "cform-grid" },
-                    React.createElement("label", { className: "cform-label" }, "Transmission Mode:"),
+                    React.createElement("label", { className: "cform-label" }, "\u4F20\u8F93\u6A21\u5F0F"),
                     React.createElement("div", { className: "cform-control" },
                         React.createElement("div", { className: "flex gap-1.5 items-center" },
                             React.createElement("select", { value: tm.pluginPointName, className: "w-[162px]", onChange: (e) => {
@@ -575,9 +575,9 @@ export function TransmissionModePanel({ properties, onChange }) {
                                     onChange();
                                     tick();
                                 } }, modes.map((m) => React.createElement("option", { key: m.name, value: m.name }, m.label))),
-                            mode && mode.openSettings && (React.createElement("button", { type: "button", className: "icon-btn", title: "Transmission Mode Settings", onClick: openSettings },
+                            mode && mode.openSettings && (React.createElement("button", { type: "button", className: "icon-btn", title: "\u4F20\u8F93\u6A21\u5F0F\u8BBE\u7F6E", onClick: openSettings },
                                 React.createElement(Icon, { name: "settings" }))))),
-                    React.createElement("label", { className: "cform-label" }, "Sample Frame:"),
+                    React.createElement("label", { className: "cform-label" }, "\u793A\u4F8B\u5E27"),
                     React.createElement("div", { className: "cform-control" },
                         React.createElement("span", { className: "mono text-text-faint text-[11px]" }, sample)))))));
 }

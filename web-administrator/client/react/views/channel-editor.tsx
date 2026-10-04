@@ -79,9 +79,9 @@ function tagChipBg(color: any) {
 
 /* AttachmentHandlerType strings/classes from com.mirth.connect.model.attachments */
 const ATTACHMENT_TYPES = [
-    { value: 'None', label: 'None', className: null },
-    { value: 'Entire Message', label: 'Entire Message', className: 'com.mirth.connect.server.attachments.identity.IdentityAttachmentHandlerProvider' },
-    { value: 'Regex', label: 'Regex', className: 'com.mirth.connect.server.attachments.regex.RegexAttachmentHandlerProvider' },
+    { value: 'None', label: '无', className: null },
+    { value: 'Entire Message', label: '整条消息', className: 'com.mirth.connect.server.attachments.identity.IdentityAttachmentHandlerProvider' },
+    { value: 'Regex', label: '正则表达式', className: 'com.mirth.connect.server.attachments.regex.RegexAttachmentHandlerProvider' },
     { value: 'DICOM', label: 'DICOM', className: 'com.mirth.connect.server.attachments.dicom.DICOMAttachmentHandlerProvider' },
     { value: 'JavaScript', label: 'JavaScript', className: 'com.mirth.connect.server.attachments.javascript.JavaScriptAttachmentHandlerProvider' }
 ];
@@ -104,19 +104,19 @@ function advancedQueueSummary(dcp: any) {
     const retryCount = Number(dcp.retryCount) || 0;
     const interval = Number(dcp.retryIntervalMillis) || 0;
     const threads = Number(dcp.threadCount) || 1;
-    const retries = `${retryCount} ${retryCount === 1 ? 'Retry' : 'Retries'}`;
+    const retries = `重试 ${retryCount} 次`;
     if (!queueEnabled) {
         parts.push(retries);
-        if (retryCount > 0) parts.push(`Interval ${interval} ms`);
+        if (retryCount > 0) parts.push(`间隔 ${interval} 毫秒`);
     } else {
-        if (dcp.regenerateTemplate) parts.push('Regenerate');
-        if (dcp.rotate) parts.push('Rotate');
-        if (dcp.includeFilterTransformer) parts.push('Including Transformer');
+        if (dcp.regenerateTemplate) parts.push('重新生成');
+        if (dcp.rotate) parts.push('轮换');
+        if (dcp.includeFilterTransformer) parts.push('包含转换器');
         if (sendFirst) parts.push(retries);
-        parts.push(`Interval ${interval} ms`);
+        parts.push(`间隔 ${interval} 毫秒`);
         if (threads > 1) {
-            parts.push(`${threads} Threads`);
-            if (dcp.threadAssignmentVariable) parts.push(`Group By ${dcp.threadAssignmentVariable}`);
+            parts.push(`${threads} 个线程`);
+            if (dcp.threadAssignmentVariable) parts.push(`按 ${dcp.threadAssignmentVariable} 分组`);
         }
     }
     return parts.join(' / ');
@@ -159,21 +159,21 @@ function promptSaveChanges(channel: any) {
     return new Promise((resolve: any) => {
         if (!platform.checkTask('channelEdit', 'doSaveChannel')) {
             modal({
-                title: 'Unsaved Changes',
-                body: h('div', `You don't have permission to save changes to "${channel.name || 'this channel'}". Your changes will be discarded.`),
+                title: '未保存的更改',
+                body: h('div', `您没有保存对“${channel.name || '此通道'}”所做更改的权限，更改将被丢弃。`),
                 onClose: () => resolve('cancel'),
-                buttons: [{ label: 'OK', primary: true, onClick: () => { resolve('discard'); } }]
+                buttons: [{ label: '确定', primary: true, onClick: () => { resolve('discard'); } }]
             });
             return;
         }
         modal({
-            title: 'Unsaved Changes',
-            body: h('div', `Would you like to save the changes made to "${channel.name || 'this channel'}"?`),
+            title: '未保存的更改',
+            body: h('div', `要保存对“${channel.name || '此通道'}”所做的更改吗？`),
             onClose: () => resolve('cancel'),
             buttons: [
-                { label: 'Cancel', onClick: () => { resolve('cancel'); } },
-                { label: "Don't Save", danger: true, onClick: () => { resolve('discard'); } },
-                { label: 'Save Changes', primary: true, onClick: () => { resolve('save'); } }
+                { label: '取消', onClick: () => { resolve('cancel'); } },
+                { label: '不保存', danger: true, onClick: () => { resolve('discard'); } },
+                { label: '保存更改', primary: true, onClick: () => { resolve('save'); } }
             ]
         });
     });
@@ -201,17 +201,17 @@ function openAttachmentPropsModal(ap: any, markDirty: any) {
                     onInput: (e: any) => { row.b = e.target.value; commit(); }
                 }));
                 grid.appendChild(h('button.btn.btn-sm', {
-                    title: 'Remove row',
+                    title: '移除该行',
                     onClick: () => { rows.splice(rows.indexOf(row), 1); commit(); renderRows(); }
-                }, 'Delete'));
+                }, '删除'));
             }
-            if (!rows.length) grid.appendChild(h('div.text-text-faint', { class: 'col-[1/-1]' }, 'No entries'));
+            if (!rows.length) grid.appendChild(h('div.text-text-faint', { class: 'col-[1/-1]' }, '无条目'));
             host.appendChild(grid);
         }
         renderRows();
         const addBtn = h('button.btn.btn-sm', {
             onClick: () => { rows.push({ a: '', b: '' }); commit(); renderRows(); }
-        }, 'New');
+        }, '新建');
         return h('div.field',
             h('div', { class: 'flex items-center justify-between gap-2.5' },
                 h('label', { class: 'm-0' }, title), addBtn),
@@ -257,18 +257,18 @@ function openAttachmentPropsModal(ap: any, markDirty: any) {
         }
 
         return h('div',
-            pairTable('Regular Expressions', patterns, 'Regular Expression', 'MIME Type', commit,
-                'Capturing group 1 of each expression is extracted as an attachment; a blank MIME type defaults to text/plain.'),
-            pairTable('Inbound Replacements', inbound, 'Replace All', 'Replace With', commit,
-                'Applied to attachment content as it is extracted. Java string escape sequences (\\n, \\t, …) are unescaped by the server.'),
-            pairTable('Outbound Replacements', outbound, 'Replace All', 'Replace With', commit,
-                'Applied when attachments are re-attached to outbound messages.'));
+            pairTable('正则表达式', patterns, '正则表达式', 'MIME 类型', commit,
+                '每个表达式的第 1 个捕获组将作为附件提取；MIME 类型留空时默认为 text/plain。'),
+            pairTable('入站替换', inbound, '被替换内容', '替换为', commit,
+                '在提取附件内容时应用。服务器会还原 Java 字符串转义序列（\\n、\\t 等）。'),
+            pairTable('出站替换', outbound, '被替换内容', '替换为', commit,
+                '在将附件重新附加到出站消息时应用。'));
     }
 
     /* IdentityAttachmentHandlerProvider reads a single identity.mimetype key. */
     function renderIdentityEditor() {
         const map = entriesToObj(ap.properties);
-        return field('Attachment MIME Type', textInput(String(map['identity.mimetype'] ?? ''), {
+        return field('附件 MIME 类型', textInput(String(map['identity.mimetype'] ?? ''), {
             class: 'max-w-[234px]',
             placeholder: 'text/plain',
             onInput: (e: any) => {
@@ -276,7 +276,7 @@ function openAttachmentPropsModal(ap: any, markDirty: any) {
                 ap.properties = objToEntries(map);
                 markDirty();
             }
-        }), 'The entire message is stored as a single attachment with this MIME type.');
+        }), '整条消息将以该 MIME 类型存储为单个附件。');
     }
 
     /* Unknown plugin handler types: raw key/value map editor (classic
@@ -290,8 +290,8 @@ function openAttachmentPropsModal(ap: any, markDirty: any) {
             ap.properties = objToEntries(next);
             markDirty();
         }
-        return pairTable('Attachment Handler Properties', rows, 'Property', 'Value', commit,
-            `Raw property map for the "${ap.type}" attachment handler.`);
+        return pairTable('附件处理器属性', rows, '属性', '值', commit,
+            `“${ap.type}”附件处理器的原始属性映射。`);
     }
 
     // Editor body per handler type. Returns { body, editor } so the modal can
@@ -309,20 +309,20 @@ function openAttachmentPropsModal(ap: any, markDirty: any) {
                     markDirty();
                 }
             });
-            return { body: field('Attachment Script', editor.el), editor };
+            return { body: field('附件脚本', editor.el), editor };
         }
         if (ap.type === 'Regex') return { body: renderRegexEditor() };
         if (ap.type === 'Entire Message') return { body: renderIdentityEditor() };
         if (ap.type && ap.type !== 'None' && ap.type !== 'DICOM' &&
             !ATTACHMENT_TYPES.some(t => t.value === ap.type)) return { body: renderCustomEditor() };
-        return { body: h('div.text-text-faint', 'This attachment handler has no configurable properties.') };
+        return { body: h('div.text-text-faint', '此附件处理器没有可配置的属性。') };
     }
 
     const { body, editor } = attachmentEditor();
     modal({
-        title: 'Set Attachment Handler',
+        title: '设置附件处理器',
         body,
-        buttons: [{ label: 'Close', primary: true }],
+        buttons: [{ label: '关闭', primary: true }],
         // Dispose the code editor (when present) on any close path; guarded
         // because the plain-textarea baseline has no dispose().
         onClose: () => { try { editor && editor.dispose && editor.dispose(); } catch { /* baseline no-op */ } }
@@ -344,10 +344,11 @@ function openDataTypesModal(channel: any, version: any, markDirty: any) {
 
     channel.sourceConnector.transformer =
         channel.sourceConnector.transformer || oie.emptyTransformer(version);
-    const rows = [{ label: 'Source Connector', transformer: channel.sourceConnector.transformer }];
+    // isSource is the stable identifier (label is display text and is localized).
+    const rows: any[] = [{ label: '源连接器', isSource: true, transformer: channel.sourceConnector.transformer }];
     for (const dest of oie.destinationsOf(channel)) {
         dest.transformer = dest.transformer || oie.emptyTransformer(version);
-        rows.push({ label: dest.name || `Destination ${dest.metaDataId}`, transformer: dest.transformer });
+        rows.push({ label: dest.name || `目的地 ${dest.metaDataId}`, transformer: dest.transformer });
     }
     for (const row of rows) {
         (row as any).draft = {
@@ -369,7 +370,7 @@ function openDataTypesModal(channel: any, version: any, markDirty: any) {
     const bulkSel = new Set(rows);
     const applySides = { inbound: true, outbound: true };
     const bulkRow = {
-        label: 'Selected connectors',
+        label: '所选连接器',
         draft: {
             inboundDataType: (rows[0] as any).draft.inboundDataType,
             outboundDataType: (rows[0] as any).draft.outboundDataType,
@@ -441,8 +442,8 @@ function openDataTypesModal(channel: any, version: any, markDirty: any) {
             }
         }
         const headCells = [
-            h('th', { class: 'w-[40%]' }, 'Connector'),
-            h('th', 'Inbound'), h('th', 'Outbound')
+            h('th', { class: 'w-[40%]' }, '连接器'),
+            h('th', '入站'), h('th', '出站')
         ];
         if (bulkMode) headCells.unshift(h('th', ''));
         tableHost.appendChild(h('table.dt', h('thead', h('tr', headCells)), tbody));
@@ -457,15 +458,15 @@ function openDataTypesModal(channel: any, version: any, markDirty: any) {
 
         const restoreBtn = h('button.btn.btn-sm', {
             disabled: !def,
-            title: 'Reset every property of this data type to its default value',
+            title: '将此数据类型的全部属性恢复为默认值',
             onClick: () => {
                 (row as any).draft[`${side}Properties`] = def!.defaults!(version);
                 renderAll();
             }
-        }, 'Restore Defaults');
+        }, '恢复默认');
 
         const head = h('div', { class: 'flex items-end gap-2.5 mb-1' },
-            field('Data Type', select(dtOptions, typeName, {
+            field('数据类型', select(dtOptions, typeName, {
                 onChange: (e: any) => setType(row, side, e.target.value)
             })),
             h('div', { class: 'pb-3' }, restoreBtn));
@@ -476,7 +477,7 @@ function openDataTypesModal(channel: any, version: any, markDirty: any) {
             props={(row as any).draft[`${side}Properties`]}
             version={version}
             direction={side}
-            connectorType={row.label === 'Source Connector' ? 'SOURCE' : 'DESTINATION'}
+            connectorType={row.isSource ? 'SOURCE' : 'DESTINATION'}
             onReplace={(obj: any) => { (row as any).draft[`${side}Properties`] = obj; }} />));
         return h('div.panel', { class: 'mt-0' },
             h('div.panel-header', `${title} — ${row.label}`),
@@ -494,8 +495,8 @@ function openDataTypesModal(channel: any, version: any, markDirty: any) {
             const applyBtn = h('button.btn.btn-primary', {
                 onClick: () => {
                     const targets = rows.filter(r => bulkSel.has(r));
-                    if (!targets.length) { toast('Select at least one connector', 'warn'); return; }
-                    if (!applySides.inbound && !applySides.outbound) { toast('Choose Inbound and/or Outbound to apply', 'warn'); return; }
+                    if (!targets.length) { toast('请至少选择一个连接器', 'warn'); return; }
+                    if (!applySides.inbound && !applySides.outbound) { toast('请选择要应用的入站和/或出站', 'warn'); return; }
                     for (const r of targets) {
                         if (applySides.inbound) {
                             (r as any).draft.inboundDataType = bulkRow.draft.inboundDataType;
@@ -506,18 +507,18 @@ function openDataTypesModal(channel: any, version: any, markDirty: any) {
                             (r as any).draft.outboundProperties = clone(bulkRow.draft.outboundProperties);
                         }
                     }
-                    toast(`Applied to ${targets.length} connector${targets.length === 1 ? '' : 's'}`);
+                    toast(`已应用到 ${targets.length} 个连接器`);
                     renderAll();
                 }
-            }, 'Apply to Selected Connectors');
+            }, '应用到所选连接器');
             panelsHost.appendChild(h('div', { class: 'col-[1/-1] flex gap-4 items-center' },
-                h('span.text-text-faint', { class: 'text-[10px] uppercase tracking-[0.08em]' }, 'Apply:'),
-                sideToggle('inbound', 'Inbound'), sideToggle('outbound', 'Outbound'), applyBtn));
-            panelsHost.appendChild(buildPanel('inbound', 'Inbound Properties', bulkRow as any));
-            panelsHost.appendChild(buildPanel('outbound', 'Outbound Properties', bulkRow as any));
+                h('span.text-text-faint', { class: 'text-[10px] uppercase tracking-[0.08em]' }, '应用：'),
+                sideToggle('inbound', '入站'), sideToggle('outbound', '出站'), applyBtn));
+            panelsHost.appendChild(buildPanel('inbound', '入站属性', bulkRow as any));
+            panelsHost.appendChild(buildPanel('outbound', '出站属性', bulkRow as any));
         } else {
-            panelsHost.appendChild(buildPanel('inbound', 'Inbound Properties'));
-            panelsHost.appendChild(buildPanel('outbound', 'Outbound Properties'));
+            panelsHost.appendChild(buildPanel('inbound', '入站属性'));
+            panelsHost.appendChild(buildPanel('outbound', '出站属性'));
         }
     }
 
@@ -528,15 +529,15 @@ function openDataTypesModal(channel: any, version: any, markDirty: any) {
         return h('label.check', input, label);
     }
     const modeBar = h('div', { class: 'flex gap-[16px] items-center mb-2.5' },
-        h('span.text-text-faint', { class: 'text-[10px] uppercase tracking-[0.08em]' }, 'Editing:'),
-        modeRadio('Single Edit', false),
-        modeRadio('Bulk Edit', true));
+        h('span.text-text-faint', { class: 'text-[10px] uppercase tracking-[0.08em]' }, '编辑方式：'),
+        modeRadio('单个编辑', false),
+        modeRadio('批量编辑', true));
 
     function renderAll() { renderTable(); renderPanels(); }
     renderAll();
 
     modal({
-        title: 'Set Data Types',
+        title: '设置数据类型',
         size: 'xwide',
         onClose: clearDtEditors,
         body: h('div',
@@ -544,11 +545,11 @@ function openDataTypesModal(channel: any, version: any, markDirty: any) {
             h('div.panel', { class: 'mt-0' }, h('div.panel-body.flush', tableHost)),
             panelsHost,
             h('div.hint', { class: 'mt-2.5' },
-                'All property groups are shown for each data type; the engine ignores groups that do not apply to a side (e.g. response generation on an outbound type).')),
+                '每种数据类型都会显示全部属性分组；引擎会忽略与某一侧无关的分组（例如出站类型上的响应生成）。')),
         buttons: [
-            { label: 'Cancel' },
+            { label: '取消' },
             {
-                label: 'OK', primary: true,
+                label: '确定', primary: true,
                 onClick: () => {
                     for (const row of rows) Object.assign(row.transformer, (row as any).draft);
                     markDirty();
@@ -587,7 +588,7 @@ async function openDependenciesModal(channel: any, version: any, markDirty: any)
         ]);
         if (!isCurrent()) return;
     } catch (e: any) {
-        if (isCurrent()) toast(`Could not load dependencies: ${e.message}`, 'error');
+        if (isCurrent()) toast(`无法加载依赖项：${e.message}`, 'error');
         return;
     }
 
@@ -615,11 +616,11 @@ async function openDependenciesModal(channel: any, version: any, markDirty: any)
     function renderLibrariesTab() {
         const tree = treeBox();
         const desc = h('div', { class: 'h-[79px] overflow-auto border border-line rounded-[4px] py-1.5 px-2 text-[10.5px] text-text-dim bg-bg1' });
-        const setDesc = (t: any) => { clear(desc); desc.appendChild(h('span', { class: 'italic' }, t && String(t).trim() ? String(t) : 'No description.')); };
+        const setDesc = (t: any) => { clear(desc); desc.appendChild(h('span', { class: 'italic' }, t && String(t).trim() ? String(t) : '无描述。')); };
         setDesc('');
         function draw() {
             clear(tree);
-            if (!libraries.length) { tree.appendChild(h('div.text-text-faint', { class: 'p-2.5' }, 'No code template libraries')); return; }
+            if (!libraries.length) { tree.appendChild(h('div.text-text-faint', { class: 'p-2.5' }, '未找到代码模板库')); return; }
             for (const lib of libraries) {
                 const templates = api.asList(lib.codeTemplates, 'codeTemplate').filter(t => t && typeof t === 'object');
                 const open = libExpanded.has(lib.id);
@@ -628,11 +629,11 @@ async function openDependenciesModal(channel: any, version: any, markDirty: any)
                 const box = h('input', { type: 'checkbox' });
                 (box as any).checked = !!libChecked.get(lib.id);
                 box.addEventListener('change', () => libChecked.set(lib.id, (box as any).checked));
-                const name = h('span', { class: 'cursor-pointer' }, lib.name || '(unnamed library)');
+                const name = h('span', { class: 'cursor-pointer' }, lib.name || '（未命名库）');
                 name.addEventListener('click', () => setDesc(lib.description));
                 tree.appendChild(h('div', { class: 'flex items-center gap-1 py-0.5 px-2' }, tw, box, name));
                 if (open) for (const t of templates) {
-                    const row = h('div', { class: 'pt-0.5 pr-2 pb-0.5 pl-[40px] cursor-pointer text-[11px]' }, t.name || '(unnamed)');
+                    const row = h('div', { class: 'pt-0.5 pr-2 pb-0.5 pl-[40px] cursor-pointer text-[11px]' }, t.name || '（未命名）');
                     row.addEventListener('click', () => setDesc((t.properties && t.properties.description) || t.description));
                     tree.appendChild(row);
                 }
@@ -641,11 +642,11 @@ async function openDependenciesModal(channel: any, version: any, markDirty: any)
         draw();
         const bar = h('div', { class: 'flex justify-between mb-1.5' },
             h('div', { class: 'flex gap-1.5 items-center' },
-                link('Select All', () => { libraries.forEach((l: any) => libChecked.set(l.id, true)); draw(); }), linkSep(),
-                link('Deselect All', () => { libraries.forEach((l: any) => libChecked.set(l.id, false)); draw(); })),
+                link('全选', () => { libraries.forEach((l: any) => libChecked.set(l.id, true)); draw(); }), linkSep(),
+                link('取消全选', () => { libraries.forEach((l: any) => libChecked.set(l.id, false)); draw(); })),
             h('div', { class: 'flex gap-1.5 items-center' },
-                link('Expand All', () => { libraries.forEach((l: any) => libExpanded.add(l.id)); draw(); }), linkSep(),
-                link('Collapse All', () => { libExpanded.clear(); draw(); })));
+                link('展开全部', () => { libraries.forEach((l: any) => libExpanded.add(l.id)); draw(); }), linkSep(),
+                link('收起全部', () => { libExpanded.clear(); draw(); })));
         return h('div', { class: 'flex flex-col h-full' }, bar, tree, h('div', { class: 'h-1.5' }), desc);
     }
 
@@ -673,12 +674,12 @@ async function openDependenciesModal(channel: any, version: any, markDirty: any)
     const src = channel.sourceConnector || {};
     const srcProps = (src.properties && src.properties.sourceConnectorProperties) || null;
     const resourceTargets = [
-        { key: 'null', label: 'Channel Scripts', leaves: ['Deploy Script', 'Undeploy Script', 'Preprocessor Script', 'Postprocessor Script', 'Attachment Script', 'Batch Script'], holder: () => props },
-        { key: '0', label: 'Source Connector' + (src.transportName ? ` (${src.transportName})` : ''), leaves: ['Receiver', 'Filter / Transformer Script'], holder: () => srcProps }
+        { key: 'null', label: '通道脚本', leaves: ['部署脚本', '取消部署脚本', '预处理脚本', '后处理脚本', '附件脚本', '批处理脚本'], holder: () => props },
+        { key: '0', label: '源连接器' + (src.transportName ? ` (${src.transportName})` : ''), leaves: ['接收器', '过滤器/转换器脚本'], holder: () => srcProps }
     ];
     for (const d of oie.destinationsOf(channel)) {
         const dp = (d.properties && (d.properties as any).destinationConnectorProperties) || null;
-        resourceTargets.push({ key: String(d.metaDataId), label: (d.name || `Destination ${d.metaDataId}`) + (d.transportName ? ` (${d.transportName})` : ''), leaves: ['Filter / Transformer Script', 'Dispatcher', 'Response Transformer Script'], holder: () => dp });
+        resourceTargets.push({ key: String(d.metaDataId), label: (d.name || `目的地 ${d.metaDataId}`) + (d.transportName ? ` (${d.transportName})` : ''), leaves: ['过滤器/转换器脚本', '分发器', '响应转换器脚本'], holder: () => dp });
     }
     const ctxMaps = new Map();   // key -> { resourceId: resourceName } (full map, incl. Default Resource)
     for (const t of resourceTargets) { const hd = t.holder(); ctxMaps.set(t.key, entriesToObj(hd && hd.resourceIds)); }
@@ -698,8 +699,8 @@ async function openDependenciesModal(channel: any, version: any, markDirty: any)
             clear(resTable);
             const isRoot = selectedKey === 'channel';
             const enabled = isCtxKey(selectedKey);
-            resTable.appendChild(h('div', { class: 'grid grid-cols-[24px_1fr_120px] gap-1 py-1 px-2 font-semibold text-[10px] border-b border-line sticky top-0 bg-bg1' }, h('span'), h('span', 'Name'), h('span', 'Type')));
-            if (!resources.length) { resTable.appendChild(h('div.text-text-faint', { class: 'p-2.5' }, 'No library resources')); return; }
+            resTable.appendChild(h('div', { class: 'grid grid-cols-[24px_1fr_120px] gap-1 py-1 px-2 font-semibold text-[10px] border-b border-line sticky top-0 bg-bg1' }, h('span'), h('span', '名称'), h('span', '类型')));
+            if (!resources.length) { resTable.appendChild(h('div.text-text-faint', { class: 'p-2.5' }, '未找到库资源')); return; }
             for (const r of resources) {
                 const box = h('input', { type: 'checkbox', disabled: !enabled });
                 if (isRoot) { const st = aggState(r.id); (box as any).checked = st === true; (box as any).indeterminate = st === null; }
@@ -719,7 +720,7 @@ async function openDependenciesModal(channel: any, version: any, markDirty: any)
                 row.addEventListener('click', () => { selectedKey = key; drawTree(); drawTable(); });
                 ctxTree.appendChild(row);
             };
-            node('Channel', 'channel', 0);
+            node('通道', 'channel', 0);
             for (const t of resourceTargets) {
                 const open = ctxExpanded.has(t.key);
                 const tw = h('span', { class: 'w-[11px] cursor-pointer text-text-dim select-none' }, t.leaves.length ? (open ? '▾' : '▸') : '');
@@ -763,7 +764,7 @@ async function openDependenciesModal(channel: any, version: any, markDirty: any)
         const listEl = h('div', { class: 'max-h-[198px] overflow-auto border border-line rounded-[4px] py-1.5 px-2' });
         function drawList() {
             clear(listEl);
-            if (!allowed.length) { listEl.appendChild(h('div.text-text-faint', 'No channels available')); return; }
+            if (!allowed.length) { listEl.appendChild(h('div.text-text-faint', '没有可用的通道')); return; }
             for (const c of allowed) {
                 const box = h('input', { type: 'checkbox' }); (box as any).checked = !!checks.get(c.id);
                 box.addEventListener('change', () => checks.set(c.id, (box as any).checked));
@@ -772,18 +773,18 @@ async function openDependenciesModal(channel: any, version: any, markDirty: any)
         }
         drawList();
         modal({
-            title: kind === 'dependency' ? 'Add Dependency' : 'Add Dependent',
+            title: kind === 'dependency' ? '添加依赖通道' : '添加被依赖通道',
             body: h('div',
-                h('div', { class: 'mb-1.5' }, kind === 'dependency' ? 'Select the dependency channel(s) to add.' : 'Select the dependent channel(s) to add.'),
+                h('div', { class: 'mb-1.5' }, kind === 'dependency' ? '选择要添加的依赖通道。' : '选择要添加的被依赖通道。'),
                 h('div', { class: 'flex gap-1.5 justify-end mb-1' },
-                    link('Select All', () => { allowed.forEach((c: any) => checks.set(c.id, true)); drawList(); }), linkSep(),
-                    link('Deselect All', () => { checks.clear(); drawList(); })),
+                    link('全选', () => { allowed.forEach((c: any) => checks.set(c.id, true)); drawList(); }), linkSep(),
+                    link('取消全选', () => { checks.clear(); drawList(); })),
                 listEl),
             buttons: [
-                { label: 'Cancel' },
-                { label: 'OK', primary: true, onClick: () => {
+                { label: '取消' },
+                { label: '确定', primary: true, onClick: () => {
                     const sel = allowed.filter((c: any) => checks.get(c.id)).map((c: any) => c.id);
-                    if (!sel.length) { toast(kind === 'dependency' ? 'You must select at least one dependency channel.' : 'You must select at least one dependent channel.', 'warn'); return false; }
+                    if (!sel.length) { toast(kind === 'dependency' ? '必须至少选择一个依赖通道。' : '必须至少选择一个被依赖通道。', 'warn'); return false; }
                     onAdd(sel);
                 } }
             ]
@@ -798,8 +799,8 @@ async function openDependenciesModal(channel: any, version: any, markDirty: any)
         const allowed = () => otherChannelsAll.filter(c => kind === 'dependency'
             ? !directDeps(channel.id).includes(c.id) && !dependsOn(c.id, channel.id)
             : !directDependents(channel.id).includes(c.id) && !dependsOn(channel.id, c.id));
-        const removeBtn = taskButton('Remove', 'trash', doRemove, { danger: true });
-        const addBtn = taskButton('Add', 'plus', () => openAddDialog(kind, allowed(), (ids: any) => {
+        const removeBtn = taskButton('移除', 'trash', doRemove, { danger: true });
+        const addBtn = taskButton('添加', 'plus', () => openAddDialog(kind, allowed(), (ids: any) => {
             for (const id of ids) dependencies.push(kind === 'dependency'
                 ? { dependentId: channel.id, dependencyId: id }
                 : { dependentId: id, dependencyId: channel.id });
@@ -820,7 +821,7 @@ async function openDependenciesModal(channel: any, version: any, markDirty: any)
         function draw() {
             clear(tree);
             const top = childrenOf(channel.id).slice().sort((a: any, b: any) => channelNameOf(a).localeCompare(channelNameOf(b)));
-            if (!top.length) tree.appendChild(h('div.text-text-faint', { class: 'p-2.5' }, 'None'));
+            if (!top.length) tree.appendChild(h('div.text-text-faint', { class: 'p-2.5' }, '无'));
             else for (const id of top) drawNode(id, 0, '>');
             if (!top.includes(selected)) selected = null;
             (removeBtn as any).disabled = !selected;
@@ -844,32 +845,32 @@ async function openDependenciesModal(channel: any, version: any, markDirty: any)
             h('div', { class: 'flex justify-between items-center mb-1' },
                 h('label', { class: 'font-semibold text-[11px]' }, title),
                 h('div', { class: 'flex gap-1.5 items-center' },
-                    link('Expand All', () => { collectPaths().forEach(p => expanded.add(p)); draw(); }), linkSep(),
-                    link('Collapse All', () => { expanded.clear(); draw(); }))),
+                    link('展开全部', () => { collectPaths().forEach(p => expanded.add(p)); draw(); }), linkSep(),
+                    link('收起全部', () => { expanded.clear(); draw(); }))),
             h('div', { class: 'flex gap-1.5 min-h-0 flex-1' },
                 tree, h('div', { class: 'flex flex-col gap-1' }, addBtn, removeBtn)));
     }
 
     function renderDependenciesTab() {
         return h('div', { class: 'flex flex-col gap-3 h-full' },
-            depSection('This channel depends upon:', 'dependency'),
-            depSection('This channel is depended upon by:', 'dependent'));
+            depSection('本通道依赖于：', 'dependency'),
+            depSection('依赖于本通道的通道：', 'dependent'));
     }
 
     /* The three panels are still built with h(); DomTabs takes the strip from
        Radix while keeping tabs()' render-on-activation, which they rely on. */
     const tabHost = h('div', { class: 'flex flex-col flex-1 overflow-hidden min-h-0' });
     tabHost.style.height = '380px';
-    const unmountTabs = mountReact(tabHost, <DomTabs label="Channel dependency sections"
+    const unmountTabs = mountReact(tabHost, <DomTabs label="通道依赖项分区"
         bodyStyle={{ padding: '12px 4px' }}
         defs={[
-            { label: 'Code Template Libraries', render: renderLibrariesTab },
-            { label: 'Library Resources', render: renderResourcesTab },
-            { label: 'Deploy/Start Dependencies', render: renderDependenciesTab }
+            { label: '代码模板库', render: renderLibrariesTab },
+            { label: '库资源', render: renderResourcesTab },
+            { label: '部署/启动依赖项', render: renderDependenciesTab }
         ]} />);
 
     modal({
-        title: 'Channel Dependencies',
+        title: '通道依赖项',
         body: tabHost,
         // Wide enough for the three tab labels on one row, and no second
         // scrollbar — the tabs manage their own inner scrolling (.modal-deps).
@@ -878,9 +879,9 @@ async function openDependenciesModal(channel: any, version: any, markDirty: any)
         // inside one.
         onClose: () => setTimeout(unmountTabs, 0),
         buttons: [
-            { label: 'Cancel' },
+            { label: '取消' },
             {
-                label: 'OK', primary: true,
+                label: '确定', primary: true,
                 onClick: async () => {
                     if (!isCurrent()) return false;
                     try {
@@ -888,26 +889,26 @@ async function openDependenciesModal(channel: any, version: any, markDirty: any)
                         //    immediately, with a confirmation (matches Swing).
                         depState.current.all = dependencies;
                         if (hasDependencyChanges(depState.current)) {
-                            const ok = await confirmDialog('Save Dependencies',
-                                "You've made changes to deploy/start dependencies, which will be saved now. Are you sure you wish to continue?");
+                            const ok = await confirmDialog('保存依赖项',
+                                '您对部署/启动依赖项做了更改，这些更改将立即保存。确定要继续吗？');
                             if (!isCurrent() || !ok) return false;
                             await persistChannelDependencies(depState);
                             if (!isCurrent()) return false;
                             dependencies = depState.current.all;
                             pending.dependencies.current = copyDependencySelection(depState.current);
-                            toast('Channel dependencies saved');
+                            toast('通道依赖项已保存');
                         }
 
                         // 2. Confirm and merge library membership intents using
                         //    the same guarded bulk API as Swing's dialog.
                         if (hasLibraryChanges(libState.current)) {
-                            const ok = await confirmDialog('Save Code Template Libraries',
-                                "You've made changes to code template libraries, which will be saved now. Are you sure you wish to continue?");
+                            const ok = await confirmDialog('保存代码模板库',
+                                '您对代码模板库做了更改，这些更改将立即保存。确定要继续吗？');
                             if (!isCurrent() || !ok) return false;
                             const saved = await persistLibraryAssociations(channel, libState, version, confirmLibraryOverwrite);
                             if (!isCurrent() || !saved) return false;
                             pending.libraries.current = copyLibrarySelection(libState.current);
-                            toast('Code template libraries saved');
+                            toast('代码模板库已保存');
                         }
 
                         // 3. Library resources — write each context's resourceIds
@@ -970,7 +971,7 @@ function openAdvancedQueueSettings(dcp: any, markDirty: any, onDone: any) {
             inputs.push(input);
             return h('label.check', input, label);
         };
-        const el = h('div.radio-group.inline-row', radio(true, 'Yes'), radio(false, 'No'));
+        const el = h('div.radio-group.inline-row', radio(true, '是'), radio(false, '否'));
         return { el, setEnabled(on: any) { inputs.forEach(i => { i.disabled = !on; }); } };
     }
 
@@ -1012,20 +1013,20 @@ function openAdvancedQueueSettings(dcp: any, markDirty: any, onDone: any) {
     sync();
 
     modal({
-        title: 'Settings',
+        title: '设置',
         body: h('div.form-grid',
-            field('Retry Count Before Queue/Error', retryCountInput),
-            field('Retry Interval (ms)', retryIntervalInput),
-            field('Regenerate Template', regenerate.el),
-            field('Include Filter/Transformer', includeFT.el),
-            field('Rotate Queue', rotate.el),
-            field('Queue Threads', threadCountInput),
-            field('Thread Assignment Variable', threadVarInput),
-            field('Queue Buffer Size', bufferInput)),
+            field('入队/报错前重试次数', retryCountInput),
+            field('重试间隔（毫秒）', retryIntervalInput),
+            field('重新生成模板', regenerate.el),
+            field('包含过滤器/转换器', includeFT.el),
+            field('轮换队列', rotate.el),
+            field('队列线程数', threadCountInput),
+            field('线程分配变量', threadVarInput),
+            field('队列缓冲区大小', bufferInput)),
         buttons: [
-            { label: 'Cancel' },
+            { label: '取消' },
             {
-                label: 'OK', primary: true,
+                label: '确定', primary: true,
                 onClick: () => {
                     dcp.retryCount = draft.retryCount;
                     dcp.retryIntervalMillis = draft.retryIntervalMillis;
@@ -1054,28 +1055,28 @@ function openDebugDeployModal(channel: any, save: any) {
     const isCurrent = channelSessionActive();
     if (!isCurrent()) return;
     const options = [
-        { label: 'Deploy/Undeploy/Preprocessor/Postprocessor scripts' },
-        { label: 'Attachment/Batch scripts' },
-        { label: 'Source connector scripts' },
-        { label: 'Source filter/transformer' },
-        { label: 'Destination filter/transformer' },
-        { label: 'Destination connector scripts' },
-        { label: 'Destination response transformer' }
+        { label: '部署/取消部署/预处理/后处理脚本' },
+        { label: '附件/批处理脚本' },
+        { label: '源连接器脚本' },
+        { label: '源过滤器/转换器' },
+        { label: '目的地过滤器/转换器' },
+        { label: '目的地连接器脚本' },
+        { label: '目的地响应转换器' }
     ];
     const state = options.map(() => false);
     modal({
-        title: 'Debug Channel Deploy Options',
+        title: '通道调试部署选项',
         body: h('div',
             h('div.hint', { class: 'mb-2.5' },
-                'Select the scripts to debug. The channel is saved, then deployed in debug mode with these options.'),
+                '选择要调试的脚本。通道将先保存，然后按这些选项以调试模式部署。'),
             h('div', { class: 'flex flex-col gap-1.5' },
                 options.map((opt: any, i: any) => checkbox(opt.label, false, {
                     onChange: (e: any) => { state[i] = e.target.checked; }
                 }).el))),
         buttons: [
-            { label: 'Cancel' },
+            { label: '取消' },
             {
-                label: 'Debug Deploy', primary: true,
+                label: '调试部署', primary: true,
                 onClick: async () => {
                     if (!isCurrent()) return false;
                     const saved = await save();
@@ -1085,7 +1086,7 @@ function openDebugDeployModal(channel: any, save: any) {
                         await api.post(`/channels/${channel.id}/_deploy`, null,
                             { params: { returnErrors: true, debugOptions } });
                         if (!isCurrent()) return false;
-                        toast(`Deployed ${channel.name} in debug mode`);
+                        toast(`已以调试模式部署 ${channel.name}`);
                     } catch (e: any) {
                         if (isCurrent()) toast(e.message, 'error');
                         return false;
@@ -1170,7 +1171,7 @@ function TagsField({ tagState, channel, version, markDirty }: any) {
         return () => { stale = true; };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-    if (!loaded) return <span className="text-text-faint text-[10.5px]">Loading tags…</span>;
+    if (!loaded) return <span className="text-text-faint text-[10.5px]">正在加载标签…</span>;
 
     const dlId = 'channel-tags-list';
     // Commit on the NATIVE 'change' event only (Enter / blur / datalist pick) —
@@ -1201,12 +1202,12 @@ function TagsField({ tagState, channel, version, markDirty }: any) {
                         className="inline-flex items-center gap-1 py-px px-1.5 rounded-[9px] border border-line text-[10.5px]"
                         style={{ background: tagChipBg(tag && tag.backgroundColor) }}>
                         {name}
-                        <span className="cursor-pointer text-text-dim" title="Remove tag"
+                        <span className="cursor-pointer text-text-dim" title="移除标签"
                             onClick={() => { tagState.assigned.delete(name); applyTagsToChannel(tagState, channel, version); markDirty(); bump(); }}>✕</span>
                     </span>
                 );
             })}
-            <input ref={addRef} list={dlId} placeholder="Add tag…" className="w-[117px]" />
+            <input ref={addRef} list={dlId} placeholder="添加标签…" className="w-[117px]" />
             <datalist id={dlId}>
                 {tagState.all.filter((t: any) => !tagState.assigned.has(t.name)).map((t: any) => <option key={t.name} value={t.name} />)}
             </datalist>
@@ -1214,8 +1215,9 @@ function TagsField({ tagState, channel, version, markDirty }: any) {
     );
 }
 
-// Mirror ChannelTag.fixName: strip disallowed chars, cap at 24.
-const fixTagName = (n: any) => String(n).replace(/[^a-zA-Z_0-9\-\s]/g, '').slice(0, 24).trim();
+// Mirror ChannelTag.fixName: strip disallowed chars, cap at 24. The engine's
+// INVALID_NAME_PATTERN allows CJK and '&', so this class must too.
+const fixTagName = (n: any) => String(n).replace(/[^a-zA-Z_0-9&\-\s\u4e00-\u9fa5]/g, '').slice(0, 24).trim();
 
 /* ---- Summary tab -------------------------------------------------------------- */
 
@@ -1237,32 +1239,32 @@ function ChannelPropertiesPanel({ channel, version, isNewRef, tagState, markDirt
     // A plugin-contributed type already on the channel stays selectable.
     const typeOptions = ATTACHMENT_TYPES.slice();
     if (ap.type && !typeOptions.some(t => t.value === ap.type)) {
-        typeOptions.unshift({ value: ap.type, label: `${ap.type} (custom)`, className: ap.className });
+        typeOptions.unshift({ value: ap.type, label: `${ap.type}（自定义）`, className: ap.className });
     }
     const attachWarn = (ap.type !== 'None' && !props.storeAttachments)
-        ? 'Attachments will be extracted but not stored or reattached.' : '';
+        ? '附件将被提取，但不会存储或重新附加。' : '';
 
     return (
         <div className="panel" style={{ marginTop: 0 }}>
-            <div className="panel-header">Channel Properties</div>
+            <div className="panel-header">通道属性</div>
             <div className="panel-body">
                 <div className="grid grid-cols-[repeat(auto-fit,minmax(min(320px,100%),1fr))] gap-y-0 gap-x-7 items-start">
                     <div>
                         <div className="field">
-                            <label>Name</label>
+                            <label>名称</label>
                             <input ref={nameRef} type="text" className="max-w-[324px]" value={channel.name ?? ''}
                                 onChange={(e: any) => { channel.name = e.target.value; markDirty(); }} />
                         </div>
                         <div className="form-row mb-3">
                             <div className="field">
-                                <label>Initial State</label>
+                                <label>初始状态</label>
                                 <select className="w-[153px]" value={props.initialState || 'STARTED'}
                                     onChange={(e: any) => { props.initialState = e.target.value; markDirty(); }}>
-                                    {INITIAL_STATES.map(s => <option key={s} value={s}>{s.charAt(0) + s.slice(1).toLowerCase()}</option>)}
+                                    {INITIAL_STATES.map(s => <option key={s} value={s}>{oie.stateLabel(s)}</option>)}
                                 </select>
                             </div>
                             <div className="field">
-                                <label>Attachment</label>
+                                <label>附件</label>
                                 <div className="flex gap-1.5 items-center">
                                     <select className="w-[162px]" value={ap.type || 'None'}
                                         onChange={(e: any) => {
@@ -1286,46 +1288,46 @@ function ChannelPropertiesPanel({ channel, version, isNewRef, tagState, markDirt
                                     {/* "Properties" opens the handler editor modal (enabled only
                                         when a handler other than None/DICOM is selected). */}
                                     <button className="btn btn-sm" disabled={ap.type === 'None' || ap.type === 'DICOM'}
-                                        onClick={() => openAttachmentPropsModal(ap, markDirty)}>Properties</button>
+                                        onClick={() => openAttachmentPropsModal(ap, markDirty)}>属性</button>
                                 </div>
                             </div>
                         </div>
                         <div className="field">
-                            <label>Tags</label>
+                            <label>标签</label>
                             <TagsField tagState={tagState} channel={channel} version={version} markDirty={markDirty} />
                         </div>
                         <div className="flex flex-wrap gap-y-1.5 gap-x-[16px] mt-0 mx-0 mb-1">
                             <label className="check">
                                 <input type="checkbox" checked={metadata.enabled !== false}
                                     onChange={(e: any) => { metadata.enabled = e.target.checked; markDirty(); }} />
-                                Enabled
+                                已启用
                             </label>
                             <label className="check">
                                 <input type="checkbox" checked={!!props.clearGlobalChannelMap}
                                     onChange={(e: any) => { props.clearGlobalChannelMap = e.target.checked; markDirty(); }} />
-                                Clear global channel map on deploy
+                                部署时清除全局通道映射
                             </label>
                             <label className="check">
                                 <input type="checkbox" checked={!!props.storeAttachments}
                                     onChange={(e: any) => { props.storeAttachments = e.target.checked; markDirty(); bump(); }} />
-                                Store Attachments
+                                存储附件
                             </label>
                         </div>
                         <div className="text-[#d00] text-[10px] mt-0.5 mx-0 mb-0">{attachWarn}</div>
                         <div className="flex flex-wrap gap-2 mt-3">
                             <button className="btn" onClick={() => openDataTypesModal(channel, version, markDirty)}>
-                                <Icon name="transform" />Set Data Types
+                                <Icon name="transform" />设置数据类型
                             </button>
                             <button className="btn" onClick={() => openDependenciesModal(channel, version, markDirty)}>
-                                <Icon name="link" />Set Dependencies
+                                <Icon name="link" />设置依赖项
                             </button>
                         </div>
                     </div>
                     <div>
                         <dl className="kv">
-                            <dt>Id</dt><dd>{channel.id ?? ''}</dd>
-                            <dt>Revision</dt><dd>{String(channel.revision ?? 0)}</dd>
-                            <dt>Last Modified</dt><dd>{fmtDate(metadata.lastModified) || '—'}</dd>
+                            <dt>ID</dt><dd>{channel.id ?? ''}</dd>
+                            <dt>修订版本</dt><dd>{String(channel.revision ?? 0)}</dd>
+                            <dt>上次修改</dt><dd>{fmtDate(metadata.lastModified) || '—'}</dd>
                         </dl>
                     </div>
                 </div>
@@ -1339,19 +1341,19 @@ function ChannelPropertiesPanel({ channel, version, isNewRef, tagState, markDirt
 // Slider value 1..5 → storage mode (MessageStorageMode.fromInt); top = 5.
 const STORAGE_SLIDER = ['DISABLED', 'METADATA', 'RAW', 'PRODUCTION', 'DEVELOPMENT'];
 const STORAGE_INFO = {
-    DEVELOPMENT: { label: 'Development', content: 'Content: All', meta: 'Metadata: All', durable: 'On', dc: '#008200', perf: 20 },
-    PRODUCTION:  { label: 'Production', content: 'Content: Raw, Encoded, Sent, Response, Maps', meta: 'Metadata: All', durable: 'On', dc: '#008200', perf: 25 },
-    RAW:         { label: 'Raw', content: 'Content: Raw', meta: 'Metadata: All', durable: 'Reprocess only', dc: '#ff6600', perf: 60 },
-    METADATA:    { label: 'Metadata', content: 'Content: None', meta: 'Metadata: All', durable: 'Off', dc: '#820000', perf: 65 },
-    DISABLED:    { label: 'Disabled', content: 'Content: None', meta: 'Metadata: None', durable: 'Off', dc: '#820000', perf: 100 }
+    DEVELOPMENT: { label: '开发', content: '内容：全部', meta: '元数据：全部', durable: '开启', dc: '#008200', perf: 20 },
+    PRODUCTION:  { label: '生产', content: '内容：原始、编码后、已发送、响应、映射', meta: '元数据：全部', durable: '开启', dc: '#008200', perf: 25 },
+    RAW:         { label: '原始', content: '内容：原始', meta: '元数据：全部', durable: '仅重新处理', dc: '#ff6600', perf: 60 },
+    METADATA:    { label: '元数据', content: '内容：无', meta: '元数据：全部', durable: '关闭', dc: '#820000', perf: 65 },
+    DISABLED:    { label: '禁用', content: '内容：无', meta: '元数据：无', durable: '关闭', dc: '#820000', perf: 100 }
 };
 const STORAGE_CHECKS = [
-    { key: 'encryptData', label: 'Encrypt message content' },
-    { key: 'encryptAttachments', label: 'Attachments' },
-    { key: 'encryptCustomMetaData', label: 'Custom metadata' },
-    { key: 'removeContentOnCompletion', label: 'Remove content on completion' },
-    { key: 'removeOnlyFilteredOnCompletion', label: 'Filtered only' },
-    { key: 'removeAttachmentsOnCompletion', label: 'Remove attachments on completion' }
+    { key: 'encryptData', label: '加密消息内容' },
+    { key: 'encryptAttachments', label: '附件' },
+    { key: 'encryptCustomMetaData', label: '自定义元数据' },
+    { key: 'removeContentOnCompletion', label: '完成后移除内容' },
+    { key: 'removeOnlyFilteredOnCompletion', label: '仅被过滤的消息' },
+    { key: 'removeAttachmentsOnCompletion', label: '完成后移除附件' }
 ];
 
 function MessageStoragePanel({ channel, markDirty }: any) {
@@ -1385,7 +1387,7 @@ function MessageStoragePanel({ channel, markDirty }: any) {
 
     return (
         <div className="panel" style={{ marginTop: 0 }}>
-            <div className="panel-header">Message Storage</div>
+            <div className="panel-header">消息存储</div>
             <div className="panel-body">
                 <div className="flex gap-4">
                     <div className="flex gap-1.5">
@@ -1397,16 +1399,16 @@ function MessageStoragePanel({ channel, markDirty }: any) {
                                 markDirty(); bump();
                             }} />
                         <div className="flex flex-col justify-between h-[135px] text-[10px] text-text-dim">
-                            <div>Development</div><div>Production</div><div>Raw</div><div>Metadata</div><div>Disabled</div>
+                            <div>开发</div><div>生产</div><div>原始</div><div>元数据</div><div>禁用</div>
                         </div>
                     </div>
                     <div className="flex flex-col gap-[4px] flex-1 min-w-0">
                         <div className="font-bold text-[12.5px]">{info.label}</div>
                         <div className="text-[11px]">{info.content}</div>
                         <div className="text-[11px]">{info.meta}</div>
-                        <div className="text-[11px]">Durable Message Delivery: <span className="font-semibold" style={{ color: info.dc }}>{info.durable}</span></div>
+                        <div className="text-[11px]">持久消息投递：<span className="font-semibold" style={{ color: info.dc }}>{info.durable}</span></div>
                         <div className="flex items-center gap-2 text-[11px]">
-                            <span>Performance:</span>
+                            <span>性能：</span>
                             <div className="h-2 w-[162px] bg-bg3 border border-line rounded-[3px] overflow-hidden">
                                 <div className="h-full bg-accent opacity-75 [transition:width_0.2s_ease]"
                                     style={{ width: Math.max(0, Math.min(100, perf)) + '%' }} />
@@ -1415,7 +1417,7 @@ function MessageStoragePanel({ channel, markDirty }: any) {
                         <div className="flex flex-wrap gap-y-1 gap-x-3.5 mt-1">{[box(STORAGE_CHECKS[0]), box(STORAGE_CHECKS[1]), box(STORAGE_CHECKS[2])]}</div>
                         <div className="flex flex-wrap gap-y-1 gap-x-3.5">{[box(STORAGE_CHECKS[3]), box(STORAGE_CHECKS[4])]}</div>
                         {box(STORAGE_CHECKS[5])}
-                        <div className="text-[#d00] text-[10px] min-h-3.5">{queued ? 'Disable destination queueing before using this mode' : ''}</div>
+                        <div className="text-[#d00] text-[10px] min-h-3.5">{queued ? '使用此模式前请先禁用目的地排队' : ''}</div>
                     </div>
                 </div>
             </div>
@@ -1448,36 +1450,36 @@ function PruningPanel({ channel, markDirty }: any) {
 
     return (
         <div className="panel" style={{ marginTop: 0 }}>
-            <div className="panel-header">Message Pruning</div>
+            <div className="panel-header">消息清除</div>
             <div className="panel-body">
                 <div className="form-grid">
                     <div className="field">
-                        <label>Metadata</label>
+                        <label>元数据</label>
                         <div className="radio-group">
                             {radio('prune-metadata', pruning.pruneMetaDataDays == null, () => {
                                 delete pruning.pruneMetaDataDays; markDirty(); bump();
-                            }, 'Store indefinitely')}
+                            }, '永久存储')}
                             <div className="flex items-center gap-2">
                                 {radio('prune-metadata', pruning.pruneMetaDataDays != null, () => {
                                     pruning.pruneMetaDataDays = pruning.pruneMetaDataDays || 30; markDirty(); bump();
-                                }, 'Prune metadata older than')}
+                                }, '清除超过')}
                                 {daysInput('pruneMetaDataDays')}
-                                <span className="text-text-dim">days</span>
+                                <span className="text-text-dim">天的元数据</span>
                             </div>
                         </div>
                     </div>
                     <div className="field">
-                        <label>Content</label>
+                        <label>内容</label>
                         <div className="radio-group">
                             {radio('prune-content', pruning.pruneContentDays == null, () => {
                                 delete pruning.pruneContentDays; markDirty(); bump();
-                            }, 'Prune when message metadata is removed')}
+                            }, '随消息元数据移除时一并清除')}
                             <div className="flex items-center gap-2">
                                 {radio('prune-content', pruning.pruneContentDays != null, () => {
                                     pruning.pruneContentDays = pruning.pruneContentDays || 30; markDirty(); bump();
-                                }, 'Prune content older than')}
+                                }, '清除超过')}
                                 {daysInput('pruneContentDays')}
-                                <span className="text-text-dim">days</span>
+                                <span className="text-text-dim">天的内容</span>
                             </div>
                         </div>
                     </div>
@@ -1486,18 +1488,18 @@ function PruningPanel({ channel, markDirty }: any) {
                     <label className="check">
                         <input type="checkbox" checked={pruning.archiveEnabled !== false} disabled={nothingPruned}
                             onChange={(e: any) => { pruning.archiveEnabled = e.target.checked; markDirty(); }} />
-                        Allow message archiving
+                        允许消息归档
                     </label>
                     <label className="check">
                         <input type="checkbox" checked={!!pruning.pruneErroredMessages} disabled={nothingPruned}
                             onChange={(e: any) => { pruning.pruneErroredMessages = e.target.checked; markDirty(); bump(); }} />
-                        Prune Errored Messages
+                        清除错误消息
                     </label>
                 </div>
                 <div className="hint mt-2">
                     {pruning.pruneErroredMessages
-                        ? '(incomplete and queued messages will not be pruned)'
-                        : '(incomplete, errored, and queued messages will not be pruned)'}
+                        ? '（不完整及队列中的消息不会被清除）'
+                        : '（不完整、错误及队列中的消息不会被清除）'}
                 </div>
             </div>
         </div>
@@ -1528,25 +1530,25 @@ function MetaDataColumnsPanel({ channel, markDirty }: any) {
     return (
         <div className="panel" style={{ marginTop: 0 }}>
             <div className="panel-header">
-                Custom Metadata
+                自定义元数据
                 <div className="panel-tools">
                     <button className="btn btn-sm" onClick={() => { columns.push({ name: '', type: 'STRING', mappingName: '' }); commit(); }}>
-                        <Icon name="plus" />Add
+                        <Icon name="plus" />添加
                     </button>
-                    <button className="btn btn-sm" title="Revert the custom metadata settings to the last save."
+                    <button className="btn btn-sm" title="将自定义元数据设置还原到上次保存的状态"
                         onClick={() => {
                             columns.length = 0;
                             for (const c of JSON.parse(JSON.stringify(snapshotRef.current))) columns.push(c);
                             commit();
-                        }}>Revert</button>
+                        }}>还原</button>
                 </div>
             </div>
             <div className="panel-body">
                 {!columns.length
-                    ? <div className="text-text-faint">No custom metadata columns</div>
+                    ? <div className="text-text-faint">无自定义元数据列</div>
                     : (
                         <div className="grid grid-cols-[minmax(160px,1fr)_130px_minmax(160px,1fr)_70px] gap-y-1 gap-x-1.5 items-center max-w-[684px]">
-                            <label>Column Name</label><label>Type</label><label>Variable Mapping</label><span />
+                            <label>列名称</label><label>类型</label><label>变量映射</label><span />
                             {columns.map((col: any, i: any) => (
                                 <FragmentRow key={i} col={col} commit={commit}
                                     onDelete={() => { columns.splice(columns.indexOf(col), 1); commit(); }} />
@@ -1567,7 +1569,7 @@ function FragmentRow({ col, commit, onDelete }: any) {
                 {META_COLUMN_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
             </select>
             <input type="text" value={col.mappingName ?? ''} onChange={(e: any) => { col.mappingName = e.target.value; commit(); }} />
-            <button className="btn w-full justify-center self-stretch" title="Remove column" onClick={onDelete}>Delete</button>
+            <button className="btn w-full justify-center self-stretch" title="移除该列" onClick={onDelete}>删除</button>
         </>
     );
 }
@@ -1583,9 +1585,9 @@ function SummaryTab({ channel, version, isNewRef, tagState, markDirty }: any) {
             </div>
             <MetaDataColumnsPanel channel={channel} markDirty={markDirty} />
             <div className="panel" style={{ marginTop: 0 }}>
-                <div className="panel-header">Channel Description</div>
+                <div className="panel-header">通道描述</div>
                 <div className="panel-body">
-                    <textarea rows={4} placeholder="Describe what this channel does…"
+                    <textarea rows={4} placeholder="描述此通道的用途…"
                         value={channel.description ?? ''}
                         onChange={(e: any) => { channel.description = e.target.value; markDirty(); }} />
                 </div>
@@ -1659,11 +1661,11 @@ function ConnectorTypeSelect({ connector, mode, engineTypes, version, markDirty,
                     // channels already using such a type still render via the
                     // generic JSON fallback panel.)
                     bump();   // snap the select back to the model value
-                    toast(`"${name}" cannot be configured in the web administrator — install a web admin plugin that registers a connector panel for it.`, 'warn');
+                    toast(`网页管理员无法配置“${name}”——请安装为其注册连接器面板的网页管理员插件。`, 'warn');
                     return;
                 }
-                const ok = await confirmDialog('Change Connector Type',
-                    `Switch this connector to ${name}? Connector settings will reset to defaults (the filter and transformer are kept).`);
+                const ok = await confirmDialog('更改连接器类型',
+                    `要将此连接器切换为 ${name} 吗？连接器设置将重置为默认值（过滤器和转换器会保留）。`);
                 if (!ok) { bump(); return; }
                 connector.transportName = name;
                 connector.properties = def.defaults(version);
@@ -1671,7 +1673,7 @@ function ConnectorTypeSelect({ connector, mode, engineTypes, version, markDirty,
                 onChanged();
             }}>
             {names.map(n => <option key={n} value={n}>{n}</option>)}
-            {extra.map(n => <option key={n} value={n}>{`${n} (no web editor)`}</option>)}
+            {extra.map(n => <option key={n} value={n}>{`${n}（无网页编辑器）`}</option>)}
         </select>
     );
 }
@@ -1758,7 +1760,7 @@ function ConnectorPanelHost({ connector, mode, channel, markDirty, panelRev }: a
             <div ref={hostRef} />
             {!hasPanel && (
                 <div className="panel">
-                    <div className="panel-header">{`${connector.transportName} Settings`}</div>
+                    <div className="panel-header">{`${connector.transportName} 设置`}</div>
                     <div className="panel-body">
                         <RawConnectorProps connector={connector} markDirty={markDirty} />
                     </div>
@@ -1777,7 +1779,7 @@ function RawConnectorProps({ connector, markDirty }: any) {
     useEffect(() => { setText(JSON.stringify(connector.properties, null, 2)); }, [connector, connector.properties]);
     return (
         <div className="field">
-            <label>Connector Properties (JSON)</label>
+            <label>连接器属性（JSON）</label>
             <textarea rows={16} spellCheck={false} value={text}
                 onChange={(e: any) => setText(e.target.value)}
                 onBlur={() => {
@@ -1785,23 +1787,34 @@ function RawConnectorProps({ connector, markDirty }: any) {
                     try {
                         parsed = JSON.parse(text);
                     } catch (e: any) {
-                        toast(`Invalid JSON: ${e.message}`, 'error');
+                        toast(`JSON 无效：${e.message}`, 'error');
                         return;
                     }
                     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed) || !parsed['@class']) {
-                        toast('Connector properties must be an object with an "@class" field', 'error');
+                        toast('连接器属性必须是包含 "@class" 字段的对象', 'error');
                         setText(JSON.stringify(connector.properties, null, 2));
                         return;
                     }
                     connector.properties = parsed;
                     markDirty();
                 }} />
-            <div className="hint">{`No settings panel registered for "${connector.transportName}" — edit the raw properties`}</div>
+            <div className="hint">{`“${connector.transportName}”未注册设置面板——请直接编辑原始属性`}</div>
         </div>
     );
 }
 
 /* ---- Source tab --------------------------------------------------------------- */
+
+/* Display-only captions. Each value is the responseVariable string persisted on the
+   connector (and compared verbatim below), so the values stay English and only the
+   rendered option text is localised — Settings tab parity. */
+const RESPONSE_LABELS_ZH: any = {
+    'None': '无',
+    'Auto-generate (Before processing)': '自动生成（处理前）',
+    'Auto-generate (After source transformer)': '自动生成（源转换器之后）',
+    'Auto-generate (Destinations completed)': '自动生成（目的地完成时）',
+    'Postprocessor': '后处理器'
+};
 
 /* Source Settings — parity with the Swing SourceSettingsPanel. */
 function SourceSettings({ channel, scp, markDirty }: any) {
@@ -1812,19 +1825,19 @@ function SourceSettings({ channel, scp, markDirty }: any) {
     // "respond from" each destination (stored as the "d<id>" response key).
     const respOpts = (respondAfter
         ? ['None', 'Auto-generate (Before processing)', 'Auto-generate (After source transformer)', 'Auto-generate (Destinations completed)', 'Postprocessor']
-        : ['None', 'Auto-generate (Before processing)']).map(v => ({ value: v, label: v }));
+        : ['None', 'Auto-generate (Before processing)']).map(v => ({ value: v, label: RESPONSE_LABELS_ZH[v] || v }));
     if (respondAfter) {
         for (const d of oie.destinationsOf(channel)) {
-            respOpts.push({ value: 'd' + d.metaDataId, label: d.name || `Destination ${d.metaDataId}` });
+            respOpts.push({ value: 'd' + d.metaDataId, label: d.name || `目的地 ${d.metaDataId}` });
         }
     }
     const currentResp = scp.responseVariable ?? 'None';
-    if (!respOpts.some(o => o.value === currentResp)) respOpts.push({ value: currentResp, label: currentResp });
+    if (!respOpts.some(o => o.value === currentResp)) respOpts.push({ value: currentResp, label: RESPONSE_LABELS_ZH[currentResp] || currentResp });
 
     return (
         <div className="form-grid">
             <div className="field">
-                <label>Source Queue</label>
+                <label>源队列</label>
                 {/* OFF = respond after processing (can use destination responses);
                     ON = queue + respond before processing. */}
                 <select value={respondAfter ? 'off' : 'on'}
@@ -1837,12 +1850,12 @@ function SourceSettings({ channel, scp, markDirty }: any) {
                         }
                         markDirty(); bump();
                     }}>
-                    <option value="off">OFF (Respond after processing)</option>
-                    <option value="on">ON (Respond before processing)</option>
+                    <option value="off">关（处理完成后响应）</option>
+                    <option value="on">开（处理前响应）</option>
                 </select>
             </div>
             <div className="field">
-                <label>Queue Buffer Size</label>
+                <label>队列缓冲区大小</label>
                 {/* Only meaningful (editable) when queue is ON. Uncontrolled: the
                     clamped model must never overwrite the text mid-edit. */}
                 <input key={respondAfter ? 'q-off' : 'q-on'} type="number" min={0} disabled={respondAfter}
@@ -1850,31 +1863,31 @@ function SourceSettings({ channel, scp, markDirty }: any) {
                     onChange={(e: any) => { scp.queueBufferSize = Number(e.target.value) || 0; markDirty(); }} />
             </div>
             <div className="field">
-                <label>Response</label>
+                <label>响应</label>
                 <select value={currentResp}
                     onChange={(e: any) => { scp.responseVariable = e.target.value; markDirty(); bump(); }}>
                     {respOpts.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
             </div>
             <div className="field">
-                <label>Process Batch</label>
+                <label>批处理</label>
                 <select value={scp.processBatch ? 'yes' : 'no'}
                     onChange={(e: any) => { scp.processBatch = e.target.value === 'yes'; markDirty(); bump(); }}>
-                    <option value="yes">Yes</option>
-                    <option value="no">No</option>
+                    <option value="yes">是</option>
+                    <option value="no">否</option>
                 </select>
             </div>
             <div className="field">
-                <label>Batch Response</label>
+                <label>批处理响应</label>
                 {/* Only applies when batching is on. */}
                 <select disabled={!scp.processBatch} value={scp.firstResponse ? 'first' : 'last'}
                     onChange={(e: any) => { scp.firstResponse = e.target.value === 'first'; markDirty(); bump(); }}>
-                    <option value="first">First</option>
-                    <option value="last">Last</option>
+                    <option value="first">首个</option>
+                    <option value="last">最后一个</option>
                 </select>
             </div>
             <div className="field">
-                <label>Max Processing Threads</label>
+                <label>最大处理线程数</label>
                 <input type="number" min={1} defaultValue={scp.processingThreads ?? 1}
                     onChange={(e: any) => { scp.processingThreads = Number(e.target.value) || 1; markDirty(); }} />
             </div>
@@ -1890,10 +1903,10 @@ function SourceTab({ channel, version, engineTypes, markDirty }: any) {
     return (
         <div>
             <div className="panel" style={{ marginTop: 0 }}>
-                <div className="panel-header">Connector Type</div>
+                <div className="panel-header">连接器类型</div>
                 <div className="panel-body">
                     <div className="field">
-                        <label>Source Connector</label>
+                        <label>源连接器</label>
                         <ConnectorTypeSelect connector={connector} mode="SOURCE" engineTypes={engineTypes}
                             version={version} markDirty={markDirty} onChanged={() => setPanelRev(r => r + 1)} />
                     </div>
@@ -1901,7 +1914,7 @@ function SourceTab({ channel, version, engineTypes, markDirty }: any) {
             </div>
             {scp && (
                 <div className="panel">
-                    <div className="panel-header">Source Settings</div>
+                    <div className="panel-header">源设置</div>
                     <div className="panel-body">
                         <SourceSettings key={panelRev} channel={channel} scp={scp} markDirty={markDirty} />
                     </div>
@@ -1966,39 +1979,39 @@ function DestinationSettings({ dcp, markDirty }: any) {
     );
     const ynRadios = (name: any, checked: any, onChange: any) => (
         <div className="radio-group inline-row">
-            <label className="check"><input type="radio" name={name} checked={checked === true} onChange={() => onChange(true)} />Yes</label>
-            <label className="check"><input type="radio" name={name} checked={checked === false} onChange={() => onChange(false)} />No</label>
+            <label className="check"><input type="radio" name={name} checked={checked === true} onChange={() => onChange(true)} />是</label>
+            <label className="check"><input type="radio" name={name} checked={checked === false} onChange={() => onChange(false)} />否</label>
         </div>
     );
     return (
         <div className="panel">
-            <div className="panel-header">Destination Settings</div>
+            <div className="panel-header">目的地设置</div>
             <div className="panel-body">
                 <div className="form-grid">
                     <div className="field">
-                        <label>Queue Messages</label>
+                        <label>消息排队</label>
                         <div className="radio-group inline-row">
-                            {queueRadio('never', 'Never')}
-                            {queueRadio('failure', 'On Failure')}
-                            {queueRadio('always', 'Always')}
+                            {queueRadio('never', '从不')}
+                            {queueRadio('failure', '失败时')}
+                            {queueRadio('always', '总是')}
                         </div>
                     </div>
                     <div className="field">
-                        <label>Advanced Queue Settings</label>
+                        <label>高级队列设置</label>
                         <div className="flex items-center gap-2.5 flex-wrap">
                             <button className="btn" onClick={() => openAdvancedQueueSettings(dcp, markDirty, () => bump())}>
-                                Advanced Queue Settings
+                                高级队列设置
                             </button>
                             <span className="text-text-faint">{advancedQueueSummary(dcp)}</span>
                         </div>
                     </div>
                     <div className="field">
-                        <label>Validate Response</label>
+                        <label>校验响应</label>
                         {ynRadios('dest-validate-response', !!dcp.validateResponse,
                             (v: any) => { dcp.validateResponse = v; markDirty(); bump(); })}
                     </div>
                     <div className="field">
-                        <label>Reattach Attachments</label>
+                        <label>重新附加附件</label>
                         {ynRadios('dest-reattach-attachments', dcp.reattachAttachments !== false,
                             (v: any) => { dcp.reattachAttachments = v; markDirty(); bump(); })}
                     </div>
@@ -2013,7 +2026,7 @@ function DestinationSettings({ dcp, markDirty }: any) {
 function DestEditor({ dest, channel, version, engineTypes, markDirty, syncRows }: any) {
     const [panelRev, setPanelRev] = useState(0);
     if (!dest) {
-        return <div className="text-text-faint py-2.5 px-0.5">Select a destination to edit its settings</div>;
+        return <div className="text-text-faint py-2.5 px-0.5">请选择要编辑设置的目的地</div>;
     }
     const dcp = dest.properties && dest.properties.destinationConnectorProperties;
     return (
@@ -2021,10 +2034,10 @@ function DestEditor({ dest, channel, version, engineTypes, markDirty, syncRows }
             {/* Static header: connector type + wait-for on ONE compact line (Swing
                 parity) — always visible above the scrollable connector panel below. */}
             <div className="panel m-0 sticky top-0 z-[1]">
-                <div className="panel-header">{`Destination ${dest.metaDataId} — ${dest.name}`}</div>
+                <div className="panel-header">{`目的地 ${dest.metaDataId} — ${dest.name}`}</div>
                 <div className="panel-body py-1.5 px-3">
                     <div className="dest-type-row flex items-center gap-2 flex-wrap">
-                        <label className="font-semibold whitespace-nowrap">Connector Type:</label>
+                        <label className="font-semibold whitespace-nowrap">连接器类型：</label>
                         <ConnectorTypeSelect connector={dest} mode="DESTINATION" engineTypes={engineTypes}
                             version={version} markDirty={markDirty} onChanged={() => setPanelRev(r => r + 1)}
                             width="200px" />
@@ -2033,7 +2046,7 @@ function DestEditor({ dest, channel, version, engineTypes, markDirty, syncRows }
                         <label className="check dest-wait-push">
                             <input type="checkbox" checked={dest.waitForPrevious !== false}
                                 onChange={(e: any) => { dest.waitForPrevious = e.target.checked; markDirty(); syncRows(); }} />
-                            Wait for previous destination
+                            等待上一个目的地
                         </label>
                     </div>
                 </div>
@@ -2049,15 +2062,15 @@ function MappingsRail({ onInsert, dragRef }: any) {
     // Shares its collapse flag with the wizard's rail — same rail, same choice.
     const [collapsed, setCollapsed] = useSideCollapse('dest-mappings');
     if (collapsed) {
-        return <CollapsedSideStrip className="panel-strip" label="Destination Mappings"
+        return <CollapsedSideStrip className="panel-strip" label="目的地映射"
             onExpand={() => setCollapsed(false)} />;
     }
     return (
         <div className="panel dest-mappings w-[216px] flex-[0_0_240px] flex flex-col self-stretch mt-0">
             <div className="panel-header">
-                Destination Mappings
+                目的地映射
                 <div className="panel-tools">
-                    <SideCollapseButton label="Destination Mappings" onCollapse={() => setCollapsed(true)} />
+                    <SideCollapseButton label="目的地映射" onCollapse={() => setCollapsed(true)} />
                 </div>
             </div>
             <div className="overflow-auto flex-1 py-1 px-0">
@@ -2117,12 +2130,12 @@ function DestinationsTab({ channel, version, engineTypes, markDirty, actionsRef,
 
     function needSelection() {
         const dest = selectedDest();
-        if (!dest) toast('Select a destination first', 'warn');
+        if (!dest) toast('请先选择目的地', 'warn');
         return dest;
     }
 
     async function newDestination() {
-        const name = await promptDialog('New Destination', 'Destination name', `Destination ${dests().length + 1}`);
+        const name = await promptDialog('新建目的地', '目的地名称', `目的地 ${dests().length + 1}`);
         if (name === null || !name.trim()) return;
         const metaDataId = Number(channel.nextMetaDataId) || (dests().length + 1);
         const dest = oie.defaultDestinationConnector(version, metaDataId, name.trim());
@@ -2144,9 +2157,9 @@ function DestinationsTab({ channel, version, engineTypes, markDirty, actionsRef,
     async function deleteDestination() {
         const dest = needSelection();
         if (!dest) return;
-        if (dests().length <= 1) { toast('A channel must have at least one destination', 'warn'); return; }
-        if (!keepsEnabledDestination(dest)) { toast('At least one destination must be enabled', 'warn'); return; }
-        if (!await confirmDialog('Delete Destination', `Delete destination "${dest.name}"?`, { danger: true, okLabel: 'Delete' })) return;
+        if (dests().length <= 1) { toast('通道必须至少包含一个目的地', 'warn'); return; }
+        if (!keepsEnabledDestination(dest)) { toast('必须至少启用一个目的地', 'warn'); return; }
+        if (!await confirmDialog('删除目的地', `要删除目的地“${dest.name}”吗？`, { danger: true, okLabel: '删除' })) return;
         oie.setDestinations(channel, dests().filter(d => d !== dest));
         setSelectedId(null);
         markDirty();
@@ -2183,7 +2196,7 @@ function DestinationsTab({ channel, version, engineTypes, markDirty, actionsRef,
             markDirty();
             refresh();
         } catch (error: any) {
-            if (active()) toast(`Import failed: ${error.message}`, 'error');
+            if (active()) toast(`导入失败：${error.message}`, 'error');
         } finally {
             importingRef.current = false;
         }
@@ -2198,7 +2211,7 @@ function DestinationsTab({ channel, version, engineTypes, markDirty, actionsRef,
             await saveFile(`${dest.name || 'destination'}.json`, 'application/json', () => JSON.stringify({ connector: dest }, null, 2), assertSession);
         } catch (e: any) {
             try { assertSession(); } catch { return; }
-            toast(`Export failed: ${e.message}`, 'error');
+            toast(`导出失败：${e.message}`, 'error');
         }
     }
 
@@ -2208,7 +2221,7 @@ function DestinationsTab({ channel, version, engineTypes, markDirty, actionsRef,
         const copy = JSON.parse(JSON.stringify(dest));
         const metaDataId = Number(channel.nextMetaDataId) || (dests().length + 1);
         copy.metaDataId = metaDataId;
-        copy.name = `${dest.name || 'Destination'} (copy)`;
+        copy.name = `${dest.name || '目的地'}（副本）`;
         channel.nextMetaDataId = metaDataId + 1;
         const list = dests().slice();
         list.push(copy);
@@ -2220,7 +2233,7 @@ function DestinationsTab({ channel, version, engineTypes, markDirty, actionsRef,
     function setEnabled(value: any) {
         const dest = needSelection();
         if (!dest) return;
-        if (!value && !keepsEnabledDestination(dest)) { toast('At least one destination must be enabled', 'warn'); return; }
+        if (!value && !keepsEnabledDestination(dest)) { toast('必须至少启用一个目的地', 'warn'); return; }
         dest.enabled = value;
         markDirty();
         refresh();
@@ -2243,16 +2256,16 @@ function DestinationsTab({ channel, version, engineTypes, markDirty, actionsRef,
         const host = tableHostRef.current;
         if (!host) return undefined;
         const table = new DataTable([
-            { key: 'metaDataId', label: 'Id', width: '46px', className: 'num' },
+            { key: 'metaDataId', label: 'ID', width: '46px', className: 'num' },
             {
-                key: 'enabled', label: 'Status', width: '100px',
+                key: 'enabled', label: '状态', width: '100px',
                 sortValue: (d: any) => d.enabled !== false ? 0 : 1,
                 render: (d: any) => d.enabled !== false
-                    ? h('span.status-cell', h('span.pip.ok'), 'Enabled')
-                    : h('span.status-cell', h('span.pip'), h('span.text-text-dim', 'Disabled'))
+                    ? h('span.status-cell', h('span.pip.ok'), '已启用')
+                    : h('span.status-cell', h('span.pip'), h('span.text-text-dim', '已禁用'))
             },
             {
-                key: 'name', label: 'Name',
+                key: 'name', label: '名称',
                 // Inline-editable name cell (matches the Swing Destinations grid).
                 // Clicks are kept off the row handler so the table never re-renders
                 // mid-edit and steals focus. markDirty repaints the React header.
@@ -2265,15 +2278,15 @@ function DestinationsTab({ channel, version, engineTypes, markDirty, actionsRef,
                     return input;
                 }
             },
-            { key: 'transportName', label: 'Type' },
+            { key: 'transportName', label: '类型' },
             {
-                key: 'waitForPrevious', label: 'Chain', sortable: false,
-                render: (d: any) => d.waitForPrevious !== false ? 'Wait for previous' : 'Don\'t wait'
+                key: 'waitForPrevious', label: '串联', sortable: false,
+                render: (d: any) => d.waitForPrevious !== false ? '等待上一个' : '不等待'
             }
         ], {
             selectable: 'single',
             rowKey: (d: any) => String(d.metaDataId),
-            emptyText: 'No destinations',
+            emptyText: '无目的地',
             columnsMenu: true,
             columnsMenuKey: 'webadmin-cols-destinations',
             onSelect: (rows: any) => {
@@ -2288,30 +2301,30 @@ function DestinationsTab({ channel, version, engineTypes, markDirty, actionsRef,
                 const a = actionsRef.current;
                 const dt = destTasksRef.current;
                 contextMenu(e.clientX, e.clientY, [
-                    { label: 'Save Changes', icon: 'save', task: 'doSaveChannel', group: 'channelEdit', onClick: () => a.save() },
-                    { label: 'Validate Connector', icon: 'check', task: 'doValidate', group: 'channelEdit', onClick: () => a.validateConnector() },
+                    { label: '保存更改', icon: 'save', task: 'doSaveChannel', group: 'channelEdit', onClick: () => a.save() },
+                    { label: '校验连接器', icon: 'check', task: 'doValidate', group: 'channelEdit', onClick: () => a.validateConnector() },
                     '-',
-                    { label: 'New Destination', icon: 'plus', task: 'doNewDestination', group: 'channelEdit', onClick: () => dt.newDestination() },
-                    { label: 'Delete Destination', icon: 'trash', danger: true, task: 'doDeleteDestination', group: 'channelEdit', onClick: () => dt.deleteDestination() },
-                    { label: 'Clone Destination', icon: 'copy', task: 'doCloneDestination', group: 'channelEdit', onClick: () => dt.cloneDestination() },
+                    { label: '新建目的地', icon: 'plus', task: 'doNewDestination', group: 'channelEdit', onClick: () => dt.newDestination() },
+                    { label: '删除目的地', icon: 'trash', danger: true, task: 'doDeleteDestination', group: 'channelEdit', onClick: () => dt.deleteDestination() },
+                    { label: '克隆目的地', icon: 'copy', task: 'doCloneDestination', group: 'channelEdit', onClick: () => dt.cloneDestination() },
                     d.enabled !== false
-                        ? { label: 'Disable Destination', icon: 'x', task: 'doDisableDestination', group: 'channelEdit', onClick: () => dt.setEnabled(false) }
-                        : { label: 'Enable Destination', icon: 'check', task: 'doEnableDestination', group: 'channelEdit', onClick: () => dt.setEnabled(true) },
+                        ? { label: '禁用目的地', icon: 'x', task: 'doDisableDestination', group: 'channelEdit', onClick: () => dt.setEnabled(false) }
+                        : { label: '启用目的地', icon: 'check', task: 'doEnableDestination', group: 'channelEdit', onClick: () => dt.setEnabled(true) },
                     '-',
-                    { label: 'Move Dest. Up', icon: 'arrowUp', task: 'doMoveDestinationUp', group: 'channelEdit', onClick: () => dt.move(-1) },
-                    { label: 'Move Dest. Down', icon: 'arrowDown', task: 'doMoveDestinationDown', group: 'channelEdit', onClick: () => dt.move(1) },
+                    { label: '上移目的地', icon: 'arrowUp', task: 'doMoveDestinationUp', group: 'channelEdit', onClick: () => dt.move(-1) },
+                    { label: '下移目的地', icon: 'arrowDown', task: 'doMoveDestinationDown', group: 'channelEdit', onClick: () => dt.move(1) },
                     '-',
-                    { label: 'Edit Filter', icon: 'filter', task: 'doEditFilter', group: 'channelEdit', onClick: () => dt.editElements('filter') },
-                    { label: 'Edit Transformer', icon: 'transform', task: 'doEditTransformer', group: 'channelEdit', onClick: () => dt.editElements('transformer') },
-                    { label: 'Edit Response', icon: 'transform', task: 'doEditResponseTransformer', group: 'channelEdit', onClick: () => dt.editElements('response') },
+                    { label: '编辑过滤器', icon: 'filter', task: 'doEditFilter', group: 'channelEdit', onClick: () => dt.editElements('filter') },
+                    { label: '编辑转换器', icon: 'transform', task: 'doEditTransformer', group: 'channelEdit', onClick: () => dt.editElements('transformer') },
+                    { label: '编辑响应', icon: 'transform', task: 'doEditResponseTransformer', group: 'channelEdit', onClick: () => dt.editElements('response') },
                     '-',
-                    { label: 'Import Connector', icon: 'import', task: 'doImportConnector', group: 'channelEdit', onClick: () => dt.importConnector() },
-                    { label: 'Export Connector', icon: 'export', task: 'doExportConnector', group: 'channelEdit', onClick: () => dt.exportConnector() },
-                    { label: 'Export Channel', icon: 'export', task: 'doExportChannel', group: 'channelEdit', onClick: () => a.exportChannel() },
-                    { label: 'Validate Script', icon: 'check', task: 'doValidateChannelScripts', group: 'channelEdit', onClick: () => a.validateChannelScripts() },
+                    { label: '导入连接器', icon: 'import', task: 'doImportConnector', group: 'channelEdit', onClick: () => dt.importConnector() },
+                    { label: '导出连接器', icon: 'export', task: 'doExportConnector', group: 'channelEdit', onClick: () => dt.exportConnector() },
+                    { label: '导出通道', icon: 'export', task: 'doExportChannel', group: 'channelEdit', onClick: () => a.exportChannel() },
+                    { label: '校验脚本', icon: 'check', task: 'doValidateChannelScripts', group: 'channelEdit', onClick: () => a.validateChannelScripts() },
                     '-',
-                    { label: 'Debug Channel', icon: 'deploy', task: 'doDebugDeployFromChannelView', group: 'channelEdit', onClick: () => a.openDebugDeployModal() },
-                    { label: 'Deploy Channel', icon: 'deploy', task: 'doDeployFromChannelView', group: 'channelEdit', onClick: () => a.deploy() }
+                    { label: '调试通道', icon: 'deploy', task: 'doDebugDeployFromChannelView', group: 'channelEdit', onClick: () => a.openDebugDeployModal() },
+                    { label: '部署通道', icon: 'deploy', task: 'doDeployFromChannelView', group: 'channelEdit', onClick: () => a.deploy() }
                 ]);
             }
         });
@@ -2347,10 +2360,10 @@ function DestinationsTab({ channel, version, engineTypes, markDirty, actionsRef,
         // No known target — fall back to the clipboard.
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(token).then(
-                () => toast(`Copied ${token}`),
-                () => toast('Focus a text field first', 'warn'));
+                () => toast(`已复制 ${token}`),
+                () => toast('请先将光标置于文本框中', 'warn'));
         } else {
-            toast('Focus a text field first', 'warn');
+            toast('请先将光标置于文本框中', 'warn');
         }
     }
 
@@ -2427,10 +2440,10 @@ function DestinationsTab({ channel, version, engineTypes, markDirty, actionsRef,
 /* ---- Scripts tab -------------------------------------------------------------- */
 
 const CHANNEL_SCRIPTS = [
-    { key: 'deployScript', label: 'Deploy', hint: 'Runs once when the channel is deployed', context: 'CHANNEL_DEPLOY' },
-    { key: 'undeployScript', label: 'Undeploy', hint: 'Runs once when the channel is undeployed', context: 'CHANNEL_UNDEPLOY' },
-    { key: 'preprocessingScript', label: 'Preprocessor', hint: 'Runs before every message is processed', context: 'CHANNEL_PREPROCESSOR' },
-    { key: 'postprocessingScript', label: 'Postprocessor', hint: 'Runs after every message is processed', context: 'CHANNEL_POSTPROCESSOR' }
+    { key: 'deployScript', label: '部署', hint: '通道部署时执行一次', context: 'CHANNEL_DEPLOY' },
+    { key: 'undeployScript', label: '取消部署', hint: '通道取消部署时执行一次', context: 'CHANNEL_UNDEPLOY' },
+    { key: 'preprocessingScript', label: '预处理', hint: '每条消息处理前执行', context: 'CHANNEL_PREPROCESSOR' },
+    { key: 'postprocessingScript', label: '后处理', hint: '每条消息处理后执行', context: 'CHANNEL_POSTPROCESSOR' }
 ];
 
 function ScriptsTab({ channel, markDirty }: any) {
@@ -2450,7 +2463,7 @@ function ScriptsTab({ channel, markDirty }: any) {
             language: 'javascript',
             minHeight: '260px',
             maximizable: true,   // channel scripts (Deploy/Undeploy/Pre/Postprocessor) can go full-screen
-            popoutTitle: `${currentRef.current.label} script`,
+            popoutTitle: `${currentRef.current.label}脚本`,
             popoutVars: SCRIPT_REFERENCE,
             onChange: (value: any) => {
                 if (switchingRef.current) return;
@@ -2472,7 +2485,7 @@ function ScriptsTab({ channel, markDirty }: any) {
     return (
         <div className="flex flex-col flex-1 min-h-0 gap-2.5">
             <div className="form-row items-center">
-                <label className="m-0">Script:</label>
+                <label className="m-0">脚本：</label>
                 <select className="w-[162px]" value={current.key}
                     onChange={(e: any) => {
                         const editor = editorRef.current;
@@ -2494,6 +2507,17 @@ function ScriptsTab({ channel, markDirty }: any) {
         </div>
     );
 }
+
+/* Display-only captions. The tab label doubles as the activation key compared
+   against activeTab (and as the plugin channel-tab label), so the labels stay
+   English and only the rendered caption is localised. Unknown labels (plugin
+   tabs) fall back to their own label — Settings tab parity. */
+const TAB_LABELS_ZH: any = {
+    Summary: '概览',
+    Source: '源连接器',
+    Destinations: '目的地',
+    Scripts: '脚本'
+};
 
 /* ---- the editor body ---------------------------------------------------------- */
 
@@ -2597,7 +2621,7 @@ function EditorBody({ params, query, onTasksChange, apiRef, returning }: any) {
             bumpSourceImportRevision();
             markDirty();
         } catch (error: any) {
-            if (active()) toast(`Import failed: ${error.message}`, 'error');
+            if (active()) toast(`导入失败：${error.message}`, 'error');
         } finally {
             sourceImportingRef.current = false;
         }
@@ -2606,13 +2630,14 @@ function EditorBody({ params, query, onTasksChange, apiRef, returning }: any) {
     /* ---- validation + save flow ---- */
 
     // Swing Frame.checkChannelName: name length (≤40), allowed characters
-    // (alphanumeric + hyphen/underscore/space), and case-insensitive uniqueness
+    // (alphanumeric + hyphen/underscore/space + CJK — the fork's pattern is
+    // "^[a-zA-Z_0-9 \-\u4e00-\u9fa5]*$"), and case-insensitive uniqueness
     // against every OTHER channel. Returns a warning string, or null when valid.
     async function checkChannelName() {
         const name = String(channel.name ?? '');
-        if (name.length > 40) return 'Channel name cannot be longer than 40 characters.';
-        if (!/^[A-Za-z0-9_\s-]*$/.test(name)) {
-            return 'Channel name cannot have special characters besides hyphen, underscore, and space.';
+        if (name.length > 40) return '通道名称不能超过 40 个字符。';
+        if (!/^[A-Za-z0-9_\-\s.\()\u4e00-\u9fa5\u3001\u3002\u300a\u300b\u3010\u3011\uff08\uff09\uff0c\uff1a\uff1b\uff1f\uff01\u2014\u2018\u2019\u201c\u201d\u00b7]*$/.test(name)) {
+            return '通道名称只能包含中文、字母、数字、空格、连字符、下划线、括号、点号及常用中文标点。';
         }
         try {
             const res = await api.channels.idsAndNames();
@@ -2620,7 +2645,7 @@ function EditorBody({ params, query, onTasksChange, apiRef, returning }: any) {
                 const pair = api.asList(en && en.string);   // [id, name]
                 if (pair.length >= 2 && String(pair[0]) !== channel.id
                     && String(pair[1]).toLowerCase() === name.toLowerCase()) {
-                    return `Channel "${name}" already exists.`;
+                    return `通道“${name}”已存在。`;
                 }
             }
         } catch { /* names unavailable — don't block the save on a lookup failure */ }
@@ -2634,12 +2659,12 @@ function EditorBody({ params, query, onTasksChange, apiRef, returning }: any) {
             if (!connector || !connector.transportName) return;
             const def = platform.connectorPanel(connector.transportName as string, mode as any);
             if (!def || typeof def.validate !== 'function') return;
-            for (const err of (def.validate(connector.properties) || [])) out.push(`${label}: ${err.label} is required.`);
+            for (const err of (def.validate(connector.properties) || [])) out.push(`${label}：${err.label}为必填项`);
         };
-        run(channel.sourceConnector, 'SOURCE', `Source (${channel.sourceConnector?.transportName || 'Source'})`);
+        run(channel.sourceConnector, 'SOURCE', `源（${channel.sourceConnector?.transportName || '源'}）`);
         for (const d of oie.destinationsOf(channel)) {
             if (d && (d.enabled === false || (d.enabled as any) === 'false')) continue;
-            const label = d.name ? `${d.name} (${d.transportName})` : (d.transportName || 'Destination');
+            const label = d.name ? `${d.name} (${d.transportName})` : (d.transportName || '目的地');
             run(d, 'DESTINATION', label);
         }
         return out;
@@ -2679,11 +2704,11 @@ function EditorBody({ params, query, onTasksChange, apiRef, returning }: any) {
         if (problems.length) {
             highlightInvalidFields();
             modal({
-                title: 'Cannot Save Channel',
+                title: '无法保存通道',
                 body: h('div',
-                    h('p', 'Please fix the following before saving:'),
+                    h('p', '保存前请先修正以下问题：'),
                     h('ul', { class: 'mt-2 mx-0 mb-0 pl-[16px]' }, problems.map(p => h('li', p)))),
-                buttons: [{ label: 'OK' }]
+                buttons: [{ label: '确定' }]
             });
             return false;
         }
@@ -2692,7 +2717,7 @@ function EditorBody({ params, query, onTasksChange, apiRef, returning }: any) {
         const nameError = await checkChannelName();
         if (!isCurrent()) return false;
         if (nameError) {
-            modal({ title: 'Cannot Save Channel', body: h('div', nameError), buttons: [{ label: 'OK' }] });
+            modal({ title: '无法保存通道', body: h('div', nameError), buttons: [{ label: '确定' }] });
             return false;
         }
         try {
@@ -2706,7 +2731,7 @@ function EditorBody({ params, query, onTasksChange, apiRef, returning }: any) {
             store.setState('editingChannelDirty', false);
             onTasksChange();
             bumpRev();
-            toast(`Saved ${channel.name}`);
+            toast(`已保存 ${channel.name}`);
             return true;
         } catch (e: any) {
             if (isCurrent()) toast(e.message, 'error');
@@ -2720,26 +2745,26 @@ function EditorBody({ params, query, onTasksChange, apiRef, returning }: any) {
         // Match the Swing channel-view deploy (Frame.doDeployFromChannelView):
         // unsaved changes prompt to save-and-deploy; otherwise a plain confirm.
         if (isDirty()) {
-            const confirmed = await confirmDialog('Deploy Channel',
-                'This channel will be saved before it is deployed. Are you sure you want to save and deploy this channel?',
-                { okLabel: 'Save and Deploy' });
+            const confirmed = await confirmDialog('部署通道',
+                '部署前将先保存此通道。确定要保存并部署此通道吗？',
+                { okLabel: '保存并部署' });
             if (!isCurrent() || !confirmed) return;
             const saved = await save();
             if (!isCurrent() || !saved) return;
         } else {
-            const confirmed = await confirmDialog('Deploy Channel', 'Are you sure you want to deploy this channel?', { okLabel: 'Deploy' });
+            const confirmed = await confirmDialog('部署通道', '确定要部署此通道吗？', { okLabel: '部署' });
             if (!isCurrent() || !confirmed) return;
         }
         try {
             await api.engine.deploy(channel.id);
             if (!isCurrent()) return;
             // Switch to the Dashboard to watch deployment (matches Swing).
-            toast(`Deploying ${channel.name}`);
+            toast(`正在部署 ${channel.name}`);
             router.navigate('/dashboard');
         } catch (e: any) {
             // A deploy failure returns the engine's full exception — far too
             // long for a corner toast; show the detail modal and stay here.
-            if (isCurrent()) errorModal('Channel Deployment Failed', e, channel.name);
+            if (isCurrent()) errorModal('通道部署失败', e, channel.name);
         }
     }
 
@@ -2747,14 +2772,14 @@ function EditorBody({ params, query, onTasksChange, apiRef, returning }: any) {
     // each connector's required-field checks (same checks applied on save).
     function validateConnector() {
         const problems = [...oie.validateChannel(channel), ...validateConnectors()];
-        if (!problems.length) { clearFieldHighlights(); toast('Connector configuration is valid'); return; }
+        if (!problems.length) { clearFieldHighlights(); toast('连接器配置有效'); return; }
         highlightInvalidFields();
         modal({
-            title: 'Validation Errors',
+            title: '校验错误',
             body: h('div',
-                h('p', 'Please fix the following:'),
+                h('p', '请先修正以下问题：'),
                 h('ul', { class: 'mt-2 mx-0 mb-0 pl-[16px]' }, problems.map(p => h('li', p)))),
-            buttons: [{ label: 'OK' }]
+            buttons: [{ label: '确定' }]
         });
     }
 
@@ -2762,18 +2787,18 @@ function EditorBody({ params, query, onTasksChange, apiRef, returning }: any) {
     // scripts via the engine bridge.
     async function validateChannelScripts() {
         const list = [
-            ['Deploy', channel.deployScript],
-            ['Undeploy', channel.undeployScript],
-            ['Preprocessor', channel.preprocessingScript],
-            ['Postprocessor', channel.postprocessingScript]
+            ['部署', channel.deployScript],
+            ['取消部署', channel.undeployScript],
+            ['预处理', channel.preprocessingScript],
+            ['后处理', channel.postprocessingScript]
         ];
         for (const [label, code] of list) {
             if (typeof code !== 'string' || !code.trim()) continue;
             const result = await validateScript(code);
             if (result.ok === null) { toast(result.message, 'warn'); return; }
-            if (result.ok === false) { toast(`${label} script — ${result.message}`, 'error'); return; }
+            if (result.ok === false) { toast(`${label}脚本 — ${result.message}`, 'error'); return; }
         }
-        toast('Channel scripts validated successfully');
+        toast('通道脚本校验通过');
     }
 
     async function exportChannel() {
@@ -2783,7 +2808,7 @@ function EditorBody({ params, query, onTasksChange, apiRef, returning }: any) {
             await saveFile(`${channel.name || channel.id}.json`, 'application/json', () => JSON.stringify({ channel }, null, 2), assertSession);
         } catch (e: any) {
             try { assertSession(); } catch { return; }
-            toast(`Export failed: ${e.message}`, 'error');
+            toast(`导出失败：${e.message}`, 'error');
         }
     }
 
@@ -2823,7 +2848,7 @@ function EditorBody({ params, query, onTasksChange, apiRef, returning }: any) {
         // route:changed resets the banner to the static route title ("Edit
         // Channel") after the route handler returns; defer past it with rAF so
         // the channel name sticks without a flash.
-        const bannerTitle = channel.name ? `Edit Channel - ${channel.name}` : 'Edit Channel';
+        const bannerTitle = channel.name ? `编辑通道 - ${channel.name}` : '编辑通道';
         window.requestAnimationFrame(() => window.dispatchEvent(new CustomEvent('webadmin:set-title', {
             detail: { title: bannerTitle }
         })));
@@ -2900,10 +2925,10 @@ function EditorBody({ params, query, onTasksChange, apiRef, returning }: any) {
                     views (Settings), but THIS view-body is padded (16px) and the
                     section cards below sit flush against that padding — the strip
                     must too, or it floats 13px right of every card edge. */}
-                <TabsPrimitive.List className="tabs mx-0 max-w-full" aria-label="Channel sections">
+                <TabsPrimitive.List className="tabs mx-0 max-w-full" aria-label="通道页签">
                     {tabLabels.map((label: any) => (
                         <TabsPrimitive.Trigger key={label} value={label}
-                            className={'tab' + (label === activeTab ? ' active' : '')}>{label}</TabsPrimitive.Trigger>
+                            className={'tab' + (label === activeTab ? ' active' : '')}>{TAB_LABELS_ZH[label] || label}</TabsPrimitive.Trigger>
                     ))}
                 </TabsPrimitive.List>
                 <TabsPrimitive.Content value={activeTab} className="tab-body">
@@ -2945,7 +2970,7 @@ export function ChannelEditorView({ params, query }: any) {
                first field read — a stale bookmark or a deleted channel took out the
                whole view instead of reporting it. */
             if (!loaded || !loaded.id) {
-                toast(`Channel ${params.channelId} was not found.`, 'error');
+                toast(`未找到通道 ${params.channelId}。`, 'error');
                 setReady(false);
                 return;
             }
@@ -2963,37 +2988,37 @@ export function ChannelEditorView({ params, query }: any) {
     return (
         <div className="view flex flex-col flex-1 min-h-0">
             <ViewTasks>
-                <RailPane title="Channel Tasks" paneKey="tasks:Channel Tasks" group="channelEdit">
+                <RailPane title="通道任务" paneKey="tasks:Channel Tasks" group="channelEdit">
                     <div className="taskbar" data-pane-title="Channel Tasks">
-                        {t && ts.dirty && <TaskButton label="Save Changes" icon="save" primary task="doSaveChannel" onClick={t.save} />}
+                        {t && ts.dirty && <TaskButton label="保存更改" icon="save" primary task="doSaveChannel" onClick={t.save} />}
                         {/* Validate Connector (Swing CHANNEL_EDIT_VALIDATE) — shown
                             whenever a connector is visible, not gated on changes. */}
-                        {t && (ts.tab === 'Source' || ts.tab === 'Destinations') && <TaskButton label="Validate Connector" icon="check" task="doValidate" onClick={t.validateConnector} />}
-                        {t && <TaskButton label="Deploy Channel" icon="deploy" task="doDeployFromChannelView" onClick={t.deploy} />}
-                        {t && <TaskButton label="Debug Channel" icon="deploy" task="doDebugDeployFromChannelView" onClick={t.openDebugDeployModal} />}
-                        {t && <TaskButton label="Export Channel" icon="export" task="doExportChannel" onClick={t.exportChannel} />}
-                        {t && <TaskButton label="Back to Channels" icon="channels" onClick={t.backToChannels} />}
+                        {t && (ts.tab === 'Source' || ts.tab === 'Destinations') && <TaskButton label="校验连接器" icon="check" task="doValidate" onClick={t.validateConnector} />}
+                        {t && <TaskButton label="部署通道" icon="deploy" task="doDeployFromChannelView" onClick={t.deploy} />}
+                        {t && <TaskButton label="调试通道" icon="deploy" task="doDebugDeployFromChannelView" onClick={t.openDebugDeployModal} />}
+                        {t && <TaskButton label="导出通道" icon="export" task="doExportChannel" onClick={t.exportChannel} />}
+                        {t && <TaskButton label="返回通道列表" icon="channels" onClick={t.backToChannels} />}
 
                         {/* Contextual connector tasks (Swing ctx-tasks), gated by active tab. */}
-                        {t && ts.tab === 'Source' && <TaskButton label="Import Connector" icon="import" task="doImportConnector" onClick={t.sourceImport} />}
-                        {t && ts.tab === 'Source' && <TaskButton label={t.withCount('Edit Filter', t.sourceStepCount('filter'))} icon="filter" task="doEditFilter" onClick={() => t.gotoElements('filter', 0)} />}
-                        {t && ts.tab === 'Source' && <TaskButton label={t.withCount('Edit Transformer', t.sourceStepCount('transformer'))} icon="transform" task="doEditTransformer" onClick={() => t.gotoElements('transformer', 0)} />}
+                        {t && ts.tab === 'Source' && <TaskButton label="导入连接器" icon="import" task="doImportConnector" onClick={t.sourceImport} />}
+                        {t && ts.tab === 'Source' && <TaskButton label={t.withCount('编辑过滤器', t.sourceStepCount('filter'))} icon="filter" task="doEditFilter" onClick={() => t.gotoElements('filter', 0)} />}
+                        {t && ts.tab === 'Source' && <TaskButton label={t.withCount('编辑转换器', t.sourceStepCount('transformer'))} icon="transform" task="doEditTransformer" onClick={() => t.gotoElements('transformer', 0)} />}
 
-                        {t && ts.tab === 'Destinations' && <TaskButton label="New Destination" icon="plus" task="doNewDestination" onClick={t.destNew} />}
-                        {t && ts.tab === 'Destinations' && <TaskButton label="Delete Destination" icon="trash" danger task="doDeleteDestination" onClick={t.destDelete} />}
-                        {t && ts.tab === 'Destinations' && <TaskButton label="Move Dest. Up" icon="arrowUp" task="doMoveDestinationUp" onClick={() => t.destMove(-1)} />}
-                        {t && ts.tab === 'Destinations' && <TaskButton label="Move Dest. Down" icon="arrowDown" task="doMoveDestinationDown" onClick={() => t.destMove(1)} />}
-                        {t && ts.tab === 'Destinations' && <TaskButton label={t.withCount('Edit Filter', t.destStepCount('filter'))} icon="filter" task="doEditFilter" onClick={() => t.destEdit('filter')} />}
-                        {t && ts.tab === 'Destinations' && <TaskButton label={t.withCount('Edit Transformer', t.destStepCount('transformer'))} icon="transform" task="doEditTransformer" onClick={() => t.destEdit('transformer')} />}
-                        {t && ts.tab === 'Destinations' && <TaskButton label={t.withCount('Edit Response', t.destStepCount('responseTransformer'))} icon="transform" task="doEditResponseTransformer" onClick={() => t.destEdit('response')} />}
-                        {t && ts.tab === 'Destinations' && <TaskButton label="Import Connector" icon="import" task="doImportConnector" onClick={t.destImport} />}
-                        {t && ts.tab === 'Destinations' && <TaskButton label="Export Connector" icon="export" task="doExportConnector" onClick={t.destExport} />}
+                        {t && ts.tab === 'Destinations' && <TaskButton label="新建目的地" icon="plus" task="doNewDestination" onClick={t.destNew} />}
+                        {t && ts.tab === 'Destinations' && <TaskButton label="删除目的地" icon="trash" danger task="doDeleteDestination" onClick={t.destDelete} />}
+                        {t && ts.tab === 'Destinations' && <TaskButton label="上移目的地" icon="arrowUp" task="doMoveDestinationUp" onClick={() => t.destMove(-1)} />}
+                        {t && ts.tab === 'Destinations' && <TaskButton label="下移目的地" icon="arrowDown" task="doMoveDestinationDown" onClick={() => t.destMove(1)} />}
+                        {t && ts.tab === 'Destinations' && <TaskButton label={t.withCount('编辑过滤器', t.destStepCount('filter'))} icon="filter" task="doEditFilter" onClick={() => t.destEdit('filter')} />}
+                        {t && ts.tab === 'Destinations' && <TaskButton label={t.withCount('编辑转换器', t.destStepCount('transformer'))} icon="transform" task="doEditTransformer" onClick={() => t.destEdit('transformer')} />}
+                        {t && ts.tab === 'Destinations' && <TaskButton label={t.withCount('编辑响应', t.destStepCount('responseTransformer'))} icon="transform" task="doEditResponseTransformer" onClick={() => t.destEdit('response')} />}
+                        {t && ts.tab === 'Destinations' && <TaskButton label="导入连接器" icon="import" task="doImportConnector" onClick={t.destImport} />}
+                        {t && ts.tab === 'Destinations' && <TaskButton label="导出连接器" icon="export" task="doExportConnector" onClick={t.destExport} />}
 
                         {/* Open in Wizard — always pinned to the bottom of the task list.
                             Switches to the wizard carrying the (possibly unsaved) channel
                             (read from the store); clear the nav guard first so it neither
                             prompts nor drops the working copy on the way out. */}
-                        {t && getPref('showViewSwitch') !== false && <TaskButton label="Open in Wizard" icon="wand" onClick={() => {
+                        {t && getPref('showViewSwitch') !== false && <TaskButton label="在向导中打开" icon="wand" onClick={() => {
                             const ch = store.getState('editingChannel');
                             const wasNew = store.getState('editingChannelNew') === true;
                             store.setState('navGuard', null);
@@ -3003,9 +3028,9 @@ export function ChannelEditorView({ params, query }: any) {
                 </RailPane>
             </ViewTasks>
             {ready === null
-                ? <div className="view-body"><div className="dt-empty">Loading channel…</div></div>
+                ? <div className="view-body"><div className="dt-empty">正在加载通道…</div></div>
                 : ready === false
-                    ? <div className="view-body"><div className="dt-empty">Channel not loaded</div></div>
+                    ? <div className="view-body"><div className="dt-empty">通道未加载</div></div>
                     : <EditorBody params={params} query={query} onTasksChange={forceRender}
                         apiRef={apiRef} returning={returningRef.current} />}
         </div>

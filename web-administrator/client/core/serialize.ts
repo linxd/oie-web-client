@@ -84,7 +84,7 @@ export async function validateScript(script: string | null | undefined): Promise
         const assertSession = captureEngineSession();
         const base = await webSupportBase();
         assertSession();
-        if (base === null) return { ok: null, message: 'Validation unavailable — the Web Support plugin is not installed on this engine.' };
+        if (base === null) return { ok: null, message: '校验不可用——此引擎未安装 Web Support 插件。' };
         const text = await post(`${base}/javascript/_validate`, String(script ?? ''), {
             contentType: 'text/plain', raw: true, noAuthHandler: true
         });
@@ -92,12 +92,12 @@ export async function validateScript(script: string | null | undefined): Promise
         const result = JSON.parse(text);
         if (!result || typeof result !== 'object' || Array.isArray(result)
             || !Object.hasOwn(result, 'error') || (result.error !== null && typeof result.error !== 'string')) {
-            return { ok: null, message: 'The engine returned an invalid script-validation response.' };
+            return { ok: null, message: '引擎返回的脚本校验响应无效。' };
         }
         const err = (result.error ?? '').trim();
         return err ? { ok: false, message: err } : { ok: true };
     } catch (e) {
-        return { ok: null, message: (e as { message?: string })?.message || 'Validation unavailable.' };
+        return { ok: null, message: (e as { message?: string })?.message || '校验不可用。' };
     }
 }
 

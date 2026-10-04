@@ -37,7 +37,7 @@ export function engineContext() { return expected; }
 function changed() {
     if (typeof window !== 'undefined')
         window.dispatchEvent(new Event('oie-session-changed'));
-    throw new Error('The browser session changed. Reload to continue.');
+    throw new Error('浏览器会话已变更，请刷新页面后继续。');
 }
 let responseGeneration = 0;
 const responseContexts = new WeakMap();
@@ -49,7 +49,7 @@ export function captureEngineSession() {
     const capturedGeneration = responseGeneration;
     const assertCurrent = () => {
         if (capturedContext !== expected || capturedGeneration !== responseGeneration) {
-            throw new Error('Discarded an operation from the previous session.');
+            throw new Error('已丢弃上一会话发起的操作。');
         }
         if (capturedContext !== context())
             changed();
@@ -61,7 +61,7 @@ export function captureEngineSession() {
 export function assertEngineResponse(response) {
     const sent = responseContexts.get(response);
     if (sent?.context !== expected || sent.generation !== responseGeneration)
-        throw new Error('Discarded a response from the previous session.');
+        throw new Error('已丢弃上一会话返回的响应。');
     if (expected !== context())
         changed();
 }

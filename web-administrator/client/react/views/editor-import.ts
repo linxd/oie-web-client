@@ -5,7 +5,7 @@ type Model = Record<string, any>;
 /** XStream XML without guessing the types of numeric-looking names, scripts or transport fields. */
 function xmlObject(element: Element): any {
     const attributes = Object.fromEntries([...element.attributes].map(attribute => [`@${attribute.name}`, attribute.value]));
-    if (attributes['@reference']) throw new Error('The export contains an unresolved XML reference');
+    if (attributes['@reference']) throw new Error('导出内容含有未解析的 XML 引用');
     if (!element.children.length) {
         const text = element.textContent || '';
         return Object.keys(attributes).length ? { ...attributes, ...(text ? { $: text } : {}) } : text;
@@ -33,7 +33,7 @@ function parse(text: string, rootName: string): any {
     if (text.trimStart().startsWith('<')) {
         const document = new DOMParser().parseFromString(text, 'text/xml');
         if (document.querySelector('parsererror') || document.documentElement.tagName !== rootName) {
-            throw new Error(`Expected a valid <${rootName}> export`);
+            throw new Error(`应为有效的 <${rootName}> 导出文件`);
         }
         return xmlObject(document.documentElement) || {};
     }
@@ -43,18 +43,18 @@ function parse(text: string, rootName: string): any {
 
 function normalizeElements(container: Model): void {
     const source = container.elements;
-    if (source != null && source !== '' && typeof source !== 'object') throw new Error('Invalid elements collection');
+    if (source != null && source !== '' && typeof source !== 'object') throw new Error('元素集合无效');
     if (source && typeof source === 'object' && !Array.isArray(source)) {
         for (const [type, value] of Object.entries(source)) {
             if (type.startsWith('@')) continue;
             for (const element of Array.isArray(value) ? value : [value]) {
-                if (!element || typeof element !== 'object' || Array.isArray(element)) throw new Error('Invalid filter rule or transformer step');
+                if (!element || typeof element !== 'object' || Array.isArray(element)) throw new Error('过滤器规则或转换器步骤无效');
             }
         }
     }
     const elements = Array.isArray(container.elements) ? container.elements : oie.elementsToArray(container.elements);
     for (const element of elements) {
-        if (!element || typeof element !== 'object' || typeof element.__type !== 'string') throw new Error('Invalid filter rule or transformer step');
+        if (!element || typeof element !== 'object' || typeof element.__type !== 'string') throw new Error('过滤器规则或转换器步骤无效');
         if (element.enabled === 'false') element.enabled = false;
         else if (element.enabled === 'true') element.enabled = true;
         if (element.properties?.children && /Iterator(Step|Rule)$/.test(element.__type)) {
@@ -71,21 +71,21 @@ export function parseFilterTransformerImport(text: string, isFilter: boolean, ve
     const fromXml = text.trimStart().startsWith('<');
     let parsed = parse(text, rootName);
     if (fromXml && (Object.hasOwn(parsed, 'steps') || Object.hasOwn(parsed, 'rules'))) {
-        throw new Error('This legacy export requires engine migration. Import it in Swing and export it again before importing here.');
+        throw new Error('此旧版导出需要引擎迁移，请先在 Swing 管理员中导入并重新导出，再在此处导入');
     }
     if (fromXml && !Object.hasOwn(parsed, 'elements')) parsed.elements = null;
     if (!isFilter && parsed?.responseTransformer) parsed = parsed.responseTransformer;
     if (Array.isArray(parsed)) parsed = { elements: parsed };
-    if (!parsed || typeof parsed !== 'object') throw new Error(`Invalid ${rootName} export`);
+    if (!parsed || typeof parsed !== 'object') throw new Error(`${isFilter ? '过滤器' : '转换器'}导出无效`);
     if (!Object.hasOwn(parsed, 'elements')) {
         const elements = parsed.steps ?? parsed.rules ?? parsed.responseTransformer?.elements;
-        if (elements === undefined) throw new Error(`No ${isFilter ? 'rules' : 'steps'} found in the file`);
+        if (elements === undefined) throw new Error(`文件中未找到${isFilter ? '规则' : '步骤'}`);
         parsed = { ...parsed, elements };
         delete parsed.steps;
         delete parsed.rules;
         delete parsed.responseTransformer;
     }
-    if (parsed.elements != null && parsed.elements !== '' && typeof parsed.elements !== 'object') throw new Error('Invalid elements collection');
+    if (parsed.elements != null && parsed.elements !== '' && typeof parsed.elements !== 'object') throw new Error('元素集合无效');
     // Historical web exports contained only elements. They cannot replace settings
     // that were never exported; full Swing/XML exports always replace the container.
     const elementsOnly = !fromXml && !['inboundDataType', 'outboundDataType', 'inboundTemplate', 'outboundTemplate', 'inboundProperties', 'outboundProperties'].some(key => Object.hasOwn(parsed, key));
@@ -99,14 +99,14 @@ export function parseFilterTransformerImport(text: string, isFilter: boolean, ve
 export function parseConnectorImport(text: string, mode: 'SOURCE' | 'DESTINATION', version: string): Model {
     const parsed = parse(text, 'connector');
     if (!parsed || typeof parsed !== 'object' || typeof parsed.transportName !== 'string' || !parsed.transportName || !parsed.properties || typeof parsed.properties !== 'object') {
-        throw new Error('File is not a connector export');
+        throw new Error('该文件不是连接器导出文件');
     }
-    if (text.trimStart().startsWith('<') && !['SOURCE', 'DESTINATION'].includes(parsed.mode)) throw new Error('Invalid connector mode');
-    if (parsed.mode && parsed.mode !== mode) throw new Error(`You must be on the ${parsed.mode === 'SOURCE' ? 'Source' : 'Destinations'} tab to import this connector`);
+    if (text.trimStart().startsWith('<') && !['SOURCE', 'DESTINATION'].includes(parsed.mode)) throw new Error('连接器模式无效');
+    if (parsed.mode && parsed.mode !== mode) throw new Error(`导入此连接器必须位于“${parsed.mode === 'SOURCE' ? '源连接器' : '目的地'}”页签`);
     const connector = { '@version': version, enabled: true, waitForPrevious: true, ...parsed, mode };
     if (text.trimStart().startsWith('<') && [connector.filter, connector.transformer, connector.responseTransformer]
         .some(container => container && (Object.hasOwn(container, 'steps') || Object.hasOwn(container, 'rules')))) {
-        throw new Error('This legacy connector requires engine migration. Import it in Swing and export it again before importing here.');
+        throw new Error('此旧版连接器需要引擎迁移，请先在 Swing 管理员中导入并重新导出，再在此处导入');
     }
     normalizeImportTypes(connector, { metaDataId: 0, enabled: true, waitForPrevious: true });
     connector.filter = { ...oie.emptyFilter(version), ...connector.filter };
@@ -219,7 +219,7 @@ function decodeImportedTemplates(transformer: Model): void {
     for (const key of ['inboundTemplate', 'outboundTemplate']) {
         const value = transformer[key];
         if (value && typeof value === 'object') {
-            if (value['@encoding'] !== 'base64') throw new Error(`Unsupported ${key} encoding`);
+            if (value['@encoding'] !== 'base64') throw new Error(`不支持 ${key} 的编码方式`);
             const binary = atob(String(value.$ ?? '').replace(/\s+/g, ''));
             transformer[key] = new TextDecoder('utf-8', { fatal: true }).decode(Uint8Array.from(binary, char => char.charCodeAt(0)));
         }

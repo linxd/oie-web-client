@@ -59,10 +59,10 @@ const wsListener = {
     component({ properties, onChange }: any) {
         return (
             <ConnectorForm properties={properties} onChange={onChange} fields={[
-                { section: 'Listener Settings' },
-                listenerAddressField('listenerConnectorProperties.host', 'Local Address'),
-                { key: 'listenerConnectorProperties.port', label: 'Local Port', type: 'number', width: '90px', refresh: true, append: () => portsInUseButton() },
-                { section: 'Web Service Listener Settings' },
+                { section: '监听器设置' },
+                listenerAddressField('listenerConnectorProperties.host', '本地地址'),
+                { key: 'listenerConnectorProperties.port', label: '本地端口', type: 'number', width: '90px', refresh: true, append: () => portsInUseButton() },
+                { section: 'Web Service 监听器设置' },
                 {
                     // Swing "Web Service:" Default/Custom selector — no backing property in
                     // either Swing or web; the selected state is derived from className.
@@ -79,21 +79,21 @@ const wsListener = {
                         const mk = (label: any, checked: any, onSelect: any) => h('label.check',
                             h('input', { type: 'radio', name, checked, onChange: onSelect }), label);
                         return h('div.radio-group.inline-row',
-                            mk('Default service', isDefault, () => { p.className = WS_DEFAULT_CLASSNAME; onChange(); ctx.repaint(); }),
-                            mk('Custom service', !isDefault, () => { if (wsIsDefaultClassName(p)) { p.className = ''; } onChange(); ctx.repaint(); }));
+                            mk('默认服务', isDefault, () => { p.className = WS_DEFAULT_CLASSNAME; onChange(); ctx.repaint(); }),
+                            mk('自定义服务', !isDefault, () => { if (wsIsDefaultClassName(p)) { p.className = ''; } onChange(); ctx.repaint(); }));
                     }
                 },
-                { key: 'className', label: 'Service Class Name', type: 'text', width: '420px', refresh: true, disabled: wsIsDefaultClassName },
-                { key: 'serviceName', label: 'Service Name', type: 'text', width: '220px', refresh: true },
-                { key: 'soapBinding', label: 'Binding', type: 'radio', options: [
-                    { value: 'DEFAULT', label: 'Default' },
+                { key: 'className', label: '服务类名', type: 'text', width: '420px', refresh: true, disabled: wsIsDefaultClassName },
+                { key: 'serviceName', label: '服务名称', type: 'text', width: '220px', refresh: true },
+                { key: 'soapBinding', label: '绑定', type: 'radio', options: [
+                    { value: 'DEFAULT', label: '默认' },
                     { value: 'SOAP11HTTP', label: 'SOAP 1.1' },
                     { value: 'SOAP12HTTP', label: 'SOAP 1.2' }
                 ] },
                 { type: 'display', label: 'WSDL URL', compute: wsdlUrlDisplay, width: '420px' },
                 {
-                    type: 'display', label: 'Method', width: '320px',
-                    compute: (p: any) => wsIsDefaultClassName(p) ? 'String acceptMessage(String message)' : '<Custom Web Service Methods>'
+                    type: 'display', label: '方法', width: '320px',
+                    compute: (p: any) => wsIsDefaultClassName(p) ? 'String acceptMessage(String message)' : '<自定义 Web Service 方法>'
                 }
             ]} />
         );
@@ -102,10 +102,10 @@ const wsListener = {
     // required. WebServiceListener.checkProperties: Service Class Name + Service Name.
     validate(properties: any) {
         return requireFields(properties, [
-            { key: 'listenerConnectorProperties.host', label: 'Local Address' },
-            { key: 'listenerConnectorProperties.port', label: 'Local Port' },
-            { key: 'className', label: 'Service Class Name' },
-            { key: 'serviceName', label: 'Service Name' }
+            { key: 'listenerConnectorProperties.host', label: '本地地址' },
+            { key: 'listenerConnectorProperties.port', label: '本地端口' },
+            { key: 'className', label: '服务类名' },
+            { key: 'serviceName', label: '服务名称' }
         ]);
     }
 };
@@ -194,10 +194,10 @@ function wsFormBody(properties: any, channel: any, extra?: any) {
    render time, to capture in-progress edits) — hence a small DOM button that
    posts the clone directly rather than connectorTestButton({ properties:{...} }). */
 function wsTestConnectionButton(properties: any, channel: any, wsdlUrl: any) {
-    const btn: any = taskButton('Test Connection', 'link', async () => {
+    const btn: any = taskButton('连接测试', 'link', async () => {
         const target = wsdlUrl ? properties.wsdlUrl : properties.locationURI;
         if (!String(target ?? '').trim()) {
-            toast(wsdlUrl ? 'WSDL URL is blank.' : 'Location URI is blank.', 'warn');
+            toast(wsdlUrl ? 'WSDL URL 为空。' : '位置 URI 为空。', 'warn');
             return;
         }
         const props = Object.assign({}, properties);
@@ -206,7 +206,7 @@ function wsTestConnectionButton(properties: any, channel: any, wsdlUrl: any) {
         try {
             const result = await postConnectorProperties('/connectors/ws/_testConnection', props, channel);
             const type = result && typeof result === 'object' ? String(result.type ?? '') : '';
-            const message = (result && typeof result === 'object' && result.message) || type || 'No response received';
+            const message = (result && typeof result === 'object' && result.message) || type || '未收到响应';
             if (type === 'SUCCESS') successToast(message);
             else toast(message, 'error');
         } catch (e) {
@@ -249,11 +249,11 @@ function attachmentsTable(properties: any, onChange: any, disabled: any) {
         rows.forEach((row: any, i: number) => {
             wrap.appendChild(h('div', { class: 'flex gap-1.5 mb-1.5' },
                 textInput(row[0], { placeholder: 'ID', disabled, class: 'flex-1', onInput: (e: any) => { row[0] = e.target.value; commit(); } }),
-                textInput(row[1], { placeholder: 'Content', disabled, class: 'flex-[2]', onInput: (e: any) => { row[1] = e.target.value; commit(); } }),
-                textInput(row[2], { placeholder: 'MIME Type', disabled, class: 'flex-1', onInput: (e: any) => { row[2] = e.target.value; commit(); } }),
-                h('button.icon-btn', { type: 'button', title: 'Remove', disabled, onClick: () => { rows.splice(i, 1); commit(); paint(); } }, icon('x'))));
+                textInput(row[1], { placeholder: '内容', disabled, class: 'flex-[2]', onInput: (e: any) => { row[1] = e.target.value; commit(); } }),
+                textInput(row[2], { placeholder: 'MIME 类型', disabled, class: 'flex-1', onInput: (e: any) => { row[2] = e.target.value; commit(); } }),
+                h('button.icon-btn', { type: 'button', title: '移除', disabled, onClick: () => { rows.splice(i, 1); commit(); paint(); } }, icon('x'))));
         });
-        wrap.appendChild(h('button.btn', { type: 'button', disabled, onClick: () => { rows.push(['', '', '']); paint(); } }, 'Add'));
+        wrap.appendChild(h('button.btn', { type: 'button', disabled, onClick: () => { rows.push(['', '', '']); paint(); } }, '添加'));
     }
     paint();
     return wrap;
@@ -306,17 +306,17 @@ const wsSender = {
 
         async function getOperations(btn: any, repaint: any) {
             if (!String(properties.wsdlUrl ?? '').trim()) {
-                toast('WSDL URL is blank', 'warn');
+                toast('WSDL URL 为空', 'warn');
                 return;
             }
             // Swing getOperationsButtonActionPerformed confirms before replacing
             // an existing service/port/location/operation set.
             const hasOps = [properties.service, properties.port, properties.locationURI].some((v: any) => String(v ?? '').trim())
                 || (String(properties.operation ?? '') && properties.operation !== WS_DEFAULT_OPERATION);
-            if (hasOps && !(await confirmDialog('Get Operations',
-                'This will replace your current service, port, location URI, and operation list. Press OK to continue.'))) return;
+            if (hasOps && !(await confirmDialog('获取操作',
+                '此操作将替换当前的服务、端口、位置 URI 和操作列表。点击「确定」继续。'))) return;
             btn.disabled = true;
-            toast('Downloading and caching WSDL — this may take a moment…');
+            toast('正在下载并缓存 WSDL，可能需要一些时间…');
             try {
                 await postConnectorProperties('/connectors/ws/_cacheWsdlFromUrl', properties, channel);
                 const definition = await api.post('/connectors/ws/_getDefinition', wsFormBody(properties, channel), {
@@ -338,9 +338,9 @@ const wsSender = {
                 properties.soapAction = (ops.length && info.actions.length) ? (info.actions[0] ?? '') : '';
                 onChange();
                 repaint();
-                successToast(`Retrieved ${ops.length} operation${ops.length === 1 ? '' : 's'}`);
+                successToast(`已获取 ${ops.length} 个操作`);
             } catch (e) {
-                toast('Error caching WSDL. Please check the WSDL URL and authentication settings.\n' + apiErrorMessage(e), 'error');
+                toast('缓存 WSDL 时出错，请检查 WSDL URL 与认证设置。\n' + apiErrorMessage(e), 'error');
             } finally {
                 btn.disabled = false;
             }
@@ -349,24 +349,24 @@ const wsSender = {
         async function generateEnvelope(btn: any, repaint: any) {
             const operation = String(properties.operation ?? '');
             if (!String(properties.wsdlUrl ?? '').trim()) {
-                toast('WSDL URL is blank', 'warn');
+                toast('WSDL URL 为空', 'warn');
                 return;
             }
             if (!operation || operation === WS_DEFAULT_OPERATION) {
-                toast('Press Get Operations and select an operation first', 'warn');
+                toast('请先点击「获取操作」并选择一个操作', 'warn');
                 return;
             }
             // Swing generateEnvelope confirms before overwriting an existing envelope/action.
             if ((String(properties.envelope ?? '').trim() || String(properties.soapAction ?? '').trim())
-                && !(await confirmDialog('Generate Envelope',
-                'This will replace your current SOAP envelope and SOAP action. Press OK to continue.'))) return;
+                && !(await confirmDialog('生成信封',
+                '此操作将替换当前的 SOAP 信封与 SOAP Action。点击「确定」继续。'))) return;
             btn.disabled = true;
             try {
                 const cached = await api.post('/connectors/ws/_isWsdlCached', wsFormBody(properties, channel), {
                     contentType: 'application/x-www-form-urlencoded'
                 });
                 if (!isTrue(cached)) {
-                    toast('The WSDL is no longer cached on the server. Press "Get Operations" to fetch the latest WSDL.', 'warn');
+                    toast('服务器上已不再缓存该 WSDL，请点击「获取操作」重新获取最新的 WSDL。', 'warn');
                     return;
                 }
                 const opParams = {
@@ -384,13 +384,13 @@ const wsSender = {
                         { contentType: 'application/x-www-form-urlencoded', raw: true });
                     if (soapAction) properties.soapAction = soapAction;
                 } catch (e) {
-                    toast('There was an error retrieving the SOAP action.\n' + apiErrorMessage(e), 'warn');
+                    toast('获取 SOAP Action 时出错。\n' + apiErrorMessage(e), 'warn');
                 }
                 onChange();
                 repaint();
-                successToast('SOAP envelope generated');
+                successToast('SOAP 信封已生成');
             } catch (e) {
-                toast('There was an error generating the envelope.\n' + apiErrorMessage(e), 'error');
+                toast('生成信封时出错。\n' + apiErrorMessage(e), 'error');
             } finally {
                 btn.disabled = false;
             }
@@ -398,7 +398,7 @@ const wsSender = {
 
         return (
             <ConnectorForm properties={properties} onChange={onChange} fields={[
-                { section: 'Web Service Sender Settings' },
+                { section: 'Web Service 发送器设置' },
                 {
                     type: 'custom', label: 'WSDL URL', span: true,
                     render: (p: any, ctx: any) => {
@@ -406,7 +406,7 @@ const wsSender = {
                             class: 'flex-1',
                             onInput: (e: any) => { p.wsdlUrl = e.target.value; onChange(); }
                         });
-                        const getOpsBtn = taskButton('Get Operations', 'refresh', () => getOperations(getOpsBtn, ctx.repaint));
+                        const getOpsBtn = taskButton('获取操作', 'refresh', () => getOperations(getOpsBtn, ctx.repaint));
                         // Swing testConnectionButtonActionPerformed(true): blanks locationURI
                         // on a copy so only the WSDL URL is tested.
                         const testBtn = wsTestConnectionButton(p, channel, true);
@@ -414,14 +414,14 @@ const wsSender = {
                     }
                 },
                 {
-                    type: 'custom', label: 'Service', width: '320px',
+                    type: 'custom', label: '服务', width: '320px',
                     render: (p: any, ctx: any) => comboInput(p.service, [...getServices().keys()], {
                         onInput: (e: any) => { p.service = e.target.value; onChange(); },
                         onCommit: () => ctx.repaint()
                     })
                 },
                 {
-                    type: 'custom', label: 'Port / Endpoint', width: '320px',
+                    type: 'custom', label: '端口 / 端点', width: '320px',
                     render: (p: any, ctx: any) => {
                         const ports = getServices().get(String(p.service ?? ''));
                         return comboInput(p.port, ports ? [...ports.keys()] : [], {
@@ -438,11 +438,11 @@ const wsSender = {
                     // Swing initLayout: add(locationURIComboBox, "split 2"); add(locationURITestConnectionButton).
                     // The second Test Connection button blanks wsdlUrl on a copy so only the
                     // Location URI is tested (testConnectionButtonActionPerformed(false)).
-                    type: 'custom', label: 'Location URI', span: true,
+                    type: 'custom', label: '位置 URI', span: true,
                     render: (p: any) => {
                         const info = currentPortInfo();
                         const combo = comboInput(p.locationURI, info && info.locationURI ? [info.locationURI] : [], {
-                            placeholder: 'Optional override of the endpoint address',
+                            placeholder: '可选：覆盖端点地址',
                             onInput: (e: any) => { p.locationURI = e.target.value; onChange(); }
                         });
                         combo.style.flex = '1';
@@ -450,25 +450,25 @@ const wsSender = {
                         return h('div', { class: 'flex gap-1.5' }, combo, testBtn);
                     }
                 },
-                { key: 'socketTimeout', label: 'Socket Timeout (ms)', type: 'number', width: '120px', tooltip: '0 = no timeout' },
+                { key: 'socketTimeout', label: '套接字超时（毫秒）', type: 'number', width: '120px', tooltip: '0 表示永不超时' },
                 {
-                    key: 'useAuthentication', label: 'Authentication', type: 'radio', options: YES_NO, refresh: true,
+                    key: 'useAuthentication', label: '认证', type: 'radio', options: YES_NO, refresh: true,
                     onSet: (p: any, v: any) => { if (!v) { p.username = ''; p.password = ''; } }
                 },
-                { key: 'username', label: 'Username', type: 'text', width: '220px', disabled: (p: any) => !usingAuth(p) },
-                { key: 'password', label: 'Password', type: 'password', width: '220px', disabled: (p: any) => !usingAuth(p) },
+                { key: 'username', label: '用户名', type: 'text', width: '220px', disabled: (p: any) => !usingAuth(p) },
+                { key: 'password', label: '密码', type: 'password', width: '220px', disabled: (p: any) => !usingAuth(p) },
                 // Swing initLayout order: invocationOneWayRadio then invocationTwoWayRadio
                 // (One-Way, Two-Way left-to-right). Match that option order.
-                { key: 'oneWay', label: 'Invocation Type', type: 'radio', options: [
-                    { value: true, label: 'One-Way' },
-                    { value: false, label: 'Two-Way' }
+                { key: 'oneWay', label: '调用方式', type: 'radio', options: [
+                    { value: true, label: '单向' },
+                    { value: false, label: '双向' }
                 ] },
                 {
                     // Swing places the Generate Envelope button inline on the Operation
                     // row (add(operationComboBox,"split 2"); add(generateEnvelopeButton)).
                     // The button is disabled until real operations are loaded
                     // (updateGenerateEnvelopeButtonEnabled -> !isDefaultOperations()).
-                    type: 'custom', label: 'Operation', span: true,
+                    type: 'custom', label: '操作', span: true,
                     render: (p: any, ctx: any) => {
                         const info = currentPortInfo();
                         const ops = info ? [...info.operations] : [];
@@ -484,41 +484,41 @@ const wsSender = {
                                 ctx.repaint();
                             }
                         });
-                        const btn: any = taskButton('Generate Envelope', 'code', () => generateEnvelope(btn, ctx.repaint), {
-                            title: 'Regenerates the SOAP Envelope from the cached WSDL schema and populates the SOAP Action, if available'
+                        const btn: any = taskButton('生成信封', 'code', () => generateEnvelope(btn, ctx.repaint), {
+                            title: '根据已缓存的 WSDL 架构重新生成 SOAP 信封，并在可用时填充 SOAP Action'
                         });
                         if (!current || current === WS_DEFAULT_OPERATION) btn.disabled = true;
                         return h('div', { class: 'flex gap-1.5 items-center' }, combo, btn);
                     }
                 },
                 { key: 'soapAction', label: 'SOAP Action', type: 'text', width: '320px' },
-                { key: 'envelope', label: 'SOAP Envelope', type: 'code', language: 'xml', minHeight: '260px' },
-                { section: 'Headers' },
-                { key: 'isUseHeadersVariable', label: 'Headers Source', type: 'radio', refresh: true, options: [
-                    { value: false, label: 'Use Table' },
-                    { value: true, label: 'Use Map' }
+                { key: 'envelope', label: 'SOAP 信封', type: 'code', language: 'xml', minHeight: '260px' },
+                { section: '请求头' },
+                { key: 'isUseHeadersVariable', label: '请求头来源', type: 'radio', refresh: true, options: [
+                    { value: false, label: '使用表格' },
+                    { value: true, label: '使用映射' }
                 ] },
-                { key: 'headersVariable', label: 'Headers Map Variable', type: 'text', width: '220px', disabled: (p: any) => !isTrue(p.isUseHeadersVariable) },
-                { key: 'headers', label: 'Headers', type: 'keyvalue', mapShape: 'list', disabled: (p: any) => isTrue(p.isUseHeadersVariable) },
-                { section: 'Attachments' },
-                { key: 'useMtom', label: 'Use MTOM', type: 'radio', options: YES_NO, refresh: true },
+                { key: 'headersVariable', label: '请求头映射变量', type: 'text', width: '220px', disabled: (p: any) => !isTrue(p.isUseHeadersVariable) },
+                { key: 'headers', label: '请求头', type: 'keyvalue', mapShape: 'list', disabled: (p: any) => isTrue(p.isUseHeadersVariable) },
+                { section: '附件' },
+                { key: 'useMtom', label: '使用 MTOM', type: 'radio', options: YES_NO, refresh: true },
                 {
                     // Swing keeps the whole attachments block VISIBLE but disables it
                     // when MTOM=No (useMtomNoRadioActionPerformed). The source radio,
                     // variable field, and table are gated on useMtom + the sub-selection.
-                    key: 'isUseAttachmentsVariable', label: 'Attachments Source', type: 'radio', refresh: true,
+                    key: 'isUseAttachmentsVariable', label: '附件来源', type: 'radio', refresh: true,
                     disabled: (p: any) => !isTrue(p.useMtom),
                     options: [
-                        { value: false, label: 'Use Table' },
-                        { value: true, label: 'Use List' }
+                        { value: false, label: '使用表格' },
+                        { value: true, label: '使用列表' }
                     ]
                 },
                 {
-                    key: 'attachmentsVariable', label: 'Attachments List Variable', type: 'text', width: '220px',
+                    key: 'attachmentsVariable', label: '附件列表变量', type: 'text', width: '220px',
                     disabled: (p: any) => !(isTrue(p.useMtom) && isTrue(p.isUseAttachmentsVariable))
                 },
                 {
-                    type: 'custom', label: 'Attachments', span: true,
+                    type: 'custom', label: '附件', span: true,
                     render: (p: any) => attachmentsTable(p, onChange, !(isTrue(p.useMtom) && !isTrue(p.isUseAttachmentsVariable)))
                 }
             ]} />
@@ -532,12 +532,12 @@ const wsSender = {
     validate(properties: any) {
         return requireFields(properties, [
             { key: 'wsdlUrl', label: 'WSDL URL' },
-            { key: 'service', label: 'Service' },
-            { key: 'port', label: 'Port / Endpoint' },
-            { key: 'socketTimeout', label: 'Socket Timeout (ms)' },
-            { key: 'envelope', label: 'SOAP Envelope' },
-            { key: 'headersVariable', label: 'Headers Map Variable', when: (p: any) => asBool(p.isUseHeadersVariable) },
-            { key: 'attachmentsVariable', label: 'Attachments List Variable', when: (p: any) => asBool(p.useMtom) && asBool(p.isUseAttachmentsVariable) }
+            { key: 'service', label: '服务' },
+            { key: 'port', label: '端口 / 端点' },
+            { key: 'socketTimeout', label: '套接字超时（毫秒）' },
+            { key: 'envelope', label: 'SOAP 信封' },
+            { key: 'headersVariable', label: '请求头映射变量', when: (p: any) => asBool(p.isUseHeadersVariable) },
+            { key: 'attachmentsVariable', label: '附件列表变量', when: (p: any) => asBool(p.useMtom) && asBool(p.isUseAttachmentsVariable) }
         ]);
     }
 };

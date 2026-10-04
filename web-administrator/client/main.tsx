@@ -39,7 +39,7 @@ setContextMenuRenderer(openRadixContextMenu as any);
 createRoot(document.getElementById('app')!).render(
     <StrictMode>
         <QueryClientProvider client={queryClient}>
-            <ErrorBoundary label="The administrator failed to start">
+            <ErrorBoundary label="管理员界面启动失败">
                 <App />
             </ErrorBoundary>
             {/* Outside <App> so these survive the auth gate swapping the tree. */}

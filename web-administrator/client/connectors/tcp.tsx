@@ -69,45 +69,45 @@ const tcpListener = {
                     address/port, shown at the top like every other listener
                     (HTTP/WS/DICOM) and the Swing TCP Listener. */}
                 <ConnectorForm properties={properties} onChange={onChange} fields={[
-                    { section: 'Listener Settings' },
-                    listenerAddressField('listenerConnectorProperties.host', 'Local Address'),
-                    { key: 'listenerConnectorProperties.port', label: 'Local Port', type: 'number', width: '90px', append: () => portsInUseButton() }
+                    { section: '监听器设置' },
+                    listenerAddressField('listenerConnectorProperties.host', '本地地址'),
+                    { key: 'listenerConnectorProperties.port', label: '本地端口', type: 'number', width: '90px', append: () => portsInUseButton() }
                 ]} />
                 <TransmissionModePanel properties={properties} onChange={onChange} />
                 <ConnectorForm properties={properties} onChange={onChange} fields={[
-                    { section: 'TCP Listener Settings' },
-                    { key: 'serverMode', label: 'Mode', type: 'radio', refresh: true, options: [
-                        { value: true, label: 'Server' },
-                        { value: false, label: 'Client' }
+                    { section: 'TCP 监听器设置' },
+                    { key: 'serverMode', label: '模式', type: 'radio', refresh: true, options: [
+                        { value: true, label: '服务器' },
+                        { value: false, label: '客户端' }
                     ] },
-                    { key: 'remoteAddress', label: 'Remote Address', type: 'text', width: '200px', disabled: serverMode },
-                    { key: 'remotePort', label: 'Remote Port', type: 'number', width: '90px', disabled: serverMode },
-                    { key: 'overrideLocalBinding', label: 'Override Local Binding', type: 'radio', options: YES_NO, disabled: serverMode },
-                    { key: 'reconnectInterval', label: 'Reconnect Interval (ms)', type: 'number', width: '90px', disabled: serverMode },
-                    { key: 'maxConnections', label: 'Max Connections', type: 'number', width: '90px', disabled: (p: any) => !asBool(p.serverMode) },
-                    { key: 'receiveTimeout', label: 'Receive Timeout (ms)', type: 'number', width: '90px', tooltip: '0 = never time out' },
-                    { key: 'bufferSize', label: 'Buffer Size (bytes)', type: 'number', width: '90px' },
-                    { key: 'keepConnectionOpen', label: 'Keep Connection Open', type: 'radio', options: YES_NO },
+                    { key: 'remoteAddress', label: '远程地址', type: 'text', width: '200px', disabled: serverMode },
+                    { key: 'remotePort', label: '远程端口', type: 'number', width: '90px', disabled: serverMode },
+                    { key: 'overrideLocalBinding', label: '覆盖本地绑定', type: 'radio', options: YES_NO, disabled: serverMode },
+                    { key: 'reconnectInterval', label: '重连间隔（毫秒）', type: 'number', width: '90px', disabled: serverMode },
+                    { key: 'maxConnections', label: '最大连接数', type: 'number', width: '90px', disabled: (p: any) => !asBool(p.serverMode) },
+                    { key: 'receiveTimeout', label: '接收超时（毫秒）', type: 'number', width: '90px', tooltip: '0 表示永不超时' },
+                    { key: 'bufferSize', label: '缓冲区大小（字节）', type: 'number', width: '90px' },
+                    { key: 'keepConnectionOpen', label: '保持连接打开', type: 'radio', options: YES_NO },
                     {
-                        key: 'dataTypeBinary', label: 'Data Type', type: 'radio', refresh: true,
+                        key: 'dataTypeBinary', label: '数据类型', type: 'radio', refresh: true,
                         // Binary disables Encoding and forces it back to the default (Swing setSelectedIndex(0)).
                         onSet: (p: any) => { if (asBool(p.dataTypeBinary)) p.charsetEncoding = 'DEFAULT_ENCODING'; },
                         options: [
-                            { value: true, label: 'Binary' },
-                            { value: false, label: 'Text' }
+                            { value: true, label: '二进制' },
+                            { value: false, label: '文本' }
                         ]
                     },
-                    { key: 'charsetEncoding', label: 'Encoding', type: 'select', options: CHARSETS, width: '160px', disabled: (p: any) => asBool(p.dataTypeBinary) },
+                    { key: 'charsetEncoding', label: '编码', type: 'select', options: CHARSETS, width: '160px', disabled: (p: any) => asBool(p.dataTypeBinary) },
                     {
-                        key: 'respondOnNewConnection', label: 'Respond on New Connection', type: 'radio', refresh: true,
+                        key: 'respondOnNewConnection', label: '新连接时响应', type: 'radio', refresh: true,
                         options: [
-                            { value: 1, label: 'Yes' },
-                            { value: 0, label: 'No' },
-                            { value: 2, label: 'Message Recovery' }
+                            { value: 1, label: '是' },
+                            { value: 0, label: '否' },
+                            { value: 2, label: '消息恢复' }
                         ]
                     },
-                    { key: 'responseAddress', label: 'Response Address', type: 'text', width: '200px', disabled: (p: any) => Number(p.respondOnNewConnection) === 0 },
-                    { key: 'responsePort', label: 'Response Port', type: 'number', width: '90px', disabled: (p: any) => Number(p.respondOnNewConnection) === 0 }
+                    { key: 'responseAddress', label: '响应地址', type: 'text', width: '200px', disabled: (p: any) => Number(p.respondOnNewConnection) === 0 },
+                    { key: 'responsePort', label: '响应端口', type: 'number', width: '90px', disabled: (p: any) => Number(p.respondOnNewConnection) === 0 }
                 ]} />
             </div>
         );
@@ -119,16 +119,16 @@ const tcpListener = {
     // New Connection is No (0). Numeric/range checks (e.g. maxConnections > 0) skipped.
     validate(properties: any) {
         return requireFields(properties, [
-            { key: 'listenerConnectorProperties.host', label: 'Local Address' },
-            { key: 'listenerConnectorProperties.port', label: 'Local Port' },
-            { key: 'remoteAddress', label: 'Remote Address', when: (p: any) => !asBool(p.serverMode) },
-            { key: 'remotePort', label: 'Remote Port', when: (p: any) => !asBool(p.serverMode) },
-            { key: 'reconnectInterval', label: 'Reconnect Interval (ms)', when: (p: any) => !asBool(p.serverMode) },
-            { key: 'receiveTimeout', label: 'Receive Timeout (ms)' },
-            { key: 'bufferSize', label: 'Buffer Size (bytes)' },
-            { key: 'maxConnections', label: 'Max Connections' },
-            { key: 'responseAddress', label: 'Response Address', when: (p: any) => Number(p.respondOnNewConnection) !== 0 },
-            { key: 'responsePort', label: 'Response Port', when: (p: any) => Number(p.respondOnNewConnection) !== 0 }
+            { key: 'listenerConnectorProperties.host', label: '本地地址' },
+            { key: 'listenerConnectorProperties.port', label: '本地端口' },
+            { key: 'remoteAddress', label: '远程地址', when: (p: any) => !asBool(p.serverMode) },
+            { key: 'remotePort', label: '远程端口', when: (p: any) => !asBool(p.serverMode) },
+            { key: 'reconnectInterval', label: '重连间隔（毫秒）', when: (p: any) => !asBool(p.serverMode) },
+            { key: 'receiveTimeout', label: '接收超时（毫秒）' },
+            { key: 'bufferSize', label: '缓冲区大小（字节）' },
+            { key: 'maxConnections', label: '最大连接数' },
+            { key: 'responseAddress', label: '响应地址', when: (p: any) => Number(p.respondOnNewConnection) !== 0 },
+            { key: 'responsePort', label: '响应端口', when: (p: any) => Number(p.respondOnNewConnection) !== 0 }
         ]);
     }
 };
@@ -172,49 +172,49 @@ const tcpSender = {
             <div>
                 <TransmissionModePanel properties={properties} onChange={onChange} />
                 <ConnectorForm properties={properties} onChange={onChange} fields={[
-                    { section: 'Connection Settings' },
+                    { section: '连接设置' },
                     // Swing initLayout adds modeClientRadio then modeServerRadio
                     // (TcpSender.java:654-655), so on-screen order is Client, Server.
-                    { key: 'serverMode', label: 'Mode', type: 'radio', refresh: true, options: [
-                        { value: false, label: 'Client' },
-                        { value: true, label: 'Server' }
+                    { key: 'serverMode', label: '模式', type: 'radio', refresh: true, options: [
+                        { value: false, label: '客户端' },
+                        { value: true, label: '服务器' }
                     ] },
                     {
-                        key: 'remoteAddress', label: 'Remote Address', type: 'text', width: '200px', disabled: serverMode,
+                        key: 'remoteAddress', label: '远程地址', type: 'text', width: '200px', disabled: serverMode,
                         // Test Connection greys in Server mode (TcpSender.modeServerRadioActionPerformed).
                         append: (p: any) => connectorTestButton({ path: '/connectors/tcp/_testConnection', channel, properties, disabled: serverMode(p) })
                     },
-                    { key: 'remotePort', label: 'Remote Port', type: 'number', width: '90px', disabled: serverMode },
-                    { key: 'overrideLocalBinding', label: 'Override Local Binding', type: 'radio', options: YES_NO, refresh: true, disabled: serverMode },
-                    { key: 'localAddress', label: 'Local Address', type: 'text', width: '200px', disabled: localBindingDisabled },
+                    { key: 'remotePort', label: '远程端口', type: 'number', width: '90px', disabled: serverMode },
+                    { key: 'overrideLocalBinding', label: '覆盖本地绑定', type: 'radio', options: YES_NO, refresh: true, disabled: serverMode },
+                    { key: 'localAddress', label: '本地地址', type: 'text', width: '200px', disabled: localBindingDisabled },
                     // Ports in Use follows the Local Port field: on in Server mode or Client+Override.
-                    { key: 'localPort', label: 'Local Port', type: 'number', width: '90px', append: (p: any) => portsInUseButton({ disabled: localBindingDisabled(p) }), disabled: localBindingDisabled },
-                    { key: 'maxConnections', label: 'Max Connections', type: 'number', width: '90px', disabled: (p: any) => !asBool(p.serverMode) },
-                    { key: 'keepConnectionOpen', label: 'Keep Connection Open', type: 'radio', options: YES_NO, refresh: true, disabled: serverMode },
-                    { key: 'checkRemoteHost', label: 'Check Remote Host', type: 'radio', options: YES_NO, disabled: sendDisabled },
-                    { key: 'sendTimeout', label: 'Send Timeout (ms)', type: 'number', width: '90px', disabled: sendDisabled },
-                    { key: 'bufferSize', label: 'Buffer Size (bytes)', type: 'number', width: '90px' },
+                    { key: 'localPort', label: '本地端口', type: 'number', width: '90px', append: (p: any) => portsInUseButton({ disabled: localBindingDisabled(p) }), disabled: localBindingDisabled },
+                    { key: 'maxConnections', label: '最大连接数', type: 'number', width: '90px', disabled: (p: any) => !asBool(p.serverMode) },
+                    { key: 'keepConnectionOpen', label: '保持连接打开', type: 'radio', options: YES_NO, refresh: true, disabled: serverMode },
+                    { key: 'checkRemoteHost', label: '检查远程主机', type: 'radio', options: YES_NO, disabled: sendDisabled },
+                    { key: 'sendTimeout', label: '发送超时（毫秒）', type: 'number', width: '90px', disabled: sendDisabled },
+                    { key: 'bufferSize', label: '缓冲区大小（字节）', type: 'number', width: '90px' },
                     {
-                        key: 'responseTimeout', label: 'Response Timeout (ms)', type: 'number', width: '90px',
+                        key: 'responseTimeout', label: '响应超时（毫秒）', type: 'number', width: '90px',
                         // Swing pairs the Ignore Response checkbox inline with Response Timeout;
                         // it gates Queue on Response Timeout below.
-                        append: (p: any, ctx: any) => checkbox('Ignore Response', asBool(p.ignoreResponse), {
+                        append: (p: any, ctx: any) => checkbox('忽略响应', asBool(p.ignoreResponse), {
                             onChange: (e: any) => { p.ignoreResponse = e.target.checked; ctx.onChange(); }
                         }).el
                     },
-                    { key: 'queueOnResponseTimeout', label: 'Queue on Response Timeout', type: 'radio', options: YES_NO, disabled: (p: any) => asBool(p.ignoreResponse) },
+                    { key: 'queueOnResponseTimeout', label: '响应超时时入队', type: 'radio', options: YES_NO, disabled: (p: any) => asBool(p.ignoreResponse) },
                     {
-                        key: 'dataTypeBinary', label: 'Data Type', type: 'radio', refresh: true,
+                        key: 'dataTypeBinary', label: '数据类型', type: 'radio', refresh: true,
                         // Binary disables Encoding and forces it back to the default (Swing setSelectedIndex(0)).
                         onSet: (p: any) => { if (asBool(p.dataTypeBinary)) p.charsetEncoding = 'DEFAULT_ENCODING'; },
                         options: [
-                            { value: true, label: 'Binary' },
-                            { value: false, label: 'Text' }
+                            { value: true, label: '二进制' },
+                            { value: false, label: '文本' }
                         ]
                     },
-                    { key: 'charsetEncoding', label: 'Encoding', type: 'select', options: CHARSETS, width: '160px', disabled: (p: any) => asBool(p.dataTypeBinary) },
-                    { section: 'Template' },
-                    { key: 'template', label: 'Template', type: 'code', minHeight: '260px' }
+                    { key: 'charsetEncoding', label: '编码', type: 'select', options: CHARSETS, width: '160px', disabled: (p: any) => asBool(p.dataTypeBinary) },
+                    { section: '模板' },
+                    { key: 'template', label: '模板', type: 'code', minHeight: '260px' }
                 ]} />
             </div>
         );
@@ -226,15 +226,15 @@ const tcpSender = {
     // always required. Numeric/range checks (e.g. maxConnections > 0) skipped.
     validate(properties: any) {
         return requireFields(properties, [
-            { key: 'remoteAddress', label: 'Remote Address', when: (p: any) => !asBool(p.serverMode) },
-            { key: 'remotePort', label: 'Remote Port', when: (p: any) => !asBool(p.serverMode) },
-            { key: 'localAddress', label: 'Local Address', when: (p: any) => asBool(p.serverMode) || asBool(p.overrideLocalBinding) },
-            { key: 'localPort', label: 'Local Port', when: (p: any) => asBool(p.serverMode) || asBool(p.overrideLocalBinding) },
-            { key: 'maxConnections', label: 'Max Connections', when: (p: any) => asBool(p.serverMode) },
-            { key: 'sendTimeout', label: 'Send Timeout (ms)', when: (p: any) => !asBool(p.serverMode) && asBool(p.keepConnectionOpen) },
-            { key: 'bufferSize', label: 'Buffer Size (bytes)' },
-            { key: 'responseTimeout', label: 'Response Timeout (ms)' },
-            { key: 'template', label: 'Template' }
+            { key: 'remoteAddress', label: '远程地址', when: (p: any) => !asBool(p.serverMode) },
+            { key: 'remotePort', label: '远程端口', when: (p: any) => !asBool(p.serverMode) },
+            { key: 'localAddress', label: '本地地址', when: (p: any) => asBool(p.serverMode) || asBool(p.overrideLocalBinding) },
+            { key: 'localPort', label: '本地端口', when: (p: any) => asBool(p.serverMode) || asBool(p.overrideLocalBinding) },
+            { key: 'maxConnections', label: '最大连接数', when: (p: any) => asBool(p.serverMode) },
+            { key: 'sendTimeout', label: '发送超时（毫秒）', when: (p: any) => !asBool(p.serverMode) && asBool(p.keepConnectionOpen) },
+            { key: 'bufferSize', label: '缓冲区大小（字节）' },
+            { key: 'responseTimeout', label: '响应超时（毫秒）' },
+            { key: 'template', label: '模板' }
         ]);
     }
 };

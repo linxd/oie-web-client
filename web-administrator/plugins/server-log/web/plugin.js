@@ -61,18 +61,18 @@ function copyText(text) {
   try {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text);
-      toast("Copied to clipboard");
+      toast("\u5DF2\u590D\u5236\u5230\u526A\u8D34\u677F");
       return;
     }
   } catch (e) {
   }
-  toast("Clipboard unavailable", "warn");
+  toast("\u526A\u8D34\u677F\u4E0D\u53EF\u7528", "warn");
 }
 function showDetail(item) {
   const stack = item.throwableInformation && String(item.throwableInformation).trim();
   const preClass = "m-0 whitespace-pre-wrap [word-break:break-word] overflow-x-hidden overflow-y-auto bg-bg0 text-text border border-[var(--bg3)] p-2 rounded-[4px]";
   modal({
-    title: "Server Log Entry",
+    title: "\u670D\u52A1\u5668\u65E5\u5FD7\u6761\u76EE",
     size: "wide",
     body: h(
       "div",
@@ -84,17 +84,17 @@ function showDetail(item) {
         h("span.mono.text-text-faint", formatLogDate(item.date)),
         h("span.mono", scopeLabel(item))
       ),
-      h("div", { class: "font-semibold" }, "Message"),
+      h("div", { class: "font-semibold" }, "\u6D88\u606F"),
       h("pre", { class: preClass + " max-h-[30vh]" }, String(item.message ?? "")),
-      stack ? h("div", { class: "font-semibold" }, "Stack Trace") : null,
+      stack ? h("div", { class: "font-semibold" }, "\u5806\u6808\u8DDF\u8E2A") : null,
       stack ? h("pre", { class: preClass + " max-h-[60vh] text-[11px]" }, String(item.throwableInformation)) : null
     ),
     buttons: [
-      { label: "Copy", onClick: () => {
+      { label: "\u590D\u5236", onClick: () => {
         copyText(fullText(item));
         return false;
       } },
-      { label: "Close", primary: true }
+      { label: "\u5173\u95ED", primary: true }
     ]
   });
 }
@@ -103,7 +103,7 @@ function LogRow({ item }) {
     "tr",
     {
       className: "cursor-pointer",
-      title: "Double-click for the full entry",
+      title: "\u53CC\u51FB\u67E5\u770B\u5B8C\u6574\u6761\u76EE",
       onDoubleClick: () => showDetail(item)
     },
     /* @__PURE__ */ React.createElement("td", { className: "mono text-text-faint whitespace-nowrap text-[11px] w-[160px]" }, formatLogDate(item.date)),
@@ -195,7 +195,7 @@ function ServerLogTab() {
     });
   }, [items, sort]);
   const headerTh = (key, label, extra = "") => /* @__PURE__ */ React.createElement("th", { className: "sortable sticky top-0 z-[1] bg-bg2 text-left " + extra, onClick: () => handleSort(key) }, label, sort.key === key ? /* @__PURE__ */ React.createElement("span", { className: "sort-arrow" }, sort.dir > 0 ? "\u25B2" : "\u25BC") : null);
-  return /* @__PURE__ */ React.createElement("div", { className: "flex flex-col h-full min-h-0" }, /* @__PURE__ */ React.createElement("div", { className: "flex-1 min-h-0 overflow-y-auto overflow-x-hidden" }, /* @__PURE__ */ React.createElement("table", { className: "dt server-log w-full" }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", null, headerTh("timestamp", "Timestamp", "w-[160px]"), headerTh("level", "Level", "w-[76px]"), headerTh("message", "Message"))), /* @__PURE__ */ React.createElement("tbody", null, error && !items.length ? /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("td", { colSpan: 3, className: "text-text-faint p-3" }, `Server Log unavailable: ${error}`)) : !items.length ? /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("td", { colSpan: 3, className: "text-text-faint p-3" }, "No server log entries yet.")) : sortedItems.map((item) => /* @__PURE__ */ React.createElement(LogRow, { key: item.id, item }))))), /* @__PURE__ */ React.createElement("div", { className: "taskbar flex items-center gap-1.5 py-[3px] px-2 flex-none text-[11px] z-[2] bg-bg2 border-t border-[var(--bg3)]" }, /* @__PURE__ */ React.createElement("button", { className: "icon-btn " + btnClass, title: "Pause or resume the live log", onClick: togglePause }, /* @__PURE__ */ React.createElement("span", { className: "text-[11.5px] leading-none" }, paused ? "\u23F5" : "\u23F8")), /* @__PURE__ */ React.createElement("button", { className: "icon-btn " + btnClass, title: "Clear the displayed log", onClick: clearLog }, /* @__PURE__ */ React.createElement("span", { className: "text-err font-bold" }, "\u2715")), /* @__PURE__ */ React.createElement("span", { className: "flex-1" }), /* @__PURE__ */ React.createElement("label", { className: "text-text-faint mr-0.5" }, "Log Size:"), /* @__PURE__ */ React.createElement(
+  return /* @__PURE__ */ React.createElement("div", { className: "flex flex-col h-full min-h-0" }, /* @__PURE__ */ React.createElement("div", { className: "flex-1 min-h-0 overflow-y-auto overflow-x-hidden" }, /* @__PURE__ */ React.createElement("table", { className: "dt server-log w-full" }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", null, headerTh("timestamp", "\u65F6\u95F4\u6233", "w-[160px]"), headerTh("level", "\u7EA7\u522B", "w-[76px]"), headerTh("message", "\u6D88\u606F"))), /* @__PURE__ */ React.createElement("tbody", null, error && !items.length ? /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("td", { colSpan: 3, className: "text-text-faint p-3" }, `\u65E0\u6CD5\u83B7\u53D6\u670D\u52A1\u5668\u65E5\u5FD7\uFF1A${error}`)) : !items.length ? /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("td", { colSpan: 3, className: "text-text-faint p-3" }, "\u6682\u65E0\u670D\u52A1\u5668\u65E5\u5FD7\u6761\u76EE")) : sortedItems.map((item) => /* @__PURE__ */ React.createElement(LogRow, { key: item.id, item }))))), /* @__PURE__ */ React.createElement("div", { className: "taskbar flex items-center gap-1.5 py-[3px] px-2 flex-none text-[11px] z-[2] bg-bg2 border-t border-[var(--bg3)]" }, /* @__PURE__ */ React.createElement("button", { className: "icon-btn " + btnClass, title: "\u6682\u505C\u6216\u6062\u590D\u5B9E\u65F6\u65E5\u5FD7", onClick: togglePause }, /* @__PURE__ */ React.createElement("span", { className: "text-[11.5px] leading-none" }, paused ? "\u23F5" : "\u23F8")), /* @__PURE__ */ React.createElement("button", { className: "icon-btn " + btnClass, title: "\u6E05\u9664\u663E\u793A\u7684\u65E5\u5FD7", onClick: clearLog }, /* @__PURE__ */ React.createElement("span", { className: "text-err font-bold" }, "\u2715")), /* @__PURE__ */ React.createElement("span", { className: "flex-1" }), /* @__PURE__ */ React.createElement("label", { className: "text-text-faint mr-0.5" }, "\u65E5\u5FD7\u6761\u6570\uFF1A"), /* @__PURE__ */ React.createElement(
     "input",
     {
       type: "number",
@@ -209,12 +209,12 @@ function ServerLogTab() {
         if (e.key === "Enter") applySize();
       }
     }
-  ), /* @__PURE__ */ React.createElement("button", { className: "icon-btn " + btnClass, title: "Apply log size", onClick: applySize }, /* @__PURE__ */ React.createElement("span", { className: "text-ok font-bold" }, "\u2713"))));
+  ), /* @__PURE__ */ React.createElement("button", { className: "icon-btn " + btnClass, title: "\u5E94\u7528\u65E5\u5FD7\u6761\u6570", onClick: applySize }, /* @__PURE__ */ React.createElement("span", { className: "text-ok font-bold" }, "\u2713"))));
 }
 function register(platform2) {
   platform2.registerDashboardTab({
     id: "server-log",
-    label: "Server Log",
+    label: "\u670D\u52A1\u5668\u65E5\u5FD7",
     order: 10,
     component: ServerLogTab
   });

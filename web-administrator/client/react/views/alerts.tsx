@@ -24,14 +24,14 @@ import { checkImportVersion } from '../../core/import-guard.js';
 
 const COLUMNS = [
     {
-        key: 'enabled', label: 'Status', width: '90px',
+        key: 'enabled', label: '状态', width: '90px',
         sortValue: (a: any) => a.enabled ? 0 : 1,
         render: (a: any) => a.enabled
-            ? h('span.status-cell', h('span.pip.ok'), 'Enabled')
-            : h('span.status-cell', h('span.pip'), h('span.text-text-dim', 'Disabled'))
+            ? h('span.status-cell', h('span.pip.ok'), '已启用')
+            : h('span.status-cell', h('span.pip'), h('span.text-text-dim', '已禁用'))
     },
-    { key: 'name', label: 'Name', render: (a: any) => a.name || '' },
-    { key: 'id', label: 'Id', className: 'mono', render: (a: any) => h('span', { style: { color: 'var(--text-faint)' } }, a.id || '') }
+    { key: 'name', label: '名称', render: (a: any) => a.name || '' },
+    { key: 'id', label: 'ID', className: 'mono', render: (a: any) => h('span', { style: { color: 'var(--text-faint)' } }, a.id || '') }
 ];
 
 export function AlertsList() {
@@ -55,12 +55,12 @@ export function AlertsList() {
 
     function single() {
         const rows = selectedRows();
-        if (rows.length !== 1) { toast('Select a single alert', 'warn'); return null; }
+        if (rows.length !== 1) { toast('请仅选择一个警报', 'warn'); return null; }
         return rows[0];
     }
     function multi() {
         const rows = selectedRows();
-        if (!rows.length) { toast('Select an alert first', 'warn'); return null; }
+        if (!rows.length) { toast('请先选择警报', 'warn'); return null; }
         return rows;
     }
 
@@ -89,14 +89,14 @@ export function AlertsList() {
         }, icon(iconName, 20),
             h('div', h('div', { class: 'font-semibold' }, title), h('div.hint', desc)));
         const m = modal({
-            title: 'New Alert',
+            title: '新建警报',
             body: h('div', { class: 'flex flex-col gap-2.5 min-w-[396px]' },
-                card('classic', 'edit', 'Classic editor', 'The full editor — all options on one screen.'),
-                card('guided', 'wand', 'Wizard', 'A step-by-step guided builder: basics, trigger, channels, actions.'),
+                card('classic', 'edit', '经典编辑器', '完整编辑器，所有选项集中在同一屏'),
+                card('guided', 'wand', '向导', '分步引导创建：基本信息、触发条件、通道、操作'),
                 h('label', { class: 'flex items-center gap-2 mt-2 text-text-dim' },
                     h('input', { type: 'checkbox', onChange: (e: any) => { remember = e.target.checked; } }),
-                    'Remember my choice (set as default)')),
-            buttons: [{ label: 'Cancel' }]
+                    '记住我的选择（设为默认）')),
+            buttons: [{ label: '取消' }]
         });
     }
     function editTask() {
@@ -115,7 +115,7 @@ export function AlertsList() {
     async function deleteTask() {
         const rows = multi();
         if (!rows) return;
-        if (!await confirmDialog('Delete alerts', `Permanently delete ${rows.length} alert(s)? This cannot be undone.`, { danger: true, okLabel: 'Delete' })) return;
+        if (!await confirmDialog('删除警报', `确定要永久删除 ${rows.length} 个警报吗？此操作无法撤销`, { danger: true, okLabel: '删除' })) return;
         for (const alert of rows) {
             try { await api.alerts.remove(alert.id); } catch (e: any) { toast(e.message, 'error'); }
         }
@@ -144,9 +144,10 @@ export function AlertsList() {
             assertSession();
             const known = currentAlerts.map(alert => ({ id: String(alert.id), name: String(alert.name ?? '') }));
             const nameError = (name: string): string | null => {
-                if (!name) return 'Alert name cannot be empty.';
-                if (!/^[a-zA-Z_0-9\- \t\n\r\f\v]*$/.test(name)) return 'Alert name cannot have special characters besides hyphen, underscore, and space.';
-                if (known.some(alert => alert.name.toLowerCase() === name.toLowerCase())) return `Alert "${name}" already exists.`;
+                if (!name) return '警报名称不能为空';
+                // Frame.checkAlertName parity: the fork's pattern also allows CJK.
+                if (!/^[A-Za-z0-9_\-\s.\()\u4e00-\u9fa5\u3001\u3002\u300a\u300b\u3010\u3011\uff08\uff09\uff0c\uff1a\uff1b\uff1f\uff01\u2014\u2018\u2019\u201c\u201d\u00b7\t\n\r\f\v]*$/.test(name)) return '警报名称只能包含中文、字母、数字、空格、连字符、下划线、括号、点号及常用中文标点。';
+                if (known.some(alert => alert.name.toLowerCase() === name.toLowerCase())) return `警报 "${name}" 已存在`;
                 return null;
             };
             const resolveIdentity = async (nameValue: any, idValue: any) => {
@@ -158,13 +159,13 @@ export function AlertsList() {
                     // may explicitly proceed even when the warning is about an
                     // invalid name rather than an existing alert.
                     const choice = await new Promise<'overwrite' | 'create' | null>(resolve => modal({
-                        title: 'Import Alert',
-                        body: h('div', h('p', warning), h('p', 'Would you like to overwrite the existing alert? Choose Create New to enter a valid, unique name.')),
+                        title: '导入警报',
+                        body: h('div', h('p', warning), h('p', '是否覆盖已有的警报？选择“新建”可输入有效且唯一的名称')),
                         onClose: () => resolve(null),
                         buttons: [
-                            { label: 'Cancel', onClick: () => resolve(null) },
-                            { label: 'Create New', onClick: () => resolve('create') },
-                            { label: 'Overwrite', primary: true, onClick: () => resolve('overwrite') }
+                            { label: '取消', onClick: () => resolve(null) },
+                            { label: '新建', onClick: () => resolve('create') },
+                            { label: '覆盖', primary: true, onClick: () => resolve('overwrite') }
                         ]
                     }));
                     assertSession();
@@ -175,7 +176,7 @@ export function AlertsList() {
                     } else {
                         let error: string | null;
                         do {
-                            const next = await promptDialog('Import Alert', 'Please enter a new name for the alert.', name);
+                            const next = await promptDialog('导入警报', '请为该警报输入新名称', name);
                             assertSession();
                             if (next == null) return null;
                             name = next;
@@ -191,14 +192,14 @@ export function AlertsList() {
                 const verdict = checkImportVersion(version, 'alert');
                 if (verdict.action === 'ok') return Promise.resolve(true);
                 return new Promise<boolean>(resolve => modal({
-                    title: verdict.action === 'block' ? 'Information' : 'Select an Option',
+                    title: verdict.action === 'block' ? '信息' : '请选择操作',
                     body: h('div', { style: 'white-space: pre-line' }, verdict.message),
                     onClose: () => resolve(false),
                     buttons: verdict.action === 'block'
-                        ? [{ label: 'OK', primary: true, onClick: () => resolve(false) }]
+                        ? [{ label: '确定', primary: true, onClick: () => resolve(false) }]
                         : [
-                            { label: 'No', onClick: () => resolve(false) },
-                            { label: 'Yes', primary: true, onClick: () => resolve(true) }
+                            { label: '否', onClick: () => resolve(false) },
+                            { label: '是', primary: true, onClick: () => resolve(true) }
                         ]
                 }));
             };
@@ -213,10 +214,10 @@ export function AlertsList() {
 
             if (content.startsWith('<')) {
                 const doc = new DOMParser().parseFromString(content, 'text/xml');
-                if (doc.querySelector('parsererror')) throw new Error('Not a valid XML file');
+                if (doc.querySelector('parsererror')) throw new Error('不是有效的 XML 文件');
                 const root = doc.documentElement;
                 const elements = root.tagName === 'alertModel' ? [root] : [...root.querySelectorAll(':scope > alertModel')];
-                if (!elements.length) throw new Error('No alerts found in the file');
+                if (!elements.length) throw new Error('文件中未找到警报');
                 const rootVersion = root.getAttribute('version');
                 if (!await allowVersions(rootVersion ? [rootVersion] : elements.map(element => element.getAttribute('version')))) return;
                 for (const element of elements) {
@@ -236,14 +237,14 @@ export function AlertsList() {
                         imported++;
                     } catch (e: any) {
                         assertSession();
-                        toast(`Error importing alert: ${e.message || e}`, 'error');
+                        toast(`导入警报出错：${e.message || e}`, 'error');
                     }
                 }
             } else {
                 let parsed = JSON.parse(content);
                 if (parsed && typeof parsed === 'object' && parsed.list) parsed = parsed.list;
                 const objects = api.asList(parsed && parsed.alertModel !== undefined ? parsed.alertModel : parsed);
-                if (!objects.length) throw new Error('No alerts found in the file');
+                if (!objects.length) throw new Error('文件中未找到警报');
                 if (!await allowVersions(parsed?.['@version'] ? [parsed['@version']] : objects.map(object => object?.['@version']))) return;
                 for (const object of objects) {
                     const identity = await resolveIdentity(object?.name, object?.id);
@@ -256,15 +257,15 @@ export function AlertsList() {
                         imported++;
                     } catch (e: any) {
                         assertSession();
-                        toast(`Error importing alert: ${e.message || e}`, 'error');
+                        toast(`导入警报出错：${e.message || e}`, 'error');
                     }
                 }
             }
-            if (imported) toast(`Imported ${imported} alert${imported === 1 ? '' : 's'} from ${file.name}`);
+            if (imported) toast(`已从 ${file.name} 导入 ${imported} 个警报`);
             await refreshImported();
         } catch (e: any) {
             try { assertSession(); } catch { return; }
-            toast(`Import failed: ${e.message}${imported ? ` (${imported} alert(s) already imported)` : ''}`, 'error');
+            toast(`导入失败：${e.message}${imported ? `（已导入 ${imported} 个警报）` : ''}`, 'error');
             if (imported) {
                 try { await refreshImported(); } catch { /* The session may have ended while refreshing. */ }
             }
@@ -280,20 +281,20 @@ export function AlertsList() {
         try {
             await saveFile(`${alert.name || alert.id}.xml`, 'application/xml', async () => {
                 const xml = await api.getXml(`/alerts/${alert.id}`);
-                if (!xml || !String(xml).trim()) throw new Error('Alert not found on the server');
+                if (!xml || !String(xml).trim()) throw new Error('服务器上未找到该警报');
                 return xml;
             }, assertSession);
             assertSession();
         } catch (e: any) {
             try { assertSession(); } catch { return; }
-            toast(`Export failed: ${e.message}`, 'error');
+            toast(`导出失败：${e.message}`, 'error');
         }
     }
     async function exportAllTask() {
         let assertSession: () => void;
         try { assertSession = captureEngineSession(); } catch { return; }
         const all = alerts;
-        if (!all.length) { toast('No alerts to export', 'warn'); return; }
+        if (!all.length) { toast('没有可导出的警报', 'warn'); return; }
         try {
             let count = 0;
             await saveFile('alerts.xml', 'application/xml', async () => {
@@ -307,10 +308,10 @@ export function AlertsList() {
                 return `<list>\n${parts.join('\n')}\n</list>`;
             }, assertSession);
             assertSession();
-            if (count) toast(`Exported ${count} alert(s)`);
+            if (count) toast(`已导出 ${count} 个警报`);
         } catch (e: any) {
             try { assertSession(); } catch { return; }
-            toast(`Export failed: ${e.message}`, 'error');
+            toast(`导出失败：${e.message}`, 'error');
         }
     }
 
@@ -319,23 +320,23 @@ export function AlertsList() {
         setSel(rows);
         const one = rows.length === 1 ? rows[0] : null;
         contextMenu(e.clientX, e.clientY, [
-            { label: 'Refresh', icon: 'refresh', task: 'doRefreshAlerts', group: 'alert', onClick: () => refresh() },
-            { label: 'New Alert', icon: 'plus', task: 'doNewAlert', group: 'alert', onClick: () => newTask() },
-            { label: 'Import Alert', icon: 'import', task: 'doImportAlert', group: 'alert', onClick: () => importTask() },
-            { label: 'Export All Alerts', icon: 'export', task: 'doExportAlerts', group: 'alert', onClick: () => exportAllTask() },
+            { label: '刷新', icon: 'refresh', task: 'doRefreshAlerts', group: 'alert', onClick: () => refresh() },
+            { label: '新建警报', icon: 'plus', task: 'doNewAlert', group: 'alert', onClick: () => newTask() },
+            { label: '导入警报', icon: 'import', task: 'doImportAlert', group: 'alert', onClick: () => importTask() },
+            { label: '导出全部警报', icon: 'export', task: 'doExportAlerts', group: 'alert', onClick: () => exportAllTask() },
             '-',
-            { label: 'Export Alert', icon: 'export', task: 'doExportAlert', group: 'alert', hidden: !one, onClick: () => exportTask() },
-            { label: 'Delete Alert', icon: 'trash', task: 'doDeleteAlert', group: 'alert', danger: true, onClick: () => deleteTask() },
-            { label: 'Edit Alert', icon: 'edit', task: 'doEditAlert', group: 'alert', hidden: !one, onClick: () => editTask() },
-            { label: 'Enable Alert', icon: 'check', task: 'doEnableAlert', group: 'alert', hidden: !one || one.enabled, onClick: () => setEnabledTask(true) },
-            { label: 'Disable Alert', icon: 'x', task: 'doDisableAlert', group: 'alert', hidden: !one || !one.enabled, onClick: () => setEnabledTask(false) }
+            { label: '导出警报', icon: 'export', task: 'doExportAlert', group: 'alert', hidden: !one, onClick: () => exportTask() },
+            { label: '删除警报', icon: 'trash', task: 'doDeleteAlert', group: 'alert', danger: true, onClick: () => deleteTask() },
+            { label: '编辑警报', icon: 'edit', task: 'doEditAlert', group: 'alert', hidden: !one, onClick: () => editTask() },
+            { label: '启用警报', icon: 'check', task: 'doEnableAlert', group: 'alert', hidden: !one || one.enabled, onClick: () => setEnabledTask(true) },
+            { label: '禁用警报', icon: 'x', task: 'doDisableAlert', group: 'alert', hidden: !one || !one.enabled, onClick: () => setEnabledTask(false) }
         ]);
     };
 
     const options = useRef({
         selectable: 'multi',
         rowKey: (a: any) => a.id,
-        emptyText: 'No alerts',
+        emptyText: '未找到警报',
         columnsMenu: true,
         columnsMenuKey: 'webadmin-cols-alerts',
         onActivate: (a: any) => router.navigate(`/alerts/${a.id}/edit`),
@@ -355,39 +356,39 @@ export function AlertsList() {
     return (
         <div className="view">
             <ViewTasks>
-                <RailPane title="Alert Tasks" paneKey="tasks:Alert Tasks" group="alert">
+                <RailPane title="警报任务" paneKey="tasks:Alert Tasks" group="alert">
                     <div className="taskbar" data-pane-title="Alert Tasks">
-                        <TaskButton label="Refresh" icon="refresh" task="doRefreshAlerts" onClick={refresh} />
-                        <TaskButton label="New Alert" icon="plus" primary task="doNewAlert" onClick={newTask} />
-                        <TaskButton label="Import Alert" icon="import" task="doImportAlert" onClick={importTask} />
-                        <TaskButton label="Export All Alerts" icon="export" task="doExportAlerts" onClick={exportAllTask} />
-                        {showExport && <TaskButton label="Export Alert" icon="export" task="doExportAlert" onClick={exportTask} />}
-                        {showDelete && <TaskButton label="Delete Alert" icon="trash" danger task="doDeleteAlert" onClick={deleteTask} />}
-                        {showEdit && <TaskButton label="Edit Alert" icon="edit" task="doEditAlert" onClick={editTask} />}
-                        {showEnable && <TaskButton label="Enable Alert" icon="check" task="doEnableAlert" onClick={() => setEnabledTask(true)} />}
-                        {showDisable && <TaskButton label="Disable Alert" icon="x" task="doDisableAlert" onClick={() => setEnabledTask(false)} />}
+                        <TaskButton label="刷新" icon="refresh" task="doRefreshAlerts" onClick={refresh} />
+                        <TaskButton label="新建警报" icon="plus" primary task="doNewAlert" onClick={newTask} />
+                        <TaskButton label="导入警报" icon="import" task="doImportAlert" onClick={importTask} />
+                        <TaskButton label="导出全部警报" icon="export" task="doExportAlerts" onClick={exportAllTask} />
+                        {showExport && <TaskButton label="导出警报" icon="export" task="doExportAlert" onClick={exportTask} />}
+                        {showDelete && <TaskButton label="删除警报" icon="trash" danger task="doDeleteAlert" onClick={deleteTask} />}
+                        {showEdit && <TaskButton label="编辑警报" icon="edit" task="doEditAlert" onClick={editTask} />}
+                        {showEnable && <TaskButton label="启用警报" icon="check" task="doEnableAlert" onClick={() => setEnabledTask(true)} />}
+                        {showDisable && <TaskButton label="禁用警报" icon="x" task="doDisableAlert" onClick={() => setEnabledTask(false)} />}
                     </div>
                 </RailPane>
             </ViewTasks>
             <div className="view-body">
                 <div className="panel"><div className="panel-body flush">
                     {alertsQuery.data === undefined ? (
-                        <div className="loading-block"><div className="spinner" />Loading alerts…</div>
+                        <div className="loading-block"><div className="spinner" />正在加载警报…</div>
                     ) : alerts.length === 0 ? (
                         /* Empty landing state: explain what alerts do and offer the two
                            ways in (RBAC-gated like their task buttons). */
                         <div className="dt-empty">
                             <div className="empty-icon"><Icon name="alerts" size={30} /></div>
-                            <div>No Alerts Configured</div>
+                            <div>尚未配置警报</div>
                             <div className="mt-[14px] flex items-center justify-center gap-2">
                                 {platform.checkTask('alert', 'doNewAlert') && (
                                     <button type="button" className="btn btn-primary" onClick={newTask}>
-                                        <Icon name="plus" size={14} />Create Alert
+                                        <Icon name="plus" size={14} />新建警报
                                     </button>
                                 )}
                                 {platform.checkTask('alert', 'doImportAlert') && (
                                     <button type="button" className="btn" onClick={importTask}>
-                                        <Icon name="import" size={14} />Import Alert
+                                        <Icon name="import" size={14} />导入警报
                                     </button>
                                 )}
                             </div>

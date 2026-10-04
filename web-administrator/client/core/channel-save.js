@@ -20,7 +20,7 @@ function fingerprint(channel) {
 export async function loadChannelForEdit(id) {
     const channel = await api.channels.get(id);
     if (!channel || channel.id !== id)
-        throw new Error(`Channel ${id} was not found.`);
+        throw new Error(`未找到通道 ${id}。`);
     sessions.set(channel, { isNew: false, baseline: fingerprint(channel), workingBaseline: fingerprint(channel), saving: false });
     return channel;
 }
@@ -53,7 +53,7 @@ export async function updateChannelWithConflict(channelId, update, options) {
         const latest = await api.channels.get(channelId);
         assertSession();
         if (!latest || latest.id !== channelId)
-            throw new Error('The channel was removed. Reopen the channel list before saving.');
+            throw new Error('该通道已被删除。请重新打开通道列表后再保存。');
         if (!savedByUser(latest, options.userId)) {
             const confirmed = await options.confirmConflict();
             assertSession();
@@ -170,11 +170,11 @@ export async function saveChannelModel(channel, options) {
         }
         if (!state.isNew) {
             if (!state.baseline)
-                throw new Error('Cannot verify the original channel. Reopen it before saving.');
+                throw new Error('无法校验原始通道，请重新打开后再保存。');
             current = current || await api.channels.get(channel.id);
             assertSession();
             if (!current || current.id !== channel.id)
-                throw new Error('The channel was removed. Reopen the channel list before saving.');
+                throw new Error('该通道已被删除。请重新打开通道列表后再保存。');
             const conflict = fingerprint(current) !== state.baseline;
             if (conflict && !savedByUser(current, options.userId) && !await confirm(options.confirmConflict()))
                 return false;

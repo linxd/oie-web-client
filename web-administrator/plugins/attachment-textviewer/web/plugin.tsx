@@ -57,15 +57,15 @@ export function register(platform: Platform) {
         if (state.key !== key || state.status === 'loading') {
             return (
                 <div className="mt-[13px]">
-                    <div className="text-text-faint text-[10px] mb-1">Loading text…</div>
+                    <div className="text-text-faint text-[10px] mb-1">正在加载文本…</div>
                 </div>
             );
         }
         if (state.status === 'error') {
             return (
                 <div className="mt-[13px]">
-                    <div className="text-text-faint">{`Could not load text: ${state.message}`}</div>
-                    <button type="button" className="btn" onClick={() => retry()}>Retry</button>
+                    <div className="text-text-faint">{`无法加载文本：${state.message}`}</div>
+                    <button type="button" className="btn" onClick={() => retry()}>重试</button>
                 </div>
             );
         }

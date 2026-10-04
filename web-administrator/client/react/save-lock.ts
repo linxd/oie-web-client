@@ -4,7 +4,7 @@ import * as store from '../core/store.js';
  * Dialogs remain usable for conflict decisions; the editor and its task pane
  * cannot accept another edit/save. The shell also fences route changes.
  */
-export async function withEditorSave<T>(save: () => Promise<T>, label = 'Saving changes…'): Promise<T | false> {
+export async function withEditorSave<T>(save: () => Promise<T>, label = '正在保存更改…'): Promise<T | false> {
     if (store.getState('editorSave')) return false;
     const token = {};
     const root = document.querySelector<HTMLElement>('.content-row');

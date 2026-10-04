@@ -57,7 +57,7 @@ export function RailPane({
     const HeaderEl: any = flat ? 'div' : 'button';
     const header = (
         <HeaderEl {...(flat ? {} : { type: 'button' })} className="rail-pane-header"
-            aria-label={disclosure || flat ? undefined : `Rename group ${title}`}
+            aria-label={disclosure || flat ? undefined : `重命名分组 ${title}`}
             onClick={disclosure || flat ? undefined : onHeaderClick}
             draggable={headerDraggable || undefined}
             onDragStart={onHeaderDragStart}
@@ -157,7 +157,7 @@ export function useSideCollapse(key: any): [boolean, (v: any) => void] {
 export function CollapsedSideStrip({ label, onExpand, className, icon = 'chevL' }: any) {
     return (
         <button type="button" className={'side-strip' + (className ? ' ' + className : '')}
-            title={`Show ${label}`} aria-label={`Show ${label}`} aria-expanded="false"
+            title={`显示${label}`} aria-label={`显示${label}`} aria-expanded="false"
             onClick={onExpand}>
             <Icon name={icon} size={13} />
             <span className="side-strip-label">{label}</span>
@@ -169,7 +169,7 @@ export function CollapsedSideStrip({ label, onExpand, className, icon = 'chevL' 
 export function SideCollapseButton({ label, onCollapse, icon = 'chevR' }: any) {
     return (
         <button type="button" className="icon-btn side-collapse-btn"
-            title={`Hide ${label}`} aria-label={`Hide ${label}`} aria-expanded="true"
+            title={`隐藏${label}`} aria-label={`隐藏${label}`} aria-expanded="true"
             onClick={onCollapse}>
             <Icon name={icon} size={14} />
         </button>

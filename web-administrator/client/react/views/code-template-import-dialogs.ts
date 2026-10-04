@@ -7,19 +7,19 @@ export function libraryImportCallbacks(assertSession: () => void, ids: Map<strin
     return {
         resolveConflict: async (kind, name) => {
             assertSession();
-            const label = kind === 'library' ? 'Library' : 'Code Template';
+            const label = kind === 'library' ? '库' : '代码模板';
             const choice = await new Promise<'overwrite' | 'copy' | 'skip' | null>(resolve => {
                 modal({
-                    title: `Import ${label} Conflict`,
+                    title: `导入${label}冲突`,
                     body: h('div', kind === 'library'
-                        ? `The library "${name}" already exists. Update its settings and merge its templates, or import a separate copy? Existing templates will be kept.`
-                        : `The code template "${name}" already exists. Replace its code and settings, or import a separate copy?`),
+                        ? `库 "${name}" 已存在。要更新其设置并合并其中的模板，还是导入一个独立副本？现有模板会被保留`
+                        : `代码模板 "${name}" 已存在。要替换其代码与设置，还是导入一个独立副本？`),
                     onClose: () => resolve(null),
                     buttons: [
-                        { label: 'Cancel', onClick: () => resolve(null) },
-                        { label: kind === 'library' ? 'Skip Library' : 'Keep Existing', onClick: () => resolve('skip') },
-                        { label: 'Import as Copy', primary: true, onClick: () => resolve('copy') },
-                        { label: 'Overwrite', danger: true, onClick: () => resolve('overwrite') }
+                        { label: '取消', onClick: () => resolve(null) },
+                        { label: kind === 'library' ? '跳过库' : '保留现有', onClick: () => resolve('skip') },
+                        { label: '导入为副本', primary: true, onClick: () => resolve('copy') },
+                        { label: '覆盖', danger: true, onClick: () => resolve('overwrite') }
                     ]
                 });
             });
@@ -28,10 +28,10 @@ export function libraryImportCallbacks(assertSession: () => void, ids: Map<strin
         },
         rename: async (kind, name) => {
             assertSession();
-            const label = kind === 'library' ? 'Library' : 'Code Template';
-            const renamed = await promptDialog(`Import ${label} Name`,
-                name ? `"${name}" is already in use. Enter a different name for the imported ${label.toLowerCase()}.`
-                    : `Enter a name for the imported ${label.toLowerCase()}.`, name ? `${name} (imported)` : '');
+            const label = kind === 'library' ? '库' : '代码模板';
+            const renamed = await promptDialog(`导入${label}名称`,
+                name ? `"${name}" 已被使用，请输入导入${label.toLowerCase()}的其他名称`
+                    : `请输入导入${label.toLowerCase()}的名称`, name ? `${name} (导入)` : '');
             assertSession();
             return renamed;
         },

@@ -19,38 +19,38 @@ const bool = (key: any, label: any, def: any, hint?: any) => ({ key, label, type
 const opt = (key: any, label: any, options: any, def: any, hint?: any) => ({ key, label, type: 'select', options, default: def, hint });
 const code = (key: any, label: any, def: any, hint?: any) => ({ key, label, type: 'code', default: def, hint });
 
-const BATCH_SCRIPT_HINT = 'JavaScript that splits the batch and returns the next message. ' +
-    "Has access to 'reader' (a Java BufferedReader); return null/empty to signal end of input. " +
-    'Only used when Process Batch is enabled in the connector.';
+const BATCH_SCRIPT_HINT = '拆分批处理并返回下一条消息的 JavaScript，' +
+    "可访问 'reader'（Java BufferedReader），返回 null/空 表示输入结束；" +
+    '仅在连接器中启用批处理时使用';
 
 const DEF: any = {
     name: 'NCPDP', label: 'NCPDP', order: 80,
     propertiesClass: `${PKG}.NCPDPDataTypeProperties`,
     groups: [
         {
-            key: 'serializationProperties', label: 'Serialization',
+            key: 'serializationProperties', label: '序列化',
             class: `${PKG}.NCPDPSerializationProperties`,
             fields: [
-                text('fieldDelimiter', 'Field Delimiter', '0x1C', 'Character(s) that delimit the fields in the message.'),
-                text('groupDelimiter', 'Group Delimiter', '0x1D', 'Character(s) that delimit the groups in the message.'),
-                text('segmentDelimiter', 'Segment Delimiter', '0x1E', 'Character(s) that delimit the segments in the message.')
+                text('fieldDelimiter', '字段分隔符', '0x1C', '分隔消息中字段的字符'),
+                text('groupDelimiter', '组分隔符', '0x1D', '分隔消息中组的字符'),
+                text('segmentDelimiter', '段分隔符', '0x1E', '分隔消息中段的字符')
             ]
         },
         {
-            key: 'deserializationProperties', label: 'Deserialization',
+            key: 'deserializationProperties', label: '反序列化',
             class: `${PKG}.NCPDPDeserializationProperties`,
             fields: [
-                text('fieldDelimiter', 'Field Delimiter', '0x1C', 'Character(s) that delimit the fields in the message.'),
-                text('groupDelimiter', 'Group Delimiter', '0x1D', 'Character(s) that delimit the groups in the message.'),
-                text('segmentDelimiter', 'Segment Delimiter', '0x1E', 'Character(s) that delimit the segments in the message.'),
-                bool('useStrictValidation', 'Use Strict Validation', false, 'Validate the NCPDP message against a schema.')
+                text('fieldDelimiter', '字段分隔符', '0x1C', '分隔消息中字段的字符'),
+                text('groupDelimiter', '组分隔符', '0x1D', '分隔消息中组的字符'),
+                text('segmentDelimiter', '段分隔符', '0x1E', '分隔消息中段的字符'),
+                bool('useStrictValidation', '使用严格校验', false, '按模式（schema）校验 NCPDP 消息')
             ]
         },
         {
-            key: 'batchProperties', label: 'Batch', class: `${PKG}.NCPDPBatchProperties`,
+            key: 'batchProperties', label: '批处理', class: `${PKG}.NCPDPBatchProperties`,
             fields: [
-                opt('splitType', 'Split Batch By', [{ value: 'JavaScript', label: 'JavaScript' }], 'JavaScript',
-                    'Method for splitting the batch message. Only used when Process Batch is enabled in the connector.'),
+                opt('splitType', '批处理拆分方式', [{ value: 'JavaScript', label: 'JavaScript' }], 'JavaScript',
+                    '拆分批处理消息的方式，仅在连接器中启用批处理时使用'),
                 code('batchScript', 'JavaScript', null, BATCH_SCRIPT_HINT)
             ]
         }

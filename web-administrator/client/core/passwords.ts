@@ -14,18 +14,18 @@ export function passwordRequirementHints(req: OieObject | null | undefined): str
     const hints: string[] = [];
 
     const minLength = num('minLength');
-    if (minLength > 0) hints.push(`at least ${minLength} character${minLength === 1 ? '' : 's'}`);
+    if (minLength > 0) hints.push(`至少 ${minLength} 个字符`);
 
     const rule = (key: string, noun: string) => {
         const v = num(key);
-        if (v === -1) hints.push(`no ${noun}s`);
-        else if (v === 1) hints.push(`1 ${noun}`);
-        else if (v > 1) hints.push(`${v} ${noun}s`);
+        if (v === -1) hints.push(`不含${noun}`);
+        else if (v === 1) hints.push(`1 个${noun}`);
+        else if (v > 1) hints.push(`${v} 个${noun}`);
     };
-    rule('minUpper', 'uppercase letter');
-    rule('minLower', 'lowercase letter');
-    rule('minNumeric', 'number');
-    rule('minSpecial', 'special character');
+    rule('minUpper', '大写字母');
+    rule('minLower', '小写字母');
+    rule('minNumeric', '数字');
+    rule('minSpecial', '特殊字符');
 
     return hints;
 }

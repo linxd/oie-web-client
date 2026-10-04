@@ -196,21 +196,21 @@ function toCount(value: any) {
    (MessageServletInterface GET /channels/{id}/messages: rawContentSearch,
    transformedContentSearch, ... responseErrorContentSearch). */
 const CONTENT_SEARCH_TYPES = [
-    { value: 'rawContentSearch', label: 'Raw' },
-    { value: 'processedRawContentSearch', label: 'Processed Raw' },
-    { value: 'transformedContentSearch', label: 'Transformed' },
-    { value: 'encodedContentSearch', label: 'Encoded' },
-    { value: 'sentContentSearch', label: 'Sent' },
-    { value: 'responseContentSearch', label: 'Response' },
-    { value: 'responseTransformedContentSearch', label: 'Response Transformed' },
-    { value: 'processedResponseContentSearch', label: 'Processed Response' },
-    { value: 'connectorMapContentSearch', label: 'Connector Map' },
-    { value: 'channelMapContentSearch', label: 'Channel Map' },
-    { value: 'sourceMapContentSearch', label: 'Source Map' },
-    { value: 'responseMapContentSearch', label: 'Response Map' },
-    { value: 'processingErrorContentSearch', label: 'Processing Error' },
-    { value: 'postprocessorErrorContentSearch', label: 'Postprocessor Error' },
-    { value: 'responseErrorContentSearch', label: 'Response Error' }
+    { value: 'rawContentSearch', label: '原始' },
+    { value: 'processedRawContentSearch', label: '处理后原始' },
+    { value: 'transformedContentSearch', label: '转换后' },
+    { value: 'encodedContentSearch', label: '编码后' },
+    { value: 'sentContentSearch', label: '已发送' },
+    { value: 'responseContentSearch', label: '响应' },
+    { value: 'responseTransformedContentSearch', label: '响应转换后' },
+    { value: 'processedResponseContentSearch', label: '处理后响应' },
+    { value: 'connectorMapContentSearch', label: '连接器映射' },
+    { value: 'channelMapContentSearch', label: '通道映射' },
+    { value: 'sourceMapContentSearch', label: '源映射' },
+    { value: 'responseMapContentSearch', label: '响应映射' },
+    { value: 'processingErrorContentSearch', label: '处理错误' },
+    { value: 'postprocessorErrorContentSearch', label: '后处理错误' },
+    { value: 'responseErrorContentSearch', label: '响应错误' }
 ];
 
 /* metaDataSearch / metaDataCaseInsensitiveSearch param format is
@@ -274,30 +274,30 @@ function deployedConnectors(xml: string, channelId: string) {
         .some(node => (node.nodeType === Node.TEXT_NODE || node.nodeType === Node.CDATA_SECTION_NODE) && !!node.textContent?.trim());
     const field = (parent: Element, name: string) => {
         const matches = Array.from(parent.children).filter(child => child.tagName === name);
-        if (matches.length !== 1) throw new Error('The engine returned invalid destination information.');
+        if (matches.length !== 1) throw new Error('引擎返回的目的地信息无效');
         return matches[0];
     };
     const text = (parent: Element, name: string) => {
         const element = field(parent, name);
-        if (element.children.length) throw new Error('The engine returned invalid destination information.');
+        if (element.children.length) throw new Error('引擎返回的目的地信息无效');
         return element.textContent ?? '';
     };
     if (doc.querySelector('parsererror') || doc.doctype || status.tagName !== 'dashboardStatus' || hasText(status)
         || text(status, 'channelId') !== channelId || text(status, 'statusType') !== 'CHANNEL') {
-        throw new Error('The engine returned no channel status information.');
+        throw new Error('引擎未返回通道状态信息');
     }
     const children = field(status, 'childStatuses');
-    if (hasText(children)) throw new Error('The engine returned invalid destination information.');
+    if (hasText(children)) throw new Error('引擎返回的目的地信息无效');
     const ids = new Set<number>();
     return Array.from(children.children).map(child => {
         if (child.tagName !== 'dashboardStatus' || hasText(child) || text(child, 'channelId') !== channelId) {
-            throw new Error('The engine returned invalid destination information.');
+            throw new Error('引擎返回的目的地信息无效');
         }
         const id = text(child, 'metaDataId');
         const metaDataId = Number(id);
         if (!/^\d+$/.test(id) || !Number.isSafeInteger(metaDataId) || ids.has(metaDataId)
             || text(child, 'statusType') !== (metaDataId === 0 ? 'SOURCE_CONNECTOR' : 'DESTINATION_CONNECTOR')) {
-            throw new Error('The engine returned invalid destination information.');
+            throw new Error('引擎返回的目的地信息无效');
         }
         ids.add(metaDataId);
         return { metaDataId, name: text(child, 'name') };
@@ -334,16 +334,16 @@ async function discoverSendMessage(platform: any, channelId: any, onSent: any, a
     } catch (e: any) {
         if (!current()) return;
         modal({
-            title: 'Unable to Load Destinations',
+            title: '无法加载目的地',
             onClose: () => { closed = true; },
-            body: h('div', `No message has been sent. Retry destination discovery before processing. ${e.message || e}`),
-            buttons: [{ label: 'Close' }, { label: 'Retry', primary: true,
+            body: h('div', `尚未发送消息，请在处理前重试目的地发现：${e.message || e}`),
+            buttons: [{ label: '关闭' }, { label: '重试', primary: true,
                 onClick: () => { if (current()) void discoverSendMessage(platform, channelId, onSent, assertSession); } }]
         });
         return;
     }
 
-    const editor = createCodeEditor({ value: '', minHeight: '340px', placeholder: 'Raw message payload…' });
+    const editor = createCodeEditor({ value: '', minHeight: '340px', placeholder: '原始消息正文…' });
 
     /* ---- file open buttons -------------------------------------------------- */
 
@@ -354,19 +354,19 @@ async function discoverSendMessage(platform: any, channelId: any, onSent: any, a
                 try {
                     const file = await pickFile();
                     if (file && current()) editor.setValue(file.content);
-                } catch (e: any) { if (current()) toast(`Failed to open file: ${e.message || e}`, 'error'); }
+                } catch (e: any) { if (current()) toast(`打开文件失败：${e.message || e}`, 'error'); }
             }
-        }, 'Open Text File…'),
+        }, '打开文本文件…'),
         h('button.btn', {
             onClick: async () => {
                 if (!current()) return;
                 const file = await pickBinaryFile();
                 if (file && current()) editor.setValue((file as any).content);
             },
-            title: 'Open a binary file into the editor above. The file will be encoded and displayed as Base64.'
-        }, 'Open Binary File…'),
+            title: '将二进制文件打开到上方编辑器中，文件会以 Base64 编码显示'
+        }, '打开二进制文件…'),
         h('span.text-text-faint', { class: 'self-center' },
-            'Binary files are Base64-encoded into the editor.'));
+            '二进制文件会以 Base64 编码写入编辑器'));
 
     /* ---- destinations table -------------------------------------------------- */
 
@@ -377,7 +377,7 @@ async function discoverSendMessage(platform: any, channelId: any, onSent: any, a
     }));
     const destTable = h('div.dt-wrap', { class: 'max-h-[126px] overflow-auto' },
         h('table.dt',
-            h('thead', h('tr', h('th', 'Destination'), h('th', { class: 'w-[81px]' }, 'Included'))),
+            h('thead', h('tr', h('th', '目的地'), h('th', { class: 'w-[81px]' }, '包含'))),
             h('tbody', destRows.map(d => {
                 const c = connectors.find(x => x.metaDataId === d.metaDataId);
                 return h('tr',
@@ -418,44 +418,44 @@ async function discoverSendMessage(platform: any, channelId: any, onSent: any, a
 
     const mapTable = h('div.dt-wrap', { class: 'max-h-[126px] overflow-auto' },
         h('table.dt',
-            h('thead', h('tr', h('th', { class: 'w-[40%]' }, 'Variable'), h('th', 'Value'))),
+            h('thead', h('tr', h('th', { class: 'w-[40%]' }, '变量'), h('th', '值'))),
             mapTbody));
     const mapButtons = h('div', { class: 'flex gap-2 mt-1.5' },
-        h('button.btn', { onClick: () => { addMapRow(newMapKey()).key.focus(); } }, 'New'),
+        h('button.btn', { onClick: () => { addMapRow(newMapKey()).key.focus(); } }, '新建'),
         h('button.btn', {
             onClick: () => {
-                if (!selectedMapRow) { toast('Select a variable row first', 'warn'); return; }
+                if (!selectedMapRow) { toast('请先选择变量行', 'warn'); return; }
                 const i = mapRows.indexOf(selectedMapRow);
                 selectedMapRow.tr.remove();
                 mapRows.splice(i, 1);
                 selectMapRow(mapRows[Math.min(i, mapRows.length - 1)] ?? null);
             }
-        }, 'Delete'));
+        }, '删除'));
 
     /* ---- dialog -------------------------------------------------------------- */
 
     let sending = false;
     let outcomeUnknown = false;
     const dialog = modal({
-        title: 'Message',
+        title: '消息',
         size: 'wide',
         onClose: () => { closed = true; editor.dispose && editor.dispose(); },
         body: h('div',
             editor.el,
             fileButtons,
             destRows.length ? h('div',
-                h('div.mt-[13px]', 'Send to the following destination(s):'),
+                h('div.mt-[13px]', '发送到以下目的地：'),
                 h('div', { class: 'mt-1.5' }, destTable)) : null,
-            h('div.mt-[13px]', 'Include the following source map variables:'),
+            h('div.mt-[13px]', '包含以下源映射变量：'),
             h('div', { class: 'mt-1.5' }, mapTable),
             mapButtons),
         buttons: [
             {
-                label: 'Process Message', primary: true,
+                label: '处理消息', primary: true,
                 onClick: async () => {
                     if (sending || !current()) return false;
                     const rawData = editor.getValue();
-                    if (!rawData) { toast('Enter a message payload', 'warn'); return false; }
+                    if (!rawData) { toast('请输入消息内容', 'warn'); return false; }
                     const selected = destRows.filter(d => (d.input as any).checked).map(d => d.metaDataId);
                     // Match Swing: all selected means all destinations deployed
                     // when processing starts, including any added while open.
@@ -465,32 +465,32 @@ async function discoverSendMessage(platform: any, channelId: any, onSent: any, a
                         .map(r => `${r.key.value.trim()}=${r.value.value}`);
                     sending = true;
                     const submit = dialog.el.querySelector<HTMLButtonElement>('.modal-foot .btn-primary');
-                    if (submit) { submit.disabled = true; submit.textContent = 'Processing…'; }
+                    if (submit) { submit.disabled = true; submit.textContent = '正在处理…'; }
                     let attempted = false;
                     try {
-                        if (outcomeUnknown && !await confirmDialog('Retry Message',
-                            'The previous send could not be confirmed and may already be processing. Verify its outcome in the engine before retrying. Sending again may create a duplicate.',
-                            { danger: true, okLabel: 'Resend Message' })) return false;
+                        if (outcomeUnknown && !await confirmDialog('重试消息',
+                            '上次发送未能确认，可能已在处理中，重试前请在引擎中核实结果，重复发送可能产生重复消息',
+                            { danger: true, okLabel: '重新发送消息' })) return false;
                         if (!current()) return false;
                         attempted = true;
                         await api.messages.processNew(channelId, rawData, metaDataIds, sourceMapEntries);
                         if (!current()) return false;
-                        toast('Message sent for processing');
+                        toast('消息已提交处理');
                         onSent && onSent();
                     } catch (e: any) {
                         if (!current()) return false;
                         if (attempted) outcomeUnknown = ![400, 401, 403, 404, 405, 415].includes(e.status);
                         toast(outcomeUnknown
-                            ? `Send could not be confirmed: ${e.message}. Verify the engine result before retrying.`
-                            : `Message was rejected: ${e.message}`, 'error');
+                            ? `无法确认发送结果：${e.message}，重试前请核实引擎中的结果`
+                            : `消息已被拒绝：${e.message}`, 'error');
                         return false;
                     } finally {
                         sending = false;
-                        if (submit) { submit.disabled = false; submit.textContent = 'Process Message'; }
+                        if (submit) { submit.disabled = false; submit.textContent = '处理消息'; }
                     }
                 }
             },
-            { label: 'Close' }
+            { label: '关闭' }
         ]
     });
     setTimeout(() => { if (current()) editor.focus(); }, 30);
@@ -520,11 +520,11 @@ function errorLabel(cm: any) {
     const resp = contentOf(cm && cm.responseErrorContent) !== null;
     const post = contentOf(cm && cm.postProcessorErrorContent) !== null;
     const n = (proc ? 1 : 0) + (resp ? 1 : 0) + (post ? 1 : 0);
-    if (n > 1) return 'Multiple';
-    if (proc) return 'Processing';
-    if (resp) return 'Response';
-    if (post) return 'Postprocessor';
-    if (String(cm && cm.status) === 'ERROR') return 'Yes';
+    if (n > 1) return '多个';
+    if (proc) return '处理';
+    if (resp) return '响应';
+    if (post) return '后处理';
+    if (String(cm && cm.status) === 'ERROR') return '是';
     return '';
 }
 // null (not an empty element) when there's no error, so the cell renders "--".
@@ -535,21 +535,21 @@ const errBadge = (label: any) => label ? <span className="text-err">{label}</spa
    channelName is per-view state, so the set is built per render (memoized). */
 function buildColumns(channelName: any, metaDataColumns: any) {
     const COLUMNS = [
-        { key: 'id', label: 'Id', def: true, w: '90px', cls: 'num', sort: (m: any) => Number(m.messageId), parent: (m: any) => String(m.messageId), child: () => '' },
-        { key: 'connector', label: 'Connector', def: true, sort: (m: any) => sourceOf(m)?.connectorName || '', parent: (m: any, s: any) => s ? (s.connectorName || 'Source') : '', child: (cm: any) => cm.connectorName || `Destination ${cm.metaDataId}` },
-        { key: 'status', label: 'Status', def: true, w: '110px', sort: (m: any) => sourceOf(m)?.status || '', parent: (m: any, s: any) => s ? <StatusTag status={s.status} /> : '', child: (cm: any) => <StatusTag status={cm.status} /> },
-        { key: 'origReceived', label: 'Orig. Received Date', cls: 'mono', sort: (m: any) => fmtDate(m.receivedDate), parent: (m: any) => fmtDate(m.receivedDate), child: () => '' },
-        { key: 'received', label: 'Received Date', def: true, cls: 'mono', sort: (m: any) => fmtDate(sourceOf(m)?.receivedDate ?? m.receivedDate), parent: (m: any, s: any) => s ? fmtDate(s.receivedDate ?? m.receivedDate) : '', child: (cm: any) => fmtDate(cm.receivedDate) },
-        { key: 'sendAttempts', label: 'Send Attempts', w: '100px', cls: 'num', sort: (m: any) => maxAttempts(m), parent: (m: any) => String(maxAttempts(m)), child: (cm: any) => String(Number(cm.sendAttempts) || 0) },
-        { key: 'sendDate', label: 'Send Date', cls: 'mono', sort: (m: any) => fmtDate(sourceOf(m)?.sendDate), parent: (m: any, s: any) => s ? fmtDate(s.sendDate) : '', child: (cm: any) => fmtDate(cm.sendDate) },
-        { key: 'responseDate', label: 'Response Date', def: true, cls: 'mono', sort: (m: any) => fmtDate(sourceOf(m)?.responseDate), parent: (m: any, s: any) => s ? fmtDate(s.responseDate) : '', child: (cm: any) => fmtDate(cm.responseDate) },
-        { key: 'errors', label: 'Errors', def: true, w: '90px', sort: (m: any) => messageHasError(m) ? 0 : 1, parent: (m: any, s: any) => errBadge(errorLabel(s)), child: (cm: any) => errBadge(errorLabel(cm)) },
-        { key: 'serverId', label: 'Server Id', cls: 'mono', sort: (m: any) => m.serverId || '', parent: (m: any) => m.serverId || '', child: (cm: any) => cm.serverId || '' },
-        { key: 'origServerId', label: 'Original Server Id', cls: 'mono', sort: (m: any) => m.originalServerId || '', parent: (m: any) => m.originalServerId || '', child: () => '' },
-        { key: 'originalId', label: 'Original Id', cls: 'num', sort: (m: any) => Number(m.originalId) || 0, parent: (m: any) => m.originalId != null ? String(m.originalId) : '', child: () => '' },
-        { key: 'importId', label: 'Import Id', cls: 'num', sort: (m: any) => Number(m.importId) || 0, parent: (m: any) => m.importId != null ? String(m.importId) : '', child: () => '' },
-        { key: 'importChannelId', label: 'Import Channel Id', cls: 'mono', sort: (m: any) => m.importChannelId || '', parent: (m: any) => m.importChannelId || '', child: () => '' },
-        { key: 'channelName', label: 'Channel Name', sort: () => channelName, parent: () => channelName, child: () => '' }
+        { key: 'id', label: 'ID', def: true, w: '90px', cls: 'num', sort: (m: any) => Number(m.messageId), parent: (m: any) => String(m.messageId), child: () => '' },
+        { key: 'connector', label: '连接器', def: true, sort: (m: any) => sourceOf(m)?.connectorName || '', parent: (m: any, s: any) => s ? (s.connectorName || '源连接器') : '', child: (cm: any) => cm.connectorName || `目的地 ${cm.metaDataId}` },
+        { key: 'status', label: '状态', def: true, w: '110px', sort: (m: any) => sourceOf(m)?.status || '', parent: (m: any, s: any) => s ? <StatusTag status={s.status} /> : '', child: (cm: any) => <StatusTag status={cm.status} /> },
+        { key: 'origReceived', label: '原始接收日期', cls: 'mono', sort: (m: any) => fmtDate(m.receivedDate), parent: (m: any) => fmtDate(m.receivedDate), child: () => '' },
+        { key: 'received', label: '接收日期', def: true, cls: 'mono', sort: (m: any) => fmtDate(sourceOf(m)?.receivedDate ?? m.receivedDate), parent: (m: any, s: any) => s ? fmtDate(s.receivedDate ?? m.receivedDate) : '', child: (cm: any) => fmtDate(cm.receivedDate) },
+        { key: 'sendAttempts', label: '发送次数', w: '100px', cls: 'num', sort: (m: any) => maxAttempts(m), parent: (m: any) => String(maxAttempts(m)), child: (cm: any) => String(Number(cm.sendAttempts) || 0) },
+        { key: 'sendDate', label: '发送日期', cls: 'mono', sort: (m: any) => fmtDate(sourceOf(m)?.sendDate), parent: (m: any, s: any) => s ? fmtDate(s.sendDate) : '', child: (cm: any) => fmtDate(cm.sendDate) },
+        { key: 'responseDate', label: '响应日期', def: true, cls: 'mono', sort: (m: any) => fmtDate(sourceOf(m)?.responseDate), parent: (m: any, s: any) => s ? fmtDate(s.responseDate) : '', child: (cm: any) => fmtDate(cm.responseDate) },
+        { key: 'errors', label: '错误', def: true, w: '90px', sort: (m: any) => messageHasError(m) ? 0 : 1, parent: (m: any, s: any) => errBadge(errorLabel(s)), child: (cm: any) => errBadge(errorLabel(cm)) },
+        { key: 'serverId', label: '服务器 ID', cls: 'mono', sort: (m: any) => m.serverId || '', parent: (m: any) => m.serverId || '', child: (cm: any) => cm.serverId || '' },
+        { key: 'origServerId', label: '原始服务器 ID', cls: 'mono', sort: (m: any) => m.originalServerId || '', parent: (m: any) => m.originalServerId || '', child: () => '' },
+        { key: 'originalId', label: '原始 ID', cls: 'num', sort: (m: any) => Number(m.originalId) || 0, parent: (m: any) => m.originalId != null ? String(m.originalId) : '', child: () => '' },
+        { key: 'importId', label: '导入 ID', cls: 'num', sort: (m: any) => Number(m.importId) || 0, parent: (m: any) => m.importId != null ? String(m.importId) : '', child: () => '' },
+        { key: 'importChannelId', label: '导入通道 ID', cls: 'mono', sort: (m: any) => m.importChannelId || '', parent: (m: any) => m.importChannelId || '', child: () => '' },
+        { key: 'channelName', label: '通道名称', sort: () => channelName, parent: () => channelName, child: () => '' }
     ];
     return [...COLUMNS, ...metaDataColumns.map((col: any) => ({
         key: `meta:${col.name}`, label: col.name, def: true,
@@ -654,7 +654,7 @@ function ResultsTable({
         <thead>
             <tr>
                 <th className="w-6" onContextMenu={onColumnMenu}>
-                    <span className="msg-twisty" title={allExpanded ? 'Collapse all' : 'Expand all'}
+                    <span className="msg-twisty" title={allExpanded ? '全部收起' : '全部展开'}
                         onClick={onToggleAll}>{allExpanded ? '▾' : '▸'}</span>
                 </th>
                 {cols.map((c: any, i: any) => (
@@ -703,7 +703,7 @@ function ResultsTable({
                         {colgroup}{thead}
                     </table>
                 </div>
-                <div className="dt-empty">No messages found</div>
+                <div className="dt-empty">未找到消息</div>
             </>
         );
     }
@@ -712,7 +712,7 @@ function ResultsTable({
     // The row the compare anchor points at, marked with an inset accent bar and a
     // ⇄ in the twisty column — a marker, never any of the content it refers to.
     const anchorMark = (key: any) => key === anchorKey
-        ? <span className="compare-mark" title="Selected for compare" aria-label="Selected for compare">⇄</span>
+        ? <span className="compare-mark" title="已选作对比" aria-label="已选作对比">⇄</span>
         : null;
     for (const m of rows) {
         const source = sourceOf(m);
@@ -768,12 +768,12 @@ function ResultsTable({
 function copyText(text: any) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(String(text == null ? '' : text)).then(
-            () => toast('Copied to clipboard'),
-            () => toast('Copy failed', 'warn'));
-    } else { toast('Clipboard unavailable', 'warn'); }
+            () => toast('已复制到剪贴板'),
+            () => toast('复制失败', 'warn'));
+    } else { toast('剪贴板不可用', 'warn'); }
 }
 
-function Loading({ text = 'Loading…' }: any) {
+function Loading({ text = '正在加载…' }: any) {
     return <div className="loading-block"><div className="spinner" />{text}</div>;
 }
 
@@ -836,17 +836,17 @@ function ContentView({ content, dataType, responseEnvelope, popoutTitle }: any) 
                 {(kind === 'xml' || kind === 'json') && (
                     <label className="check">
                         <input type="checkbox" checked={formatted} onChange={(e: any) => setFormatted(e.target.checked)} />
-                        Format
+                        格式化
                     </label>
                 )}
                 <span className="flex-1" />
                 {popoutTitle && (
-                    <button className="btn btn-sm" title="Open full screen"
+                    <button className="btn btn-sm" title="全屏打开"
                         onClick={() => openContentPopout(popoutTitle, { content, dataType, responseEnvelope })}>
-                        <Icon name="popout" />Full Screen
+                        <Icon name="popout" />全屏
                     </button>
                 )}
-                <button className="btn btn-sm" onClick={() => copyText(body)}><Icon name="copy" />Copy</button>
+                <button className="btn btn-sm" onClick={() => copyText(body)}><Icon name="copy" />复制</button>
             </div>
             {env && (
                 <div className="content-banner">
@@ -872,7 +872,7 @@ function openContentPopout(title: any, props: any) {
     const teardown = mountReact(host, <ContentView {...props} />);
     modal({
         title, size: 'fit', body: host,
-        buttons: [{ label: 'Close', primary: true }],
+        buttons: [{ label: '关闭', primary: true }],
         onClose: () => { try { teardown(); } catch { /* ignore */ } }
     });
 }
@@ -882,17 +882,17 @@ function openContentPopout(title: any, props: any) {
    stays put (table.dt th is position:sticky) while the rows scroll in the tab
    body, and clicking a column sorts by it (toggling asc/desc). */
 const MAPPING_COLS = [
-    { key: 'scope', label: 'Scope' }, { key: 'variable', label: 'Variable' }, { key: 'value', label: 'Value' }];
+    { key: 'scope', label: '作用域' }, { key: 'variable', label: '变量' }, { key: 'value', label: '值' }];
 
 function MappingsTable({ cm }: any) {
     // Scope, deserialized map content. Matches the Swing browser exactly:
     // Source / Connector / Channel / Response only — no Custom Metadata.
     const rows = useMemo(() => {
         const groups = [
-            ['Source', cm.sourceMapContent],
-            ['Connector', cm.connectorMapContent],
-            ['Channel', cm.channelMapContent],
-            ['Response', cm.responseMapContent]
+            ['源', cm.sourceMapContent],
+            ['连接器', cm.connectorMapContent],
+            ['通道', cm.channelMapContent],
+            ['响应', cm.responseMapContent]
         ];
         const out: any[] = [];
         for (const [scope, mc] of groups) {
@@ -907,7 +907,7 @@ function MappingsTable({ cm }: any) {
     const [sort, setSort] = useState<any>({ key: null, dir: 1 });
 
     if (!rows.length) {
-        return <div className="p-3.5"><div className="text-text-faint">There are no mappings present.</div></div>;
+        return <div className="p-3.5"><div className="text-text-faint">该消息没有映射</div></div>;
     }
 
     const view = sort.key
@@ -933,7 +933,7 @@ function MappingsTable({ cm }: any) {
             </thead>
             <tbody>
                 {view.map((r: any, i: any) => (
-                    <tr key={i} className="cursor-pointer" title="Double-click for the full value"
+                    <tr key={i} className="cursor-pointer" title="双击查看完整值"
                         onDoubleClick={() => openMappingValue(r.value)}>
                         <td className="w-[108px]">{r.scope}</td>
                         <td className="mono w-[30%]">{r.variable}</td>
@@ -954,8 +954,8 @@ function openTextPopout(title: any, text: any, display = text) {
         size: 'fit',
         body: h('pre', { class: 'content-pre flex-1 min-h-[108px] max-h-none m-2.5' }, display),
         buttons: [
-            { label: 'Copy', onClick: () => { copyText(text); return false; } },
-            { label: 'Close', primary: true }
+            { label: '复制', onClick: () => { copyText(text); return false; } },
+            { label: '关闭', primary: true }
         ]
     });
 }
@@ -965,7 +965,7 @@ function openTextPopout(title: any, text: any, display = text) {
    Copy takes the value itself — the tab→newline swap is display-only. */
 function openMappingValue(value: any) {
     const text = String(value ?? '');
-    openTextPopout('Mapping Value', text, text.replace(/\t/g, '\n'));
+    openTextPopout('映射值', text, text.replace(/\t/g, '\n'));
 }
 
 /* ---- attachments ------------------------------------------------------------------ */
@@ -1005,10 +1005,10 @@ async function exportAttachment(channelId: any, message: any, attachment: any, s
             } catch { return content; /* not Base64 — save as-is */ }
         }, assertSession);
         assertSession();
-        if (contentLoaded) toast('Attachment exported');
+        if (contentLoaded) toast('附件已导出');
     } catch (e: any) {
         try { assertSession(); } catch { return; }
-        toast(`Failed to export attachment: ${e.message}`, 'error');
+        toast(`导出附件失败：${e.message}`, 'error');
     }
 }
 
@@ -1025,18 +1025,18 @@ function AttachmentFallback({ channelId, message, attachment }: any) {
             }
             setContent(displayValue(c));
         } catch (e: any) {
-            toast(`Failed to fetch attachment: ${e.message}`, 'error');
+            toast(`获取附件内容失败：${e.message}`, 'error');
         }
     };
     return (
         <div className="mt-[13px]">
             <dl className="kv">
-                <dt>Id</dt><dd>{displayValue(attachment.id)}</dd>
-                <dt>Type</dt><dd>{displayValue(attachment.type)}</dd>
+                <dt>ID</dt><dd>{displayValue(attachment.id)}</dd>
+                <dt>类型</dt><dd>{displayValue(attachment.type)}</dd>
             </dl>
             <div className="mt-[13px] flex gap-2">
-                <button className="btn" onClick={fetchContent}><Icon name="eye" />Fetch Content</button>
-                <TaskButton label="Export" icon="export" task="doExportAttachment" group="message"
+                <button className="btn" onClick={fetchContent}><Icon name="eye" />获取内容</button>
+                <TaskButton label="导出" icon="export" task="doExportAttachment" group="message"
                     onClick={() => exportAttachment(channelId, message, attachment)} />
             </div>
             {content != null && <pre className="content-pre mt-[13px]">{content}</pre>}
@@ -1071,9 +1071,9 @@ function AttachmentList({ platform, channelId, message }: any) {
         return () => { stale = true; };
     }, [channelId, message]);
 
-    if (state.status === 'loading') return <Loading text="Loading attachments…" />;
-    if (state.status === 'error') return <div className="text-text-faint">{`Failed to load attachments: ${(state as any).error}`}</div>;
-    if (!(state as any).attachments.length) return <div className="text-text-faint">No attachments</div>;
+    if (state.status === 'loading') return <Loading text="正在加载附件…" />;
+    if (state.status === 'error') return <div className="text-text-faint">{`加载附件失败：${(state as any).error}`}</div>;
+    if (!(state as any).attachments.length) return <div className="text-text-faint">无附件</div>;
 
     const shownOnce = new Set();
     const blocks: any[] = [];
@@ -1103,7 +1103,7 @@ function viewAttachmentsModal(platform: any, channelId: any, m: any) {
     const host = h('div', { class: 'w-full min-w-0 max-h-[60vh] overflow-auto' });
     const teardown = mountReact(host, <AttachmentList platform={platform} channelId={channelId} message={m} />);
     modal({
-        title: `Attachments — Message ${m.messageId}`, size: 'wide', body: host, buttons: [{ label: 'Close' }],
+        title: `附件 — 消息 ${m.messageId}`, size: 'wide', body: host, buttons: [{ label: '关闭' }],
         onClose: () => { try { teardown(); } catch { /* ignore */ } }
     });
 }
@@ -1118,12 +1118,12 @@ async function exportAttachmentTask(platform: any, channelId: any, m: any) {
         const attachments = m.__attachments ?? await api.messages.attachments(channelId, m.messageId);
         assertSession();
         m.__attachments = attachments;
-        if (!attachments.length) { toast('No attachments on this message', 'warn'); return; }
+        if (!attachments.length) { toast('该消息没有附件', 'warn'); return; }
         if (attachments.length === 1) { await exportAttachment(channelId, m, attachments[0], assertSession); return; }
         viewAttachmentsModal(platform, channelId, m);
     } catch (e: any) {
         try { assertSession(); } catch { return; }
-        toast(`Failed to load attachments: ${e.message || e}`, 'error');
+        toast(`加载附件失败：${e.message || e}`, 'error');
     }
 }
 
@@ -1148,7 +1148,7 @@ function DetailTabs({ defs, anchorType, onActiveStage, onStageMenu }: any) {
     return (
         <TabsPrimitive.Root value={String(active)} onValueChange={(v: any) => setActive(Number(v))}
             className="flex-1 min-h-0 flex flex-col">
-            <TabsPrimitive.List className="tabs flex-none" aria-label="Message sections">
+            <TabsPrimitive.List className="tabs flex-none" aria-label="消息内容分区">
                 {defs.map((def: any, i: any) => (
                     <TabsPrimitive.Trigger key={def.label} value={String(i)}
                         onContextMenu={stageMenu(def)}
@@ -1171,9 +1171,9 @@ function DetailTabs({ defs, anchorType, onActiveStage, onStageMenu }: any) {
    attachments) — mirrors the Swing browser's per-connector tabs. */
 function ConnectorTabs({ message, cm, channelId, channelName, platform, anchor, onActiveStage, onStageMenu }: any) {
     const contentDefs = [
-        ['Raw', 'raw'], ['Processed Raw', 'processedRaw'], ['Transformed', 'transformed'],
-        ['Encoded', 'encoded'], ['Sent', 'sent'], ['Response', 'response'],
-        ['Response Transformed', 'responseTransformed'], ['Processed Response', 'processedResponse']
+        ['原始', 'raw'], ['处理后原始', 'processedRaw'], ['转换后', 'transformed'],
+        ['编码后', 'encoded'], ['已发送', 'sent'], ['响应', 'response'],
+        ['响应转换后', 'responseTransformed'], ['处理后响应', 'processedResponse']
     ];
     // Which of these tabs Compare understands (the six pipeline stages).
     const comparable = new Map(COMPARE_STAGES.map(s => [s.key, s.type]));
@@ -1203,7 +1203,7 @@ function ConnectorTabs({ message, cm, channelId, channelName, platform, anchor, 
     // Full-screen titles carry the connector: the results tree, which normally
     // says whose content this is, sits behind the modal overlay.
     const connectorLabel = cm.connectorName
-        || (Number(cm.metaDataId) === 0 ? 'Source' : `Destination ${cm.metaDataId}`);
+        || (Number(cm.metaDataId) === 0 ? '源连接器' : `目的地 ${cm.metaDataId}`);
     for (const [label, key] of contentDefs) {
         let content = contentOf(cm[key]);
         if (content === null) continue;
@@ -1220,18 +1220,18 @@ function ConnectorTabs({ message, cm, channelId, channelName, platform, anchor, 
         defs.push({
             label, contentType: comparable.get(key) ?? null,
             node: <ContentView content={content} dataType={dataType} responseEnvelope={responseEnvelope}
-                popoutTitle={`Message ${message.messageId} — ${connectorLabel} — ${label}`} />
+                popoutTitle={`消息 ${message.messageId} — ${connectorLabel} — ${label}`} />
         });
     }
 
     const errorDefs = [
-        ['Processing Error', contentOf(cm.processingErrorContent)],
-        ['Postprocessor Error', contentOf(cm.postProcessorErrorContent)],
-        ['Response Error', contentOf(cm.responseErrorContent)]
+        ['处理错误', contentOf(cm.processingErrorContent)],
+        ['后处理错误', contentOf(cm.postProcessorErrorContent)],
+        ['响应错误', contentOf(cm.responseErrorContent)]
     ].filter(([, content]) => content !== null);
     if (errorDefs.length) {
         defs.push({
-            label: 'Errors',
+            label: '错误',
             node: (
                 <div className="p-2.5 overflow-auto">
                     {errorDefs.map(([label, content]) => (
@@ -1240,9 +1240,9 @@ function ConnectorTabs({ message, cm, channelId, channelName, platform, anchor, 
                                 stage — never the whole tab. */}
                             <div className="mt-[13px] flex items-center">
                                 <span className="text-text-faint">{label}</span>
-                                <button className="btn btn-sm ml-auto" title="Open full screen"
-                                    onClick={() => openTextPopout(`Message ${message.messageId} — ${connectorLabel} — ${label}`, content)}>
-                                    <Icon name="popout" />Full Screen
+                                <button className="btn btn-sm ml-auto" title="全屏打开"
+                                    onClick={() => openTextPopout(`消息 ${message.messageId} — ${connectorLabel} — ${label}`, content)}>
+                                    <Icon name="popout" />全屏
                                 </button>
                             </div>
                             <pre className="content-pre">{content}</pre>
@@ -1253,12 +1253,12 @@ function ConnectorTabs({ message, cm, channelId, channelName, platform, anchor, 
         });
     }
 
-    defs.push({ label: 'Mappings', node: <MappingsTable cm={cm} /> });
+    defs.push({ label: '映射', node: <MappingsTable cm={cm} /> });
     // Keep the tab visible on a failed attachment request so the failure cannot
     // masquerade as a message with no attachments.
     if (message.__attachmentsError || (message.__attachments && message.__attachments.length)) {
         defs.push({
-            label: 'Attachments',
+            label: '附件',
             node: (
                 <div className="p-2.5 overflow-auto">
                     <AttachmentList platform={platform} channelId={channelId} message={message} />
@@ -1277,10 +1277,10 @@ function ConnectorTabs({ message, cm, channelId, channelName, platform, anchor, 
    no status pill or connector dropdown. */
 function DetailBody({ detail, channelId, channelName, platform, anchor, onActiveStage, onStageMenu }: any) {
     if (detail.status === 'empty') {
-        return <div className="text-text-faint flex-none py-[8px] px-3.5">Select a message to view its contents.</div>;
+        return <div className="text-text-faint flex-none py-[8px] px-3.5">请选择消息以查看其内容</div>;
     }
     if (detail.status === 'loading') {
-        return <div className="py-3 px-3.5"><Loading text="Loading message…" /></div>;
+        return <div className="py-3 px-3.5"><Loading text="正在加载消息…" /></div>;
     }
     if (detail.status === 'error') {
         return <div className="text-danger py-3 px-3.5" role="alert">{detail.error}</div>;
@@ -1290,15 +1290,15 @@ function DetailBody({ detail, channelId, channelName, platform, anchor, onActive
     if (!cms.length) {
         return (
             <>
-                <div className="panel-header flex-none">{`Message ${message.messageId}`}</div>
-                <div className="text-text-faint py-3 px-3.5">No connector messages</div>
+                <div className="panel-header flex-none">{`消息 ${message.messageId}`}</div>
+                <div className="text-text-faint py-3 px-3.5">无连接器消息</div>
             </>
         );
     }
     const cm = cms.find(c => Number(c.metaDataId) === Number(metaDataId)) || cms[0];
     return (
         <>
-            <div className="panel-header flex-none">{`Message ${message.messageId}`}</div>
+            <div className="panel-header flex-none">{`消息 ${message.messageId}`}</div>
             <ConnectorTabs key={`${message.messageId}:${cm.metaDataId}`}
                 message={message} cm={cm} channelId={channelId} channelName={channelName} platform={platform}
                 anchor={anchor} onActiveStage={onActiveStage} onStageMenu={onStageMenu} />
@@ -1322,7 +1322,7 @@ function openAdvancedSearch({ connectors, metaDataColumns, adv, onApply }: any) 
     };
     const connRows: any[] = [];
     const connTbody = h('tbody');
-    for (const c of [...connectors, { metaDataId: null, name: 'Deleted Connectors' }]) {
+    for (const c of [...connectors, { metaDataId: null, name: '已删除的连接器' }]) {
         const input = h('input', { type: 'checkbox', checked: isConnChecked(c.metaDataId) });
         connRows.push({ key: c.metaDataId, input });
         connTbody.appendChild(h('tr',
@@ -1333,12 +1333,12 @@ function openAdvancedSearch({ connectors, metaDataColumns, adv, onApply }: any) 
     const setAllConn = (v: any) => connRows.forEach(r => { r.input.checked = v; });
     const connBlock = h('div',
         h('div', { class: 'flex justify-end gap-2.5 mb-1.5' },
-            h('a', { class: 'link-btn', onClick: () => setAllConn(true) }, 'Select All'),
+            h('a', { class: 'link-btn', onClick: () => setAllConn(true) }, '全选'),
             h('span.text-text-faint', '|'),
-            h('a', { class: 'link-btn', onClick: () => setAllConn(false) }, 'Deselect All')),
+            h('a', { class: 'link-btn', onClick: () => setAllConn(false) }, '全不选')),
         h('div.dt-wrap', { class: 'max-h-[135px] overflow-auto' },
             h('table.dt',
-                h('thead', h('tr', h('th', 'Id'), h('th', 'Current Connector Name'), h('th', 'Included'))),
+                h('thead', h('tr', h('th', 'ID'), h('th', '当前连接器名称'), h('th', '包含'))),
                 connTbody)));
 
     /* ---- id / numeric ranges (stacked "label: min – max" rows) ---- */
@@ -1356,8 +1356,8 @@ function openAdvancedSearch({ connectors, metaDataColumns, adv, onApply }: any) 
     const singleRow = (label: any, el: any) => h('div', { class: 'flex items-center gap-2 mb-2' },
         lbl(label), el);
 
-    const attachmentCheck = checkbox('Has Attachment', adv.attachment);
-    const errorCheck = checkbox('Has Error', adv.error);
+    const attachmentCheck = checkbox('含附件', adv.attachment);
+    const errorCheck = checkbox('含错误', adv.error);
 
     /* ---- selectable search tables with right-side New/Delete ---- */
     function makeSelectableTable(head: any) {
@@ -1382,13 +1382,13 @@ function openAdvancedSearch({ connectors, metaDataColumns, adv, onApply }: any) 
             h('div.dt-wrap', { class: 'flex-1 max-h-[135px] overflow-auto' },
                 h('table.dt', h('thead', h('tr', head.map((l: any) => h('th', l)))), tbody)),
             h('div', { class: 'flex flex-col gap-1.5' },
-                h('button.btn', { onClick: onNew }, 'New'), delBtn));
-        delBtn.textContent = 'Delete';
+                h('button.btn', { onClick: onNew }, '新建'), delBtn));
+        delBtn.textContent = '删除';
         return { tbody, rows, sel, el };
     }
 
     /* Content Searches — one repeatable query param per content type. */
-    const cs = makeSelectableTable(['Content Type', 'Contains']);
+    const cs = makeSelectableTable(['内容类型', '包含']);
     function addContentSearchRow(type = 'rawContentSearch', text = '') {
         const row = {
             type: select(CONTENT_SEARCH_TYPES, type),
@@ -1403,7 +1403,7 @@ function openAdvancedSearch({ connectors, metaDataColumns, adv, onApply }: any) 
     adv.contentSearches.forEach((c: any) => addContentSearchRow(c.type, c.text));
 
     /* Custom Metadata searches — "COLUMN OPERATOR value" strings. */
-    const ms = makeSelectableTable(['Metadata', 'Operator', 'Value', 'Ignore Case']);
+    const ms = makeSelectableTable(['元数据', '运算符', '值', '忽略大小写']);
     function addMetaSearchRow(column?: any, operator = 'CONTAINS', value = '', ignoreCase = false) {
         const row = {
             column: metaDataColumns.length
@@ -1411,7 +1411,7 @@ function openAdvancedSearch({ connectors, metaDataColumns, adv, onApply }: any) 
                 : h('input', { type: 'text', value: column ?? '', placeholder: 'COLUMN_NAME' }),
             operator: select(META_SEARCH_OPERATORS, operator),
             value: h('input', { type: 'text', value, class: 'w-full' }),
-            ignoreCase: h('input', { type: 'checkbox', checked: ignoreCase, title: 'Ignore case' })
+            ignoreCase: h('input', { type: 'checkbox', checked: ignoreCase, title: '忽略大小写' })
         };
         (row as any).tr = h('tr', { onMousedown: () => ms.sel(row) },
             h('td', row.column), h('td', row.operator), h('td', row.value),
@@ -1426,30 +1426,30 @@ function openAdvancedSearch({ connectors, metaDataColumns, adv, onApply }: any) 
     const sectionLabel = (text: any) => h('div', { class: 'font-semibold mt-3.5 mx-0 mb-1.5' }, text);
 
     modal({
-        title: 'Advanced Search Filter',
+        title: '高级搜索筛选',
         size: 'wide',
         body: h('div',
             connBlock,
             h('div', { class: 'mt-3.5' },
-                rangeRow('Message Id:', inputs.minMessageId, inputs.maxMessageId),
-                rangeRow('Original Id:', inputs.minOriginalId, inputs.maxOriginalId),
-                rangeRow('Import Id:', inputs.minImportId, inputs.maxImportId),
-                singleRow('Server Id:', inputs.serverId),
-                rangeRow('Send Attempts:', inputs.minSendAttempts, inputs.maxSendAttempts)),
+                rangeRow('消息 ID：', inputs.minMessageId, inputs.maxMessageId),
+                rangeRow('原始 ID：', inputs.minOriginalId, inputs.maxOriginalId),
+                rangeRow('导入 ID：', inputs.minImportId, inputs.maxImportId),
+                singleRow('服务器 ID：', inputs.serverId),
+                rangeRow('发送次数：', inputs.minSendAttempts, inputs.maxSendAttempts)),
             h('div', { class: 'flex gap-6 mt-1' },
                 attachmentCheck.el, errorCheck.el),
-            sectionLabel('Content Searches'),
+            sectionLabel('内容搜索'),
             cs.el(() => addContentSearchRow().text.focus()),
-            sectionLabel('Custom Metadata Searches'),
+            sectionLabel('自定义元数据搜索'),
             ms.el(() => addMetaSearchRow().value.focus())),
         buttons: [
             {
-                label: 'Reset',
+                label: '重置',
                 onClick: () => { onApply(defaultAdvancedCriteria()); }
             },
-            { label: 'Cancel' },
+            { label: '取消' },
             {
-                label: 'OK', primary: true,
+                label: '确定', primary: true,
                 onClick: () => {
                     // Resolve the connector table into included/excluded ids.
                     let included = null, excluded = null;
@@ -1499,35 +1499,35 @@ function reprocessDialog({ channelId, connectors, total, lastParams, messageId, 
         metaDataId: c.metaDataId, name: c.name,
         input: h('input', { type: 'checkbox', checked: true })
     }));
-    const overwrite = checkbox('Overwrite existing messages and update statistics', false);
+    const overwrite = checkbox('覆盖现有消息并更新统计', false);
     const setAll = (v: any) => destRows.forEach((r: any) => { r.input.checked = v; });
 
     const destTable = destRows.length ? h('div',
         h('div', { class: 'flex justify-end gap-2.5 my-1 mx-0' },
-            h('a', { class: 'link-btn', onClick: () => setAll(true) }, 'Select All'),
+            h('a', { class: 'link-btn', onClick: () => setAll(true) }, '全选'),
             h('span.text-text-faint', '|'),
-            h('a', { class: 'link-btn', onClick: () => setAll(false) }, 'Deselect All')),
+            h('a', { class: 'link-btn', onClick: () => setAll(false) }, '全不选')),
         h('div.dt-wrap', { class: 'max-h-[144px] overflow-auto' },
             h('table.dt',
-                h('thead', h('tr', h('th', 'Destination'), h('th', { class: 'w-[81px]' }, 'Included'))),
+                h('thead', h('tr', h('th', '目的地'), h('th', { class: 'w-[81px]' }, '包含'))),
                 h('tbody', destRows.map((d: any) => h('tr',
-                    h('td', d.name || `Destination ${d.metaDataId}`),
+                    h('td', d.name || `目的地 ${d.metaDataId}`),
                     h('td', { class: 'text-center' }, d.input))))))) : null;
 
     modal({
-        title: 'Reprocessing Options',
+        title: '重新处理选项',
         size: 'wide',
         body: h('div',
             isResults ? h('div', {
                 class: 'text-err mb-2.5 text-[11px]'
-            }, h('b', 'Warning: '), `This will reprocess all ${fmtNumber(total)} result(s) for the current search criteria, including those not listed on the current page.`) : null,
+            }, h('b', '警告：'), `这将重新处理当前搜索条件的全部 ${fmtNumber(total)} 条结果，包括未列在当前页的结果`) : null,
             overwrite.el,
-            destRows.length ? h('div.mt-[13px]', 'Reprocess through the following destinations:') : null,
+            destRows.length ? h('div.mt-[13px]', '通过以下目的地重新处理：') : null,
             destTable),
         buttons: [
-            { label: 'Cancel' },
+            { label: '取消' },
             {
-                label: 'OK', primary: true,
+                label: '确定', primary: true,
                 onClick: async () => {
                     try { assertSession(); } catch { return false; }
                     const checked = destRows.filter((r: any) => r.input.checked).map((r: any) => r.metaDataId);
@@ -1537,12 +1537,12 @@ function reprocessDialog({ channelId, connectors, total, lastParams, messageId, 
                     // The REPROCESSALL confirmation is gated on the
                     // "Reprocess/remove messages confirmation" preference.
                     if (isResults && getPref('confirmReprocessRemove') !== false) {
-                        const answer = await promptDialog('Reprocess Results',
-                            'This will reprocess all messages matching the current search criteria. Type REPROCESSALL to continue.');
+                        const answer = await promptDialog('重新处理结果',
+                            '这将重新处理所有匹配当前搜索条件的消息，输入 REPROCESSALL 以继续');
                         try { assertSession(); } catch { return false; }
                         if (answer === null) return false;
                         if (String(answer).trim() !== 'REPROCESSALL') {
-                            toast('You must type REPROCESSALL to reprocess results.', 'warn');
+                            toast('必须输入 REPROCESSALL 才能重新处理结果', 'warn');
                             return false;
                         }
                     }
@@ -1557,16 +1557,16 @@ function reprocessDialog({ channelId, connectors, total, lastParams, messageId, 
                                 timeoutMs: null
                             });
                             assertSession();
-                            toast('Reprocess task submitted');
+                            toast('重新处理任务已提交');
                         } else {
                             await api.messages.reprocess(channelId, messageId, overwrite.input.checked, filterDestinations, metaDataIds || []);
                             assertSession();
-                            toast('Reprocess task sent');
+                            toast('重新处理任务已发送');
                         }
                         onDone();
                     } catch (e: any) {
                         try { assertSession(); } catch { return false; }
-                        toast(`Reprocess failed: ${e.message}`, 'error');
+                        toast(`重新处理失败：${e.message}`, 'error');
                         return false;
                     }
                 }
@@ -1583,31 +1583,31 @@ function reprocessDialog({ channelId, connectors, total, lastParams, messageId, 
    connector message(s). `ct` is the engine ContentType enum name used for
    the server-side _export endpoint. */
 const EXPORT_CONTENT_OPTIONS = [
-    { value: 'xml', label: 'XML serialized message', xml: true },
-    { value: 'src:raw', label: 'Source - Raw', key: 'raw', ct: 'RAW', dest: false },
-    { value: 'src:processedRaw', label: 'Source - Processed Raw', key: 'processedRaw', ct: 'PROCESSED_RAW', dest: false },
-    { value: 'src:transformed', label: 'Source - Transformed', key: 'transformed', ct: 'TRANSFORMED', dest: false },
-    { value: 'src:encoded', label: 'Source - Encoded', key: 'encoded', ct: 'ENCODED', dest: false },
-    { value: 'src:response', label: 'Source - Response', key: 'response', ct: 'RESPONSE', dest: false },
-    { value: 'dst:raw', label: 'Destination - Raw', key: 'raw', ct: 'RAW', dest: true },
-    { value: 'dst:transformed', label: 'Destination - Transformed', key: 'transformed', ct: 'TRANSFORMED', dest: true },
-    { value: 'dst:encoded', label: 'Destination - Encoded', key: 'encoded', ct: 'ENCODED', dest: true },
-    { value: 'dst:sent', label: 'Destination - Sent', key: 'sent', ct: 'SENT', dest: true },
-    { value: 'dst:response', label: 'Destination - Response', key: 'response', ct: 'RESPONSE', dest: true },
-    { value: 'dst:processedResponse', label: 'Destination - Processed Response', key: 'processedResponse', ct: 'PROCESSED_RESPONSE', dest: true }
+    { value: 'xml', label: 'XML 序列化消息', xml: true },
+    { value: 'src:raw', label: '源连接器 - 原始', key: 'raw', ct: 'RAW', dest: false },
+    { value: 'src:processedRaw', label: '源连接器 - 处理后原始', key: 'processedRaw', ct: 'PROCESSED_RAW', dest: false },
+    { value: 'src:transformed', label: '源连接器 - 转换后', key: 'transformed', ct: 'TRANSFORMED', dest: false },
+    { value: 'src:encoded', label: '源连接器 - 编码后', key: 'encoded', ct: 'ENCODED', dest: false },
+    { value: 'src:response', label: '源连接器 - 响应', key: 'response', ct: 'RESPONSE', dest: false },
+    { value: 'dst:raw', label: '目的地 - 原始', key: 'raw', ct: 'RAW', dest: true },
+    { value: 'dst:transformed', label: '目的地 - 转换后', key: 'transformed', ct: 'TRANSFORMED', dest: true },
+    { value: 'dst:encoded', label: '目的地 - 编码后', key: 'encoded', ct: 'ENCODED', dest: true },
+    { value: 'dst:sent', label: '目的地 - 已发送', key: 'sent', ct: 'SENT', dest: true },
+    { value: 'dst:response', label: '目的地 - 响应', key: 'response', ct: 'RESPONSE', dest: true },
+    { value: 'dst:processedResponse', label: '目的地 - 处理后响应', key: 'processedResponse', ct: 'PROCESSED_RESPONSE', dest: true }
 ];
 
 /* File Pattern variables (Swing MessageExportPanel variable list). */
 const FILE_PATTERN_VARS = [
-    ['Message ID', '${message.messageId}'],
-    ['Server ID', '${message.serverId}'],
-    ['Channel ID', '${message.channelId}'],
-    ['Original File Name', '${message.originalFileName}'],
-    ['Formatted Message Date', '${message.formattedMessageDate}'],
-    ['Formatted Current Date', '${message.formattedCurrentDate}'],
-    ['Timestamp', '${message.timestamp}'],
-    ['Unique ID', '${message.uniqueId}'],
-    ['Count', '${message.count}']
+    ['消息 ID', '${message.messageId}'],
+    ['服务器 ID', '${message.serverId}'],
+    ['通道 ID', '${message.channelId}'],
+    ['原始文件名', '${message.originalFileName}'],
+    ['格式化消息日期', '${message.formattedMessageDate}'],
+    ['格式化当前日期', '${message.formattedCurrentDate}'],
+    ['时间戳', '${message.timestamp}'],
+    ['唯一 ID', '${message.uniqueId}'],
+    ['序号', '${message.count}']
 ];
 const DEFAULT_FILE_PATTERN = '${message.channelId}_message_${message.messageId}.xml';
 
@@ -1616,7 +1616,7 @@ const DEFAULT_FILE_PATTERN = '${message.channelId}_message_${message.messageId}.
 const ENCRYPTION_ALGORITHMS = [
     { value: 'AES128', label: 'AES-128', strength: 128 },
     { value: 'AES256', label: 'AES-256', strength: 256 },
-    { value: 'STANDARD', label: 'Standard', strength: 'standard' }
+    { value: 'STANDARD', label: '标准', strength: 'standard' }
 ];
 
 const dateStamp = (millis: any) => (fmtDate(millis) || '').replace(/[:\s]/g, '-');
@@ -1657,7 +1657,7 @@ function suffixName(name: any, suffix: any) {
 function xmlWithAttachments(xml: string, attachments: any[]) {
     const doc = new DOMParser().parseFromString(xml, 'text/xml');
     if (doc.querySelector('parsererror') || doc.documentElement.tagName !== 'message') {
-        throw new Error('Engine returned invalid message XML');
+        throw new Error('引擎返回的消息 XML 无效');
     }
     const message = doc.documentElement;
     const old = [...message.children].find(child => child.tagName === 'attachments');
@@ -1703,15 +1703,15 @@ function exportResultsDialog({ channelId, total, lastParams, assertCurrent = () 
     };
 
     const contentSel = select(EXPORT_CONTENT_OPTIONS, 'xml', { onChange: updateEnabled });
-    const encryptCheck = checkbox('Encrypt', false);
-    const attachCheck = checkbox('Include Attachments', false);
-    const compressionSel = select([{ value: 'none', label: 'None' }, { value: 'zip', label: 'Zip' }], 'none', { onChange: updateEnabled });
+    const encryptCheck = checkbox('加密', false);
+    const attachCheck = checkbox('包含附件', false);
+    const compressionSel = select([{ value: 'none', label: '无' }, { value: 'zip', label: 'Zip' }], 'none', { onChange: updateEnabled });
 
     const radio = (name: any, checked?: any) => h('input', { type: 'radio', name, checked: checked || null, onChange: updateEnabled });
     const radioLabel = (input: any, text: any) => h('label', { class: 'inline-flex items-center gap-1 cursor-pointer' }, input, text);
     const pwYes = radio('exp-pw'); const pwNo = radio('exp-pw', true);
     const algoSel = select(ENCRYPTION_ALGORITHMS, 'AES128');
-    const pwInput = h('input', { type: 'password', placeholder: 'Password', class: 'w-full' });
+    const pwInput = h('input', { type: 'password', placeholder: '密码', class: 'w-full' });
     const toServer = radio('exp-to'); const toComputer = radio('exp-to', true);
 
     const rootInput = h('input', { type: 'text', placeholder: '/path/accessible/by/server', class: 'flex-1' });
@@ -1727,18 +1727,18 @@ function exportResultsDialog({ channelId, total, lastParams, assertCurrent = () 
     };
     const varList = h('div.tree', { class: 'max-h-[135px] overflow-auto border border-[var(--border)] rounded-[4px] p-1' },
         FILE_PATTERN_VARS.map(([label, token]) => h('div.tree-node', {
-            title: `Insert ${token}`, draggable: 'true', class: 'cursor-grab',
+            title: `插入 ${token}`, draggable: 'true', class: 'cursor-grab',
             onClick: () => insertToken(token),
             onDragstart: (e: any) => { e.dataTransfer.setData('text/plain', token); e.dataTransfer.effectAllowed = 'copy'; }
         }, label)));
 
-    const status = h('div.text-text-faint', `${fmtNumber(total)} message(s) match the current search.`);
+    const status = h('div.text-text-faint', `当前搜索匹配 ${fmtNumber(total)} 条消息`);
     const fill = h('div.progress-fill', { class: 'w-[0%]' });
     // A progressbar, not an anonymous div: an export of tens of thousands of
     // messages is the one long operation in the app, and its state was visual only.
     const barWrap = h('div.progress', {
         style: { display: 'none' },
-        role: 'progressbar', 'aria-label': 'Export progress',
+        role: 'progressbar', 'aria-label': '导出进度',
         'aria-valuemin': '0', 'aria-valuemax': String(total), 'aria-valuenow': '0'
     }, fill);
 
@@ -1763,26 +1763,26 @@ function exportResultsDialog({ channelId, total, lastParams, assertCurrent = () 
     const lbl = (t: any) => h('div', { class: 'text-right whitespace-nowrap self-center' }, t);
     const cell = (...c: any[]) => h('div', { class: 'flex items-center gap-2 flex-wrap' }, ...c);
     const grid = h('div', { class: 'grid grid-cols-[auto_1fr] gap-x-2.5 gap-y-2 items-center' },
-        lbl('Content:'), cell(contentSel, encryptCheck.el, attachCheck.el),
-        lbl('Compression:'), cell(compressionSel),
-        lbl('Password Protect:'), cell(radioLabel(pwYes, 'Yes'), radioLabel(pwNo, 'No'), algoSel),
-        lbl('Password:'), cell(pwInput),
-        lbl('Export To:'), cell(radioLabel(toServer, 'Server'), radioLabel(toComputer, 'My Computer')),
-        lbl('Root Path:'), cell(rootInput, h('span.text-text-faint', { class: 'whitespace-nowrap' }, '/[timestamp].zip')),
-        lbl('File Pattern:'), cell(patternInput));
+        lbl('内容：'), cell(contentSel, encryptCheck.el, attachCheck.el),
+        lbl('压缩：'), cell(compressionSel),
+        lbl('密码保护：'), cell(radioLabel(pwYes, '是'), radioLabel(pwNo, '否'), algoSel),
+        lbl('密码：'), cell(pwInput),
+        lbl('导出到：'), cell(radioLabel(toServer, '服务器'), radioLabel(toComputer, '我的电脑')),
+        lbl('根路径：'), cell(rootInput, h('span.text-text-faint', { class: 'whitespace-nowrap' }, '/[timestamp].zip')),
+        lbl('文件命名模式：'), cell(patternInput));
 
     const dlg = modal({
-        title: 'Export Results',
+        title: '导出结果',
         size: 'wide',
         onClose: () => { aborted = true; },
         body: h('div', { class: 'flex flex-wrap gap-[16px]' },
             h('div', { class: 'flex-1 min-w-[234px] flex flex-col gap-2' }, grid, status, barWrap),
             h('div', { class: 'w-full sm:w-[180px] min-w-0 flex flex-col' },
-                h('label', { class: 'block mb-0.5' }, 'Variables:'),
+                h('label', { class: 'block mb-0.5' }, '变量：'),
                 varList)),
         buttons: [
-            { label: 'Cancel', onClick: () => { aborted = true; } },
-            { label: 'Export', primary: true, onClick: () => { if (!running) runExport(); return false; } }
+            { label: '取消', onClick: () => { aborted = true; } },
+            { label: '导出', primary: true, onClick: () => { if (!running) runExport(); return false; } }
         ]
     });
     updateEnabled();
@@ -1796,7 +1796,7 @@ function exportResultsDialog({ channelId, total, lastParams, assertCurrent = () 
     function progress(done: any) {
         fill.style.width = total ? Math.round((done / total) * 100) + '%' : '0%';
         barWrap.setAttribute('aria-valuenow', String(done));
-        status.textContent = `Exporting… ${fmtNumber(done)} / ${fmtNumber(total)}`;
+        status.textContent = `正在导出… ${fmtNumber(done)} / ${fmtNumber(total)}`;
     }
 
     async function auditExportSuccess(o: any, exportCount: number, rootPath: string) {
@@ -1857,7 +1857,7 @@ function exportResultsDialog({ channelId, total, lastParams, assertCurrent = () 
     }
 
     async function runServerExport(o: any) {
-        status.textContent = 'Submitting server export…';
+        status.textContent = '正在提交服务器导出…';
         try {
             const params = { ...lastParams };
             delete params.offset; delete params.limit; delete params.includeContent;
@@ -1879,16 +1879,16 @@ function exportResultsDialog({ channelId, total, lastParams, assertCurrent = () 
             } catch (e: any) {
                 if (!aborted && currentSession()) {
                     dlg.close();
-                    toast(`Messages were exported, but the success audit failed: ${e.message || e}`, 'error');
+                    toast(`消息已导出，但成功审计记录失败：${e.message || e}`, 'error');
                 }
                 return;
             }
             if (aborted || !currentSession()) return;
             dlg.close();
-            toast(`Server exported ${fmtNumber(count)} message(s) to ${o.rootFolder}`);
+            toast(`服务器已导出 ${fmtNumber(count)} 条消息到 ${o.rootFolder}`);
         } catch (e: any) {
             if (aborted || !currentSession()) return;
-            toast(`Server export failed: ${e.message}`, 'error');
+            toast(`服务器导出失败：${e.message}`, 'error');
             running = false; setDisabled(false);
         }
     }
@@ -1908,14 +1908,14 @@ function exportResultsDialog({ channelId, total, lastParams, assertCurrent = () 
         const server = (toServer as any).checked;
         const rootFolder = (rootInput as any).value.trim();
 
-        if (server && !rootFolder) { toast('Enter a Root Path for server export', 'warn'); return; }
+        if (server && !rootFolder) { toast('服务器导出需要填写根路径', 'warn'); return; }
 
         // My Computer (browser) export.
         if (!server && encryptContent) {
-            toast('Content encryption requires "Server" export — the encryption key stays on the server. Switch Export To: Server, or uncheck Encrypt.', 'warn');
+            toast('加密内容仅支持“服务器”导出，加密密钥保存在服务器端，请改用“服务器”或取消勾选“加密”', 'warn');
             return;
         }
-        if (pwProtect && !password) { toast('Enter a password, or turn off Password protect', 'warn'); return; }
+        if (pwProtect && !password) { toast('请输入密码，或关闭“密码保护”', 'warn'); return; }
 
         // Claim the operation before auditing. Cancel/close is permanent for
         // this dialog, including while the audit or native picker is pending.
@@ -1923,7 +1923,7 @@ function exportResultsDialog({ channelId, total, lastParams, assertCurrent = () 
         try { await api.messages.auditExport({}); assertActive(); }
         catch (e: any) {
             if (aborted || !currentSession()) return;
-            toast(`Export audit failed: ${e.message || e}`, 'error');
+            toast(`导出审计记录失败：${e.message || e}`, 'error');
             running = false; setDisabled(false); barWrap.style.display = 'none';
             return;
         }
@@ -1937,7 +1937,7 @@ function exportResultsDialog({ channelId, total, lastParams, assertCurrent = () 
             const zip = createZip();
             const result = await eachFile((n: any, c: any) => { zip.add(n, c); }, opt, pattern, includeAttachments);
             assertActive();
-            if (!result.files) throw new Error('No content of that type found in the results');
+            if (!result.files) throw new Error('结果中未找到该类型的内容');
             const blob = await zip.generate((pwProtect ? { password, strength: algo.strength } : {}) as any);
             assertActive();
             (buildZip as any).result = result;
@@ -1957,21 +1957,21 @@ function exportResultsDialog({ channelId, total, lastParams, assertCurrent = () 
                 } catch (e: any) {
                     if (!aborted && currentSession()) {
                         dlg.close();
-                        toast(`Messages were exported, but the success audit failed: ${e.message || e}`, 'error');
+                        toast(`消息已导出，但成功审计记录失败：${e.message || e}`, 'error');
                     }
                     return;
                 }
                 if (aborted || !currentSession()) return;
                 dlg.close();
-                toast(`Exported ${fmtNumber(r.files)} file(s) from ${fmtNumber(r.done)} message(s)`);
+                toast(`已导出 ${fmtNumber(r.files)} 个文件，来自 ${fmtNumber(r.done)} 条消息`);
             } else {
                 if (aborted || !currentSession()) return;
                 running = false; setDisabled(false); barWrap.style.display = 'none';
             }
         } catch (e: any) {
             if (aborted || !currentSession()) return;
-            if (e && e.message === 'cancelled') { toast('Export cancelled', 'warn'); dlg.close(); }
-            else { toast(`Export failed: ${e.message}`, 'error'); running = false; setDisabled(false); barWrap.style.display = 'none'; }
+            if (e && e.message === 'cancelled') { toast('导出已取消', 'warn'); dlg.close(); }
+            else { toast(`导出失败：${e.message}`, 'error'); running = false; setDisabled(false); barWrap.style.display = 'none'; }
         }
     }
 }
@@ -2031,7 +2031,7 @@ export function MessagesView({ params, query }: any) {
     const [connectorVal, setConnectorVal] = useState('');
     const [pageSize, setPageSize] = useState(() => String(Number(getPref('messagePageSize')) || 20));
     const [advOn, setAdvOn] = useState(() => advIsActive(advRef.current));
-    const [searchSummary, setSearchSummary] = useState('Current Search: (none — press Search)');
+    const [searchSummary, setSearchSummary] = useState('当前搜索：（无，请点击搜索）');
     const [criteriaCollapsed, setCriteriaCollapsed] = useState(false);
     const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -2162,12 +2162,12 @@ export function MessagesView({ params, query }: any) {
         const adv = advRef.current;
         const nameOf = (id: any) => {
             const c = connectors.find(x => String(x.metaDataId) === String(id));
-            return c ? c.name : `Id ${id}`;
+            return c ? c.name : `ID ${id}`;
         };
-        if (adv.includedMetaDataIds) return adv.includedMetaDataIds.length ? adv.includedMetaDataIds.map(nameOf).join(', ') : '(none)';
-        if (adv.excludedMetaDataIds) return `all except ${adv.excludedMetaDataIds.map(nameOf).join(', ')}`;
+        if (adv.includedMetaDataIds) return adv.includedMetaDataIds.length ? adv.includedMetaDataIds.map(nameOf).join(', ') : '（无）';
+        if (adv.excludedMetaDataIds) return `除 ${adv.excludedMetaDataIds.map(nameOf).join(', ')} 以外的全部`;
         if (connectorVal !== '') return nameOf(connectorVal);
-        return '(any)';
+        return '（任意）';
     }
 
     /* Human-readable "Current Search" summary (Swing's labeled box) rather than a
@@ -2182,30 +2182,30 @@ export function MessagesView({ params, query }: any) {
             if (hi) return `≤ ${hi}`;
             return null;
         };
-        const dt = (v: any) => v ? v.replace('T', ' ') : '(any)';
+        const dt = (v: any) => v ? v.replace('T', ' ') : '（任意）';
         const parts: any[] = [];
-        parts.push(`Statuses: ${statusSel.size ? [...statusSel].join(', ') : '(any)'}`);
-        parts.push(`Date Range: ${dt(startDate)} to ${dt(endDate)}`);
+        parts.push(`状态：${statusSel.size ? [...statusSel].join(', ') : '（任意）'}`);
+        parts.push(`日期范围：${dt(startDate)} 至 ${dt(endDate)}`);
         const text = textSearch.trim();
-        if (text) parts.push(`Text Search: "${text}"${textRegex ? ' (regex)' : ''}`);
-        parts.push(`Connectors: ${describeConnectors()}`);
+        if (text) parts.push(`文本搜索：“${text}”${textRegex ? '（正则表达式）' : ''}`);
+        parts.push(`连接器：${describeConnectors()}`);
         let r: any;
-        if ((r = range(adv.minMessageId, adv.maxMessageId))) parts.push(`Message Id: ${r}`);
-        if ((r = range(adv.minOriginalId, adv.maxOriginalId))) parts.push(`Original Id: ${r}`);
-        if ((r = range(adv.minImportId, adv.maxImportId))) parts.push(`Import Id: ${r}`);
-        if (adv.serverId.trim()) parts.push(`Server Id: ${adv.serverId.trim()}`);
-        if ((r = range(adv.minSendAttempts, adv.maxSendAttempts))) parts.push(`Send Attempts: ${r}`);
+        if ((r = range(adv.minMessageId, adv.maxMessageId))) parts.push(`消息 ID：${r}`);
+        if ((r = range(adv.minOriginalId, adv.maxOriginalId))) parts.push(`原始 ID：${r}`);
+        if ((r = range(adv.minImportId, adv.maxImportId))) parts.push(`导入 ID：${r}`);
+        if (adv.serverId.trim()) parts.push(`服务器 ID：${adv.serverId.trim()}`);
+        if ((r = range(adv.minSendAttempts, adv.maxSendAttempts))) parts.push(`发送次数：${r}`);
         for (const cs of adv.contentSearches) {
             if (!cs.text) continue;
             const label = (CONTENT_SEARCH_TYPES.find(t => t.value === cs.type) || {}).label || cs.type;
-            parts.push(`${label} contains "${cs.text}"`);
+            parts.push(`${label} 包含“${cs.text}”`);
         }
         for (const ms of adv.metaDataSearches) {
             if (!ms.column) continue;
-            parts.push(`${ms.column} ${ms.operator} ${ms.value}${ms.ignoreCase ? ' (ignore case)' : ''}`);
+            parts.push(`${ms.column} ${ms.operator} ${ms.value}${ms.ignoreCase ? '（忽略大小写）' : ''}`);
         }
-        if (adv.attachment) parts.push('Has Attachment');
-        if (adv.error) parts.push('Has Error');
+        if (adv.attachment) parts.push('含附件');
+        if (adv.error) parts.push('含错误');
         return parts.join(' · ');
     }
 
@@ -2224,7 +2224,7 @@ export function MessagesView({ params, query }: any) {
             const error = String(e.message || e);
             metaDataReadyRef.current = false;
             setMetaDataError(error);
-            toast(`Failed to load channel metadata: ${error}`, 'error');
+            toast(`加载通道元数据失败：${error}`, 'error');
             return false;
         }
     }
@@ -2240,7 +2240,7 @@ export function MessagesView({ params, query }: any) {
             params: structuredClone(resetOffset ? buildParams() : lastParamsRef.current),
             offset: resetOffset ? 0 : offset,
             limit: resetOffset ? Number(pageSize) || 20 : limitRef.current,
-            summary: resetOffset ? `Current Search: ${describeSearch()}` : resultRef.current?.summary,
+            summary: resetOffset ? `当前搜索：${describeSearch()}` : resultRef.current?.summary,
             total: resetOffset ? null : totalRef.current
         };
         try {
@@ -2255,7 +2255,7 @@ export function MessagesView({ params, query }: any) {
             if (candidate.params.maxMessageId == null) {
                 const maximum = await api.messages.maxMessageId(channelId);
                 if (maximum == null || !/^\d+$/.test(String(maximum)) || (typeof maximum === 'number' && !Number.isSafeInteger(maximum))) {
-                    throw new Error('Unable to determine the current message ID boundary');
+                    throw new Error('无法确定当前消息 ID 边界');
                 }
                 candidate.params.maxMessageId = String(maximum);
             }
@@ -2278,7 +2278,7 @@ export function MessagesView({ params, query }: any) {
                     }
                 }
                 api.messages.auditQueriedPHI(attributes).catch((e: any) =>
-                    toast(`Unable to audit queried PHI: ${e.message || e}`, 'error'));
+                    toast(`无法记录 PHI 查询审计：${e.message || e}`, 'error'));
             }
             const rows = await search;
             if (gen !== searchGenRef.current) return;   // superseded by a newer search
@@ -2310,7 +2310,7 @@ export function MessagesView({ params, query }: any) {
             setPager({ offset: offsetRef.current, shown: list.length, total: totalRef.current, hasNext });
         } catch (e: any) {
             if (gen !== searchGenRef.current) return;   // superseded — its results are on screen
-            toast(`Search failed: ${e.message}`, 'error');
+            toast(`搜索失败：${e.message}`, 'error');
         } finally {
             if (gen === searchGenRef.current) searchPendingRef.current = false;
         }
@@ -2324,7 +2324,7 @@ export function MessagesView({ params, query }: any) {
         const gen = searchGenRef.current;
         const assertCurrent = () => {
             if (!result || result !== resultRef.current || gen !== searchGenRef.current || searchPendingRef.current) {
-                throw new Error('Search changed or is still loading. Wait for results and try the action again.');
+                throw new Error('搜索条件已变更或仍在加载，请等待结果返回后再重试此操作');
             }
         };
         assertCurrent();
@@ -2346,7 +2346,7 @@ export function MessagesView({ params, query }: any) {
         let n;
         try { n = await ensureTotal(); }
         catch (e: any) {
-            if (gen === searchGenRef.current) toast(`Count failed: ${e.message}`, 'error');
+            if (gen === searchGenRef.current) toast(`统计数量失败：${e.message}`, 'error');
             return;
         }
         finally { setCountBusy(false); }
@@ -2377,10 +2377,10 @@ export function MessagesView({ params, query }: any) {
         let message: any;
         try {
             message = await api.messages.get(channelId, row.messageId);
-            if (!message || typeof message !== 'object') throw new Error('Engine returned an invalid message');
+            if (!message || typeof message !== 'object') throw new Error('引擎返回的消息无效');
         } catch (e: any) {
             if (!isCurrentSelection()) return;
-            const error = `Failed to load message content: ${e.message || e}`;
+            const error = `加载消息内容失败：${e.message || e}`;
             toast(error, 'error');
             setDetail({ status: 'error', error });
             return;
@@ -2392,7 +2392,7 @@ export function MessagesView({ params, query }: any) {
         } catch (e: any) {
             message.__attachments = [];
             message.__attachmentsError = String(e.message || e);
-            toast(`Failed to load attachments: ${e.message || e}`, 'error');
+            toast(`加载附件失败：${e.message || e}`, 'error');
         }
         if (!isCurrentSelection()) return;
         setDetail({ status: 'ready', message, metaDataId });
@@ -2404,7 +2404,7 @@ export function MessagesView({ params, query }: any) {
                     patientId: String(metaOfCm(connector, 'PATIENT_ID') || ''),
                     channel: `Channel[id=${channelId},name=${channelNameRef.current}]`,
                     messageId: String(connector.messageId ?? message.messageId)
-                }).catch((e: any) => toast(`Unable to audit accessed PHI: ${e.message || e}`, 'error'));
+                }).catch((e: any) => toast(`无法记录 PHI 访问审计：${e.message || e}`, 'error'));
             }
         }
     }
@@ -2456,7 +2456,7 @@ export function MessagesView({ params, query }: any) {
                 return next;
             })
         }));
-        (items as any).push('-', { label: 'Restore Default', onClick: () => { saveColumnVis({}); setColumnVis({}); } });
+        (items as any).push('-', { label: '恢复默认', onClick: () => { saveColumnVis({}); setColumnVis({}); } });
         contextMenu(e.clientX, e.clientY, items as any);
     }
 
@@ -2488,10 +2488,10 @@ export function MessagesView({ params, query }: any) {
        could correct themselves. Engine failures below still use toast(). */
     function offerCandidate(ref: any) {
         const result = proposeCompare(ref);
-        if (result === 'none') { cornerToast('Select content for compare first', 'warn'); return; }
+        if (result === 'none') { cornerToast('请先选择要对比的内容', 'warn'); return; }
         // Diffing content against itself is never the question being asked, so
         // this stops before the modal rather than after it.
-        if (result === 'same') { cornerToast('Same content already selected for compare', 'warn'); return; }
+        if (result === 'same') { cornerToast('所选内容已作为对比项', 'warn'); return; }
         openCompareConfirm();
     }
 
@@ -2507,14 +2507,14 @@ export function MessagesView({ params, query }: any) {
             h('span', { class: 'tag ' + tone }, side),
             h('span.mono', describeRef(ref)));
         modal({
-            title: 'Compare selected content?',
+            title: '对比所选内容？',
             body: h('div',
-                sideRow('Left', left, 'accent'),
-                sideRow('Right', right, 'amber'),
+                sideRow('左侧', left, 'accent'),
+                sideRow('右侧', right, 'amber'),
                 /* Same CHANNEL and message: ids are a per-channel sequence, so
                    comparing message 5 of two channels is not one message's pipeline. */
                 sameMessage(left, right)
-                    ? h('div.compare-confirm-note', 'Two stages of the same message — this traces what the pipeline changed.')
+                    ? h('div.compare-confirm-note', '这是同一条消息的两个阶段，用于查看管道处理改变了什么')
                     : null),
             /* Cancel, Esc and a click on the scrim all land here, and all mean the
                same thing: drop the SECOND selection, keep the anchor — the usual
@@ -2522,12 +2522,12 @@ export function MessagesView({ params, query }: any) {
             onClose: () => {
                 if (confirmed) return;
                 cancelPending();
-                toast('Cancelled — second selection discarded');
+                toast('已取消——第二次选择已丢弃');
             },
             buttons: [
-                { label: 'Cancel' },
+                { label: '取消' },
                 {
-                    label: 'Compare', primary: true, onClick: () => {
+                    label: '对比', primary: true, onClick: () => {
                         confirmed = true;
                         const pair = confirmCompare();
                         if (pair) setComparePair(pair);
@@ -2545,13 +2545,13 @@ export function MessagesView({ params, query }: any) {
         try {
             message = await api.messages.get(channelId, row.messageId);
         } catch (e: any) {
-            toast(`Failed to load message content: ${e.message}`, 'error');
+            toast(`加载消息内容失败：${e.message}`, 'error');
             return;
         }
         const cm = connectorMessagesOf(message).find(c => Number(c.metaDataId) === Number(metaDataId));
-        if (!cm) { cornerToast(`Connector ${metaDataId} is no longer part of message ${row.messageId}`, 'warn'); return; }
+        if (!cm) { cornerToast(`连接器 ${metaDataId} 已不属于消息 ${row.messageId}`, 'warn'); return; }
         if (!storedContentTypes(cm).includes(contentType)) {
-            cornerToast(`${stageLabel(contentType)} content is not stored for message ${row.messageId}`, 'warn');
+            cornerToast(`消息 ${row.messageId} 未存储 ${stageLabel(contentType)} 内容`, 'warn');
             return;
         }
         const ref = refFromConnectorMessage({ id: channelId, name: channelName }, row.messageId, cm, contentType);
@@ -2569,7 +2569,7 @@ export function MessagesView({ params, query }: any) {
             // does not exist, so it is not offered at all.
             .filter(s => !(s.type === 'SENT' && Number(metaDataId) === 0))
             .map(s => ({
-                label: s.label + (stored && !stored.includes(s.type) ? '  (not stored)' : ''),
+                label: s.label + (stored && !stored.includes(s.type) ? '（未存储）' : ''),
                 disabled: !!stored && !stored.includes(s.type),
                 onClick: () => pickRowStage(row, metaDataId, s.type, mode)
             }));
@@ -2579,13 +2579,13 @@ export function MessagesView({ params, query }: any) {
     function stageContextMenu(ref: any, e: any) {
         e.preventDefault();
         contextMenu(e.clientX, e.clientY, [
-            { header: true, label: 'Compare', sub: `${ref.connectorName} · ${stageLabel(ref.contentType)}` },
+            { header: true, label: '对比', sub: `${ref.connectorName} · ${stageLabel(ref.contentType)}` },
             {
-                label: 'Select for Compare', icon: 'compare', task: 'doSelectForCompare', group: 'message',
+                label: '选择以对比', icon: 'compare', task: 'doSelectForCompare', group: 'message',
                 onClick: () => takeAnchor(ref)
             },
             {
-                label: 'Compare to Selection', icon: 'compare', task: 'doCompareWithSelection', group: 'message',
+                label: '与所选内容对比', icon: 'compare', task: 'doCompareWithSelection', group: 'message',
                 disabled: !getAnchor(), onClick: () => offerCandidate(ref)
             }
         ]);
@@ -2593,13 +2593,13 @@ export function MessagesView({ params, query }: any) {
 
     function selectForCompareTask() {
         const ref = activeStageRef.current;
-        if (!ref) { cornerToast('Open a message and choose a content tab, or right-click a row, to pick what to compare', 'warn'); return; }
+        if (!ref) { cornerToast('请打开一条消息并选择内容标签，或右键单击某一行，以选择要对比的内容', 'warn'); return; }
         takeAnchor(ref);
     }
 
     function compareWithSelectionTask() {
         const ref = activeStageRef.current;
-        if (!ref) { cornerToast('Open a message and choose a content tab, or right-click a row, to pick what to compare', 'warn'); return; }
+        if (!ref) { cornerToast('请打开一条消息并选择内容标签，或右键单击某一行，以选择要对比的内容', 'warn'); return; }
         offerCandidate(ref);
     }
 
@@ -2630,31 +2630,31 @@ export function MessagesView({ params, query }: any) {
         selectMessage(m, metaDataId);
         const pluginItems = messageActionItems(m, metaDataId);
         contextMenu(e.clientX, e.clientY, [
-            { label: 'Refresh', icon: 'refresh', task: 'doRefreshMessages', group: 'message', onClick: () => searchRef.current(true) },
-            { label: 'Send Message', icon: 'send', task: 'doSendMessage', group: 'message', onClick: () => sendMessageTask() },
+            { label: '刷新', icon: 'refresh', task: 'doRefreshMessages', group: 'message', onClick: () => searchRef.current(true) },
+            { label: '发送消息', icon: 'send', task: 'doSendMessage', group: 'message', onClick: () => sendMessageTask() },
             '-',
-            { label: 'Import Messages', icon: 'import', task: 'doImportMessages', group: 'message', onClick: () => importMessagesTask() },
-            { label: 'Export Results', icon: 'export', task: 'doExportMessages', group: 'message', onClick: () => exportResultsTask() },
+            { label: '导入消息', icon: 'import', task: 'doImportMessages', group: 'message', onClick: () => importMessagesTask() },
+            { label: '导出结果', icon: 'export', task: 'doExportMessages', group: 'message', onClick: () => exportResultsTask() },
             '-',
-            { label: 'Reprocess Results', icon: 'transform', task: 'doReprocessFilteredMessages', group: 'message', onClick: () => reprocessResultsTask() },
-            { label: 'Reprocess Message', icon: 'transform', task: 'doReprocessMessage', group: 'message', onClick: () => reprocessTask(m) },
+            { label: '重新处理结果', icon: 'transform', task: 'doReprocessFilteredMessages', group: 'message', onClick: () => reprocessResultsTask() },
+            { label: '重新处理消息', icon: 'transform', task: 'doReprocessMessage', group: 'message', onClick: () => reprocessTask(m) },
             '-',
-            { label: 'View Attachment', icon: 'eye', task: 'viewImage', group: 'message', onClick: () => viewAttachmentsModal(platform, channelId, m) },
-            { label: 'Export Attachment', icon: 'export', task: 'doExportAttachment', group: 'message', onClick: () => exportAttachmentTask(platform, channelId, m) },
+            { label: '查看附件', icon: 'eye', task: 'viewImage', group: 'message', onClick: () => viewAttachmentsModal(platform, channelId, m) },
+            { label: '导出附件', icon: 'export', task: 'doExportAttachment', group: 'message', onClick: () => exportAttachmentTask(platform, channelId, m) },
             '-',
             {
-                label: 'Select for Compare', icon: 'compare', task: 'doSelectForCompare', group: 'message',
+                label: '选择以对比', icon: 'compare', task: 'doSelectForCompare', group: 'message',
                 items: compareStageItems(m, metaDataId, 'select')
             },
             {
-                label: 'Compare to Selection', icon: 'compare', task: 'doCompareWithSelection', group: 'message',
+                label: '与所选内容对比', icon: 'compare', task: 'doCompareWithSelection', group: 'message',
                 disabled: !getAnchor(), items: compareStageItems(m, metaDataId, 'compare')
             },
             ...(pluginItems.length ? ['-', ...pluginItems] : []),
             '-',
-            { label: 'Remove Message', icon: 'trash', danger: true, task: 'doRemoveMessage', group: 'message', onClick: () => removeMessageTask(m) },
-            { label: 'Remove Results', icon: 'trash', danger: true, task: 'doRemoveFilteredMessages', group: 'message', onClick: () => removeResultsTask() },
-            { label: 'Remove All Messages', icon: 'trash', danger: true, task: 'doRemoveAllMessages', group: 'message', onClick: () => removeAllTask() }
+            { label: '移除消息', icon: 'trash', danger: true, task: 'doRemoveMessage', group: 'message', onClick: () => removeMessageTask(m) },
+            { label: '移除结果', icon: 'trash', danger: true, task: 'doRemoveFilteredMessages', group: 'message', onClick: () => removeResultsTask() },
+            { label: '移除全部消息', icon: 'trash', danger: true, task: 'doRemoveAllMessages', group: 'message', onClick: () => removeAllTask() }
         ]);
     }
 
@@ -2662,7 +2662,7 @@ export function MessagesView({ params, query }: any) {
 
     function requireSelection() {
         const sel = selectedRef.current;
-        if (!sel) { toast('Select a message first', 'warn'); return null; }
+        if (!sel) { toast('请先选择消息', 'warn'); return null; }
         return sel.m;
     }
 
@@ -2684,13 +2684,13 @@ export function MessagesView({ params, query }: any) {
     async function removeMessageTask(row = requireSelection()) {
         if (!row) return;
         if (getPref('confirmReprocessRemove') !== false &&
-            !await confirmDialog('Remove message', `Permanently remove message ${row.messageId}? This cannot be undone.`, { danger: true, okLabel: 'Remove' })) return;
+            !await confirmDialog('移除消息', `确定永久移除消息 ${row.messageId}？此操作无法撤销`, { danger: true, okLabel: '移除' })) return;
         try {
             await api.messages.remove(channelId, row.messageId);
-            toast('Message removed');
+            toast('消息已移除');
             searchRef.current(false);
         } catch (e: any) {
-            toast(`Remove failed: ${e.message}`, 'error');
+            toast(`移除失败：${e.message}`, 'error');
         }
     }
 
@@ -2703,7 +2703,7 @@ export function MessagesView({ params, query }: any) {
             state = status?.state ? String(status.state).toUpperCase() : null;
         } catch (e: any) {
             if (e?.status !== 404) {
-                toast(`Could not determine channel state: ${e.message}`, 'error');
+                toast(`无法确定通道状态：${e.message}`, 'error');
                 return;
             }
         }
@@ -2723,16 +2723,16 @@ export function MessagesView({ params, query }: any) {
         try { snapshot = captureResult(); total = await ensureTotal(snapshot); assertSession(); }
         catch (e: any) {
             try { assertSession(); } catch { return; }
-            toast(`Count failed: ${e.message}`, 'error'); return;
+            toast(`统计数量失败：${e.message}`, 'error'); return;
         }
         if (getPref('confirmReprocessRemove') !== false) {
-            const text = await promptDialog('Remove Results',
-                `Permanently remove all ${fmtNumber(total)} message(s) matching the current search from ${channelName}? ` +
-                'This cannot be undone. Type REMOVE to confirm.');
+            const text = await promptDialog('移除结果',
+                `确定从 ${channelName} 永久移除匹配当前搜索的全部 ${fmtNumber(total)} 条消息？` +
+                '此操作无法撤销，请输入 REMOVE 以确认');
             try { assertSession(); } catch { return; }
             if (text === null) return;
             if (text.trim() !== 'REMOVE') {
-                toast('Confirmation text did not match — nothing was removed', 'warn');
+                toast('确认文本不匹配，未移除任何内容', 'warn');
                 return;
             }
         }
@@ -2745,11 +2745,11 @@ export function MessagesView({ params, query }: any) {
             // result set can outlast the default ceiling — no client timeout.
             await api.del(`/channels/${channelId}/messages`, snapshot.result.params, { timeoutMs: null });
             assertSession();
-            toast('Messages removed');
+            toast('消息已移除');
             searchRef.current(true);
         } catch (e: any) {
             try { assertSession(); } catch { return; }
-            toast(`Remove results failed: ${e.message}`, 'error');
+            toast(`移除结果失败：${e.message}`, 'error');
         }
     }
 
@@ -2761,7 +2761,7 @@ export function MessagesView({ params, query }: any) {
         try { snapshot = captureResult(); total = await ensureTotal(snapshot); assertSession(); }
         catch (e: any) {
             try { assertSession(); } catch { return; }
-            toast(`Count failed: ${e.message}`, 'error'); return;
+            toast(`统计数量失败：${e.message}`, 'error'); return;
         }
         reprocessDialog({
             channelId, connectors, total, lastParams: snapshot.result.params, assertCurrent: snapshot.assertCurrent, assertSession,
@@ -2770,7 +2770,7 @@ export function MessagesView({ params, query }: any) {
     }
 
     function importMessagesTask() {
-        return withEditorSave(importMessagesUnlocked, 'Importing messages…');
+        return withEditorSave(importMessagesUnlocked, '正在导入消息…');
     }
 
     async function importMessagesUnlocked() {
@@ -2794,10 +2794,10 @@ export function MessagesView({ params, query }: any) {
                 imported = Number(result?.successCount);
                 const total = Number(result?.totalCount);
                 if (!Number.isInteger(imported) || !Number.isInteger(total) || imported < 0 || total < imported) {
-                    throw new Error('The server returned an invalid import result. Refresh to check the imported messages.');
+                    throw new Error('服务器返回的导入结果无效，请刷新以检查已导入的消息');
                 }
                 failed = total - imported;
-                toast(`${imported} out of ${total} message(s) have been successfully imported from ${source.path}.`, failed ? 'warn' : undefined);
+                toast(`已从 ${source.path} 成功导入 ${total} 条中的 ${imported} 条消息`, failed ? 'warn' : undefined);
             } else {
                 for await (const file of readMessageFiles(source.files, source.recursive, assertSession)) {
                     assertSession();
@@ -2818,13 +2818,13 @@ export function MessagesView({ params, query }: any) {
                         }
                     }
                 }
-                if (!imported && !failed) toast('No messages were found to import', 'warn');
-                else if (failed) toast(`Imported ${imported} message(s); ${failed} failed: ${lastError.message}`, 'error');
-                else toast(`Imported ${imported} message(s)`);
+                if (!imported && !failed) toast('未找到可导入的消息', 'warn');
+                else if (failed) toast(`已导入 ${imported} 条消息，${failed} 条失败：${lastError.message}`, 'error');
+                else toast(`已导入 ${imported} 条消息`);
             }
         } catch (error: any) {
             try { assertSession(); } catch { return; }
-            toast(`Import failed${imported || failed ? ` after ${imported} imported and ${failed} failed message(s)` : ''}: ${error.message || error}`, 'error');
+            toast(`导入失败${imported || failed ? `（已导入 ${imported} 条，失败 ${failed} 条）` : ''}：${error.message || error}`, 'error');
         } finally {
             try {
                 assertSession();
@@ -2841,9 +2841,9 @@ export function MessagesView({ params, query }: any) {
         try { snapshot = captureResult(); total = await ensureTotal(snapshot); assertSession(); }
         catch (e: any) {
             try { assertSession(); } catch { return; }
-            toast(`Count failed: ${e.message}`, 'error'); return;
+            toast(`统计数量失败：${e.message}`, 'error'); return;
         }
-        if (!total) { toast('No results to export', 'warn'); return; }
+        if (!total) { toast('没有可导出的结果', 'warn'); return; }
         exportResultsDialog({ channelId, total, lastParams: snapshot.result.params, assertCurrent: snapshot.assertCurrent, assertSession });
     }
 
@@ -2907,7 +2907,7 @@ export function MessagesView({ params, query }: any) {
                     const names = await api.channels.connectorNames(channelId);
                     if (!cancelled) setConnectors(connectorEntries(names));
                 } catch (e: any) {
-                    toast(`Failed to load connectors: ${e.message}`, 'error');
+                    toast(`加载连接器失败：${e.message}`, 'error');
                 }
                 if (!cancelled) await loadMetaDataColumns();
             }
@@ -2923,10 +2923,10 @@ export function MessagesView({ params, query }: any) {
                     // this async handler returns; defer past it (rAF runs after that
                     // microtask, before paint) so the channel name sticks without a flash.
                     window.requestAnimationFrame(() => window.dispatchEvent(new CustomEvent('webadmin:set-title', {
-                        detail: { title: `Channel Messages - ${found.name}` }
+                        detail: { title: `通道消息 - ${found.name}` }
                     })));
                 }
-            } catch (e: any) { toast(`Failed to load channels: ${e.message || e}`, 'error'); }
+            } catch (e: any) { toast(`加载通道失败：${e.message || e}`, 'error'); }
             // Nothing to search until a channel is chosen.
             if (!cancelled && channelId && metaDataReadyRef.current) searchRef.current(true, { automatic: true });
         })();
@@ -2940,9 +2940,9 @@ export function MessagesView({ params, query }: any) {
 
     /* ---- render ---- */
 
-    const statusLabel = statusSel.size === 0 ? 'Any'
+    const statusLabel = statusSel.size === 0 ? '任意'
         : statusSel.size === 1 ? [...statusSel][0]
-            : `${statusSel.size} selected`;
+            : `已选 ${statusSel.size} 项`;
     const totalStr = pager.total == null ? '?' : fmtNumber(pager.total);
     const hasSel = !!selected;
 
@@ -2954,13 +2954,13 @@ export function MessagesView({ params, query }: any) {
        new channel's connectors and metadata columns. */
     const channelPicker = (
         <label className="msg-channel">
-            <span>Channel</span>
-            <select value={channelId || ''} aria-label="Channel"
+            <span>通道</span>
+            <select value={channelId || ''} aria-label="通道"
                 onChange={(e: any) => {
                     const id = e.target.value;
                     router.navigate(id ? `/messages/${id}` : '/messages');
                 }}>
-                <option value="">Select a channel…</option>
+                <option value="">请选择通道…</option>
                 {channelList.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
         </label>
@@ -2969,13 +2969,13 @@ export function MessagesView({ params, query }: any) {
     const criteria = (
         <>
                         <div className="form-row">
-                            <Field label="Start Date">
-                                <DateTimeField value={startDate} onChange={setStartDate} label="Start date" />
+                            <Field label="开始日期">
+                                <DateTimeField value={startDate} onChange={setStartDate} label="开始日期" />
                             </Field>
-                            <Field label="End Date">
-                                <DateTimeField value={endDate} onChange={setEndDate} label="End date" />
+                            <Field label="结束日期">
+                                <DateTimeField value={endDate} onChange={setEndDate} label="结束日期" />
                             </Field>
-                            <Field label="Status">
+                            <Field label="状态">
                                 <DropdownMenu.Root open={statusMenuOpen} onOpenChange={setStatusMenuOpen}>
                                     <DropdownMenu.Trigger asChild>
                                         <button type="button" className="btn justify-between min-w-[119px] font-normal">
@@ -3007,7 +3007,7 @@ export function MessagesView({ params, query }: any) {
                                             ))}
                                             <DropdownMenu.Separator className="ctx-sep" />
                                             <DropdownMenu.Item className="ctx-item"
-                                                onSelect={() => setStatusSel(new Set())}>Clear (Any)</DropdownMenu.Item>
+                                                onSelect={() => setStatusSel(new Set())}>清除（任意）</DropdownMenu.Item>
                                         </DropdownMenu.Content>
                                     </DropdownMenu.Portal>
                                 </DropdownMenu.Root>
@@ -3015,37 +3015,37 @@ export function MessagesView({ params, query }: any) {
                             {/* The Regex checkbox rides on the label line (top-right of the
                                 field) so it costs no slot in the criteria row. */}
                             <div className="field relative">
-                                <label>Text Search</label>
+                                <label>文本搜索</label>
                                 <label className="check msg-regex"
-                                    title="Treat the text search as a regular expression">
+                                    title="将文本搜索按正则表达式处理">
                                     <input type="checkbox" checked={textRegex} onChange={(e: any) => setTextRegex(e.target.checked)} />
-                                    Regex
+                                    正则表达式
                                 </label>
-                                <input type="text" placeholder="Search message content…" className="w-[198px]"
+                                <input type="text" placeholder="搜索消息内容…" className="w-[198px]"
                                     value={textSearch} onChange={(e: any) => setTextSearch(e.target.value)}
                                     onKeyDown={(e: any) => { if (e.key === 'Enter') runSearch(true); }} />
                             </div>
-                            <Field label="Connector">
+                            <Field label="连接器">
                                 <select value={connectorVal} onChange={(e: any) => setConnectorVal(e.target.value)}>
-                                    <option value="">Any</option>
+                                    <option value="">任意</option>
                                     {connectors.map(c => (
                                         <option key={c.metaDataId} value={String(c.metaDataId)}>{`${c.name} (${c.metaDataId})`}</option>
                                     ))}
                                 </select>
                             </Field>
-                            <Field label="Page Size">
+                            <Field label="每页条数">
                                 <select value={pageSize} onChange={(e: any) => setPageSize(e.target.value)}>
                                     {[20, 50, 100].map(n => <option key={n} value={String(n)}>{n}</option>)}
                                 </select>
                             </Field>
-                            <button className="btn btn-primary" onClick={() => runSearch(true)}><Icon name="search" />Search</button>
-                            <button className="btn" onClick={resetSearch}>Reset</button>
+                            <button className="btn btn-primary" onClick={() => runSearch(true)}><Icon name="search" />搜索</button>
+                            <button className="btn" onClick={resetSearch}>重置</button>
                             {/* The Advanced… button carries a dot whenever any advanced
                                 criterion is staged. Applying advanced criteria does NOT
                                 auto-search — the user runs it with Search (Swing parity). */}
                             <button className="btn" onClick={openAdvanced}
-                                title={advOn ? 'Advanced filter applied — press Search to run it' : undefined}>
-                                <Icon name="filter" />Advanced…
+                                title={advOn ? '已应用高级筛选条件，请点击搜索执行' : undefined}>
+                                <Icon name="filter" />高级…
                                 {advOn && <span className="inline-block w-[6px] h-[6px] ml-[6px] rounded-full bg-accent" />}
                             </button>
                         </div>
@@ -3059,25 +3059,25 @@ export function MessagesView({ params, query }: any) {
                 pane stays empty until one is chosen rather than offering actions
                 that cannot run. */}
             {channelId && <ViewTasks>
-                <RailPane title="Message Tasks" paneKey="tasks:Message Tasks" group="message">
+                <RailPane title="消息任务" paneKey="tasks:Message Tasks" group="message">
                     <div className="taskbar" data-pane-title="Message Tasks">
-                        <TaskButton label="Refresh" icon="refresh" task="doRefreshMessages" onClick={() => runSearch(true)} />
-                        <TaskButton label="Send Message" icon="send" primary task="doSendMessage" onClick={sendMessageTask} />
-                        <TaskButton label="Import Messages" icon="import" task="doImportMessages" onClick={importMessagesTask} />
-                        <TaskButton label="Export Results" icon="export" task="doExportMessages" onClick={exportResultsTask} />
-                        <TaskButton label="Remove All Messages" icon="trash" danger task="doRemoveAllMessages" onClick={removeAllTask} />
-                        <TaskButton label="Remove Results" icon="trash" danger task="doRemoveFilteredMessages" onClick={removeResultsTask} />
-                        {hasSel && <TaskButton label="Remove Message" icon="trash" danger task="doRemoveMessage" onClick={() => removeMessageTask()} />}
-                        <TaskButton label="Reprocess Results" icon="transform" task="doReprocessFilteredMessages" onClick={reprocessResultsTask} />
-                        {hasSel && <TaskButton label="Reprocess Message" icon="transform" task="doReprocessMessage" onClick={() => reprocessTask()} />}
-                        <TaskButton label="Select for Compare" icon="compare" task="doSelectForCompare"
+                        <TaskButton label="刷新" icon="refresh" task="doRefreshMessages" onClick={() => runSearch(true)} />
+                        <TaskButton label="发送消息" icon="send" primary task="doSendMessage" onClick={sendMessageTask} />
+                        <TaskButton label="导入消息" icon="import" task="doImportMessages" onClick={importMessagesTask} />
+                        <TaskButton label="导出结果" icon="export" task="doExportMessages" onClick={exportResultsTask} />
+                        <TaskButton label="移除全部消息" icon="trash" danger task="doRemoveAllMessages" onClick={removeAllTask} />
+                        <TaskButton label="移除结果" icon="trash" danger task="doRemoveFilteredMessages" onClick={removeResultsTask} />
+                        {hasSel && <TaskButton label="移除消息" icon="trash" danger task="doRemoveMessage" onClick={() => removeMessageTask()} />}
+                        <TaskButton label="重新处理结果" icon="transform" task="doReprocessFilteredMessages" onClick={reprocessResultsTask} />
+                        {hasSel && <TaskButton label="重新处理消息" icon="transform" task="doReprocessMessage" onClick={() => reprocessTask()} />}
+                        <TaskButton label="选择以对比" icon="compare" task="doSelectForCompare"
                             onClick={selectForCompareTask}
-                            title={activeStage ? `Select ${describeRef(activeStage)} for comparison` : undefined} />
+                            title={activeStage ? `选择 ${describeRef(activeStage)} 进行对比` : undefined} />
                         {/* Greyed rather than hidden: the task exists, it just has
                             nothing to compare against yet (Swing's task-rail idiom). */}
-                        <TaskButton label="Compare to Selection" icon="compare" task="doCompareWithSelection"
+                        <TaskButton label="与所选内容对比" icon="compare" task="doCompareWithSelection"
                             disabled={!anchor} onClick={compareWithSelectionTask}
-                            title={anchor ? `Compare against ${describeRef(anchor)}` : 'Select content for compare first'} />
+                            title={anchor ? `与 ${describeRef(anchor)} 对比` : '请先选择要对比的内容'} />
                         {/* Plugin message actions for the selected row — selection-gated
                             like Remove/Reprocess Message, and the row menu's twins. */}
                         {hasSel && messageActionItems(selected.m, selected.metaDataId).map((a: any) => (
@@ -3088,7 +3088,7 @@ export function MessagesView({ params, query }: any) {
             </ViewTasks>}
             <div className="view-body flush flex flex-col h-full min-h-0">
                 {metaDataError && <div className="panel border-danger text-danger mx-[13px] mt-3" role="alert">
-                    Failed to load channel metadata: {metaDataError}. Search will retry this request.
+                    加载通道元数据失败：{metaDataError}，搜索时会重试该请求
                 </div>}
                 {/* Wide: click the "Search Criteria" heading to collapse the criteria
                     in place. Narrow: they collapse into a "Filters" popover. */}
@@ -3098,12 +3098,12 @@ export function MessagesView({ params, query }: any) {
                 <div ref={criteriaPanelRef} className="panel filter-collapse flex-none mx-[13px] mt-3 mb-3">
                     {narrowCriteria ? (
                         <div className="panel-header flex items-center gap-2">
-                            <span className="criteria-heading inline-flex items-center gap-1.5">Search Criteria</span>
+                            <span className="criteria-heading inline-flex items-center gap-1.5">搜索条件</span>
                             {channelPicker}
                             <Popover.Root open={filtersOpen} onOpenChange={setFiltersOpen}>
                                 <Popover.Trigger asChild>
                                     <button className="btn filter-toggle" type="button">
-                                        <Icon name="filter" /><span>Filters</span><Icon name="chevD" />
+                                        <Icon name="filter" /><span>筛选</span><Icon name="chevD" />
                                     </button>
                                 </Popover.Trigger>
                                 <Popover.Portal>
@@ -3121,7 +3121,7 @@ export function MessagesView({ params, query }: any) {
                                 <Collapsible.Trigger asChild>
                                     <button type="button" className="criteria-heading inline-flex items-center gap-1.5">
                                         <span aria-hidden="true">{criteriaCollapsed ? '▸' : '▾'}</span>
-                                        Search Criteria
+                                        搜索条件
                                     </button>
                                 </Collapsible.Trigger>
                                 {channelPicker}
@@ -3136,7 +3136,7 @@ export function MessagesView({ params, query }: any) {
                     {!channelId ? (
                         <div className="dt-empty">
                             <div className="empty-icon"><Icon name="messages" size={30} /></div>
-                            Choose a channel to search its messages.
+                            请选择一个通道以搜索其消息
                         </div>
                     ) : (
                     <ResultsTable
@@ -3162,23 +3162,23 @@ export function MessagesView({ params, query }: any) {
 
                 <div className="filterbar flex-none panel overflow-visible mx-[13px]">
                     <button className="btn" disabled={pager.offset <= 0}
-                        onClick={() => runSearch(false, { offset: 0 })}>« First</button>
+                        onClick={() => runSearch(false, { offset: 0 })}>« 首页</button>
                     <button className="btn" disabled={pager.offset <= 0}
-                        onClick={() => runSearch(false, { offset: Math.max(0, offsetRef.current - limitRef.current) })}>‹ Prev</button>
+                        onClick={() => runSearch(false, { offset: Math.max(0, offsetRef.current - limitRef.current) })}>‹ 上一页</button>
                     <button className="btn" disabled={!pager.hasNext}
-                        onClick={() => runSearch(false, { offset: offsetRef.current + limitRef.current })}>Next ›</button>
+                        onClick={() => runSearch(false, { offset: offsetRef.current + limitRef.current })}>下一页 ›</button>
                     {/* Can't jump to the last page without a total. */}
                     <button className="btn" disabled={pager.total == null}
                         onClick={() => {
                             runSearch(false, { offset: Math.max(0, Math.floor(Math.max(0, totalRef.current - 1) / limitRef.current) * limitRef.current) });
-                        }}>Last »</button>
+                        }}>末页 »</button>
                     <span className="counts">
                         {pager.shown == null ? ''
-                            : pager.shown === 0 ? 'No results'
-                                : `${fmtNumber(pager.offset + 1)}–${fmtNumber(pager.offset + pager.shown)} of ${totalStr}`}
+                            : pager.shown === 0 ? '无结果'
+                                : `${fmtNumber(pager.offset + 1)}–${fmtNumber(pager.offset + pager.shown)} 共 ${totalStr}`}
                     </span>
                     {/* Nothing left to count once the total is known. */}
-                    <button className="btn" disabled={pager.total != null || countBusy} onClick={doCount}>Count</button>
+                    <button className="btn" disabled={pager.total != null || countBusy} onClick={doCount}>统计数量</button>
                 </div>
 
                 <div className="split-handle mx-[13px]" data-orient="v" data-resize="next" />
@@ -3203,8 +3203,8 @@ export function MessagesView({ params, query }: any) {
                            than what went away. */
                         const kept = info?.cleared ? null : getAnchor();
                         toast(kept
-                            ? `Comparison closed — ${describeRef(kept)} is still selected for compare`
-                            : 'Comparison closed');
+                            ? `对比已关闭——${describeRef(kept)} 仍被选为对比基准`
+                            : '对比已关闭');
                     }} />
             )}
         </div>

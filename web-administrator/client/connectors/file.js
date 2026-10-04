@@ -16,7 +16,7 @@ import { h, clear, checkbox, select, textInput } from '@oie/web-ui';
 // (rendered as custom DOM / append, matching http.jsx idioms).
 import { ConnectorForm, PollSection, connectorTestButton, asBool, YES_NO, defaultSourceProperties, defaultDestinationProperties, defaultPollProperties, CHARSETS, requireFields } from './react-forms.js';
 const SCHEMES = [
-    { value: 'FILE', label: 'File' },
+    { value: 'FILE', label: '文件' },
     { value: 'FTP', label: 'FTP' },
     { value: 'SFTP', label: 'SFTP' },
     { value: 'S3', label: 'Amazon S3' },
@@ -59,8 +59,8 @@ function onFileTypeSet(p) {
         p.charsetEncoding = 'DEFAULT_ENCODING';
 }
 const FILE_TYPE_OPTIONS = [
-    { value: true, label: 'Binary' },
-    { value: false, label: 'Text' }
+    { value: true, label: '二进制' },
+    { value: false, label: '文本' }
 ];
 /* File Writer "File Exists" is a single 3-way radio (Append/Overwrite/Error) in
    Swing, mapping onto the two booleans outputAppend + errorOnExists:
@@ -81,14 +81,14 @@ function fileExistsValue(p) {
 function fileExistsField() {
     const allowAppend = (p) => p.scheme !== 'S3' && p.scheme !== 'WEBDAV';
     return {
-        label: 'File Exists', type: 'custom', refresh: true,
+        label: '文件已存在时', type: 'custom', refresh: true,
         render: (p, { onChange, repaint }) => {
             const current = fileExistsValue(p);
             const group = h('div.radio-group.inline-row');
             const opts = [
-                { value: 'append', label: 'Append' },
-                { value: 'overwrite', label: 'Overwrite' },
-                { value: 'error', label: 'Error' }
+                { value: 'append', label: '追加' },
+                { value: 'overwrite', label: '覆盖' },
+                { value: 'error', label: '报错' }
             ];
             opts.forEach((o) => {
                 const input = h('input', {
@@ -120,7 +120,7 @@ function regionPicker(p, ctx) {
     const sp = p.schemeProperties || {};
     const current = sp.region || '';
     const isKnown = S3_REGIONS.includes(current);
-    const opts = [{ value: 'Custom', label: 'Custom' }, ...S3_REGIONS.map((r) => ({ value: r, label: r }))];
+    const opts = [{ value: 'Custom', label: '自定义' }, ...S3_REGIONS.map((r) => ({ value: r, label: r }))];
     const sel = select(opts, isKnown ? current : 'Custom', {
         onChange: (e) => {
             const v = e.target.value;
@@ -142,7 +142,7 @@ function schemePrefix(p) {
     switch (String(p.scheme)) {
         case 'FTP': return 'ftp://';
         case 'SFTP': return 'sftp://';
-        case 'S3': return 'S3 Bucket:';
+        case 'S3': return 'S3 存储桶：';
         case 'SMB': return 'smb://';
         case 'WEBDAV': return asBool(p.secure) ? 'https://' : 'http://';
         default: return '';
@@ -226,16 +226,16 @@ function sftpKeyEnabled(p) {
 }
 function sftpAuthField() {
     return {
-        label: 'Authentication', type: 'custom', refresh: true,
+        label: '认证方式', type: 'custom', refresh: true,
         visible: (p) => p.scheme === 'SFTP',
         render: (p, { onChange, repaint }) => {
             const sp = p.schemeProperties || {};
             const current = sftpAuthValue(sp);
             const group = h('div.radio-group.inline-row');
             const opts = [
-                { value: 'password', label: 'Password' },
-                { value: 'key', label: 'Public Key' },
-                { value: 'both', label: 'Both' }
+                { value: 'password', label: '密码' },
+                { value: 'key', label: '公钥' },
+                { value: 'both', label: '两者' }
             ];
             opts.forEach((o) => {
                 const input = h('input', {
@@ -348,7 +348,7 @@ function onWriterSchemeChange(properties) {
 /* FTP initial commands: List<String> rendered one-per-line. */
 function ftpInitialCommandsField() {
     return {
-        label: 'Initial Commands', type: 'custom', span: true,
+        label: '初始命令', type: 'custom', span: true,
         visible: (p) => p.scheme === 'FTP',
         render: (p, { onChange }) => {
             const sp = p.schemeProperties || {};
@@ -360,7 +360,7 @@ function ftpInitialCommandsField() {
                 lines = [lines];
             const area = h('textarea', {
                 rows: 3,
-                placeholder: 'One FTP command per line, sent after connecting',
+                placeholder: '每行一条 FTP 命令，连接后发送',
                 onInput: (e) => {
                     const values = e.target.value.split('\n').map((s) => s.trim()).filter((s) => s !== '');
                     sp.initialCommands = values.length ? { string: values } : null;
@@ -376,44 +376,44 @@ function schemeSettingsFields() {
     const sftp = (p) => p.scheme === 'SFTP';
     const s3 = (p) => p.scheme === 'S3';
     return [
-        { section: 'FTP Settings', visible: (p) => p.scheme === 'FTP' },
+        { section: 'FTP 设置', visible: (p) => p.scheme === 'FTP' },
         ftpInitialCommandsField(),
-        { section: 'SFTP Settings', visible: sftp },
+        { section: 'SFTP 设置', visible: sftp },
         sftpAuthField(),
-        { key: 'schemeProperties.keyFile', label: 'Public/Private Key File', type: 'text', width: '320px', visible: (p) => sftp(p) && sftpKeyEnabled(p) },
-        { key: 'schemeProperties.passPhrase', label: 'Passphrase', type: 'password', width: '220px', visible: (p) => sftp(p) && sftpKeyEnabled(p) },
-        { key: 'schemeProperties.hostKeyChecking', label: 'Host Key Checking', type: 'select', width: '120px', visible: sftp, options: [
-                { value: 'yes', label: 'Yes' },
-                { value: 'ask', label: 'Ask' },
-                { value: 'no', label: 'No' }
+        { key: 'schemeProperties.keyFile', label: '公钥/私钥文件', type: 'text', width: '320px', visible: (p) => sftp(p) && sftpKeyEnabled(p) },
+        { key: 'schemeProperties.passPhrase', label: '口令', type: 'password', width: '220px', visible: (p) => sftp(p) && sftpKeyEnabled(p) },
+        { key: 'schemeProperties.hostKeyChecking', label: '主机密钥检查', type: 'select', width: '120px', visible: sftp, options: [
+                { value: 'yes', label: '是' },
+                { value: 'ask', label: '询问' },
+                { value: 'no', label: '否' }
             ] },
-        { key: 'schemeProperties.knownHostsFile', label: 'Known Hosts File', type: 'text', width: '320px', visible: sftp },
-        { key: 'schemeProperties.configurationSettings', label: 'Configuration Options', type: 'keyvalue', visible: sftp },
-        { section: 'Amazon S3 Settings', visible: s3 },
+        { key: 'schemeProperties.knownHostsFile', label: '已知主机文件', type: 'text', width: '320px', visible: sftp },
+        { key: 'schemeProperties.configurationSettings', label: '配置选项', type: 'keyvalue', visible: sftp },
+        { section: 'Amazon S3 设置', visible: s3 },
         {
-            key: 'schemeProperties.useDefaultCredentialProviderChain', label: 'Use Default Credential Provider Chain',
+            key: 'schemeProperties.useDefaultCredentialProviderChain', label: '使用默认凭证提供程序链',
             type: 'radio', options: YES_NO, refresh: true, visible: s3,
             // Swing AdvancedS3SettingsDialog greys these + shows a red warning when
             // the connector is using Anonymous credentials.
             disabled: (p) => asBool(p.anonymous),
             append: (p) => asBool(p.anonymous)
-                ? h('span', { class: 'text-[#c0392b] ml-3 font-[500]' }, 'Anonymous credentials are currently in use')
+                ? h('span', { class: 'text-[#c0392b] ml-3 font-[500]' }, '当前正在使用匿名凭证')
                 : null,
-            tooltip: 'When No, the Username/Password above are used as the AWS access key ID / secret access key'
+            tooltip: '选择「否」时，使用上方的用户名/密码作为 AWS 访问密钥 ID / 秘密访问密钥'
         },
-        { key: 'schemeProperties.useTemporaryCredentials', label: 'Use Temporary Credentials', type: 'radio', options: YES_NO, refresh: true, visible: s3, disabled: (p) => asBool(p.anonymous) },
-        { key: 'schemeProperties.duration', label: 'Duration (seconds)', type: 'number', numeric: true, width: '110px', visible: (p) => s3(p) && asBool(p.schemeProperties && p.schemeProperties.useTemporaryCredentials), disabled: (p) => asBool(p.anonymous) },
+        { key: 'schemeProperties.useTemporaryCredentials', label: '使用临时凭证', type: 'radio', options: YES_NO, refresh: true, visible: s3, disabled: (p) => asBool(p.anonymous) },
+        { key: 'schemeProperties.duration', label: '时长（秒）', type: 'number', numeric: true, width: '110px', visible: (p) => s3(p) && asBool(p.schemeProperties && p.schemeProperties.useTemporaryCredentials), disabled: (p) => asBool(p.anonymous) },
         {
-            key: 'schemeProperties.region', label: 'Region', type: 'text', width: '160px', visible: s3, placeholder: 'us-east-1', refresh: true,
+            key: 'schemeProperties.region', label: '区域', type: 'text', width: '160px', visible: s3, placeholder: 'us-east-1', refresh: true,
             // Region helper combo (AdvancedS3SettingsDialog.regionComboBox): picking
             // a known Region id fills the text field; a non-matching typed value
             // snaps the combo to "Custom" (regionFieldUpdated/regionComboBoxActionPerformed).
             append: (p, ctx) => regionPicker(p, ctx)
         },
-        { key: 'schemeProperties.customHeaders', label: 'Custom HTTP Headers', type: 'keyvalue', mapShape: 'list', visible: s3 },
-        { section: 'SMB Settings', visible: (p) => p.scheme === 'SMB' },
-        { key: 'schemeProperties.smbMinVersion', label: 'SMB Minimum Version', type: 'select', options: SMB_VERSIONS, width: '140px', visible: (p) => p.scheme === 'SMB' },
-        { key: 'schemeProperties.smbMaxVersion', label: 'SMB Maximum Version', type: 'select', options: SMB_VERSIONS, width: '140px', visible: (p) => p.scheme === 'SMB' }
+        { key: 'schemeProperties.customHeaders', label: '自定义 HTTP 请求头', type: 'keyvalue', mapShape: 'list', visible: s3 },
+        { section: 'SMB 设置', visible: (p) => p.scheme === 'SMB' },
+        { key: 'schemeProperties.smbMinVersion', label: 'SMB 最低版本', type: 'select', options: SMB_VERSIONS, width: '140px', visible: (p) => p.scheme === 'SMB' },
+        { key: 'schemeProperties.smbMaxVersion', label: 'SMB 最高版本', type: 'select', options: SMB_VERSIONS, width: '140px', visible: (p) => p.scheme === 'SMB' }
     ];
 }
 /* File-name template variables (Swing MirthVariableList). A connector-specific
@@ -514,19 +514,19 @@ function afterProcessingBlock(properties, onChange) {
                     return inp;
                 };
                 const rows = [
-                    [labelCell('After Processing Action'), radioCell('afterProcessingAction', [
-                            { value: 'NONE', label: 'None' }, { value: 'MOVE', label: 'Move' }, { value: 'DELETE', label: 'Delete' }
+                    [labelCell('处理后动作'), radioCell('afterProcessingAction', [
+                            { value: 'NONE', label: '无' }, { value: 'MOVE', label: '移动' }, { value: 'DELETE', label: '删除' }
                         ])],
-                    [labelCell('Move-to Directory', moveDis), inputCell('moveToDirectory', '320px', moveDis)],
-                    [labelCell('Move-to File Name', moveDis), inputCell('moveToFileName', '220px', moveDis)],
-                    [labelCell('Error Reading Action'), radioCell('errorReadingAction', [
-                            { value: 'NONE', label: 'None' }, { value: 'MOVE', label: 'Move' }, { value: 'DELETE', label: 'Delete' }
+                    [labelCell('移动到的目录', moveDis), inputCell('moveToDirectory', '320px', moveDis)],
+                    [labelCell('移动后的文件名', moveDis), inputCell('moveToFileName', '220px', moveDis)],
+                    [labelCell('读取错误时动作'), radioCell('errorReadingAction', [
+                            { value: 'NONE', label: '无' }, { value: 'MOVE', label: '移动' }, { value: 'DELETE', label: '删除' }
                         ])],
-                    [labelCell('Error in Response Action'), radioCell('errorResponseAction', [
-                            { value: 'AFTER_PROCESSING', label: 'After Processing Action' }, { value: 'MOVE', label: 'Move' }, { value: 'DELETE', label: 'Delete' }
+                    [labelCell('响应错误时动作'), radioCell('errorResponseAction', [
+                            { value: 'AFTER_PROCESSING', label: '同处理后动作' }, { value: 'MOVE', label: '移动' }, { value: 'DELETE', label: '删除' }
                         ])],
-                    [labelCell('Error Move-to Directory', errDis), inputCell('errorMoveToDirectory', '320px', errDis)],
-                    [labelCell('Error Move-to File Name', errDis), inputCell('errorMoveToFileName', '220px', errDis)]
+                    [labelCell('错误移动到的目录', errDis), inputCell('errorMoveToDirectory', '320px', errDis)],
+                    [labelCell('错误移动后的文件名', errDis), inputCell('errorMoveToFileName', '220px', errDis)]
                 ];
                 rows.forEach(([lab, ctrl], i) => {
                     lab.style.gridColumn = '1';
@@ -541,7 +541,7 @@ function afterProcessingBlock(properties, onChange) {
                 }, FILE_NAME_VARS.map((v) => {
                     const item = h('div', {
                         class: 'py-[3px] px-3 cursor-grab font-mono text-[11px] select-none',
-                        title: `Drag into a Move-to / Error field, or click to insert into the last-focused one`,
+                        title: `拖到"移动到/错误"字段中，或点击插入到最近聚焦的字段`,
                         onClick: () => insertVar(v)
                     }, v);
                     // Draggable: a text/plain ${var} drops natively into the text
@@ -616,52 +616,52 @@ const fileReader = {
         return (React.createElement("div", null,
             React.createElement(PollSection, { properties: properties, onChange: onChange }),
             React.createElement(ConnectorForm, { properties: properties, onChange: onChange, fields: [
-                    { section: 'Connection Settings' },
-                    { key: 'scheme', label: 'Method', type: 'select', options: SCHEMES, refresh: true, width: '160px', onSet: onSchemeChange, append: () => connectorTestButton({ label: 'Test Read', icon: 'folder', path: '/connectors/file/_testRead', channel, properties }) },
-                    { key: 'host', label: 'Directory', type: 'text', width: '420px', disabled: (p) => p.scheme !== 'FILE' },
+                    { section: '连接设置' },
+                    { key: 'scheme', label: '方式', type: 'select', options: SCHEMES, refresh: true, width: '160px', onSet: onSchemeChange, append: () => connectorTestButton({ label: '测试读取', icon: 'folder', path: '/connectors/file/_testRead', channel, properties }) },
+                    { key: 'host', label: '目录', type: 'text', width: '420px', disabled: (p) => p.scheme !== 'FILE' },
                     hostPathField(onChange),
-                    { key: 'fileFilter', label: 'Filename Filter Pattern', type: 'text', width: '220px' },
-                    { key: 'regex', label: 'Regular Expression', type: 'radio', options: YES_NO },
-                    { key: 'directoryRecursion', label: 'Include All Subdirectories', type: 'radio', options: YES_NO, refresh: true },
-                    { key: 'ignoreDot', label: 'Ignore . files', type: 'radio', options: YES_NO },
+                    { key: 'fileFilter', label: '文件名筛选模式', type: 'text', width: '220px' },
+                    { key: 'regex', label: '正则表达式', type: 'radio', options: YES_NO },
+                    { key: 'directoryRecursion', label: '包含所有子目录', type: 'radio', options: YES_NO, refresh: true },
+                    { key: 'ignoreDot', label: '忽略 . 开头的文件', type: 'radio', options: YES_NO },
                     {
-                        key: 'anonymous', label: 'Anonymous', type: 'radio', options: YES_NO, refresh: true,
+                        key: 'anonymous', label: '匿名访问', type: 'radio', options: YES_NO, refresh: true,
                         disabled: (p) => !anonymousEnabled(p), onSet: applyAnonymous
                     },
-                    { key: 'username', label: (p) => p.scheme === 'S3' ? 'AWS Access Key ID' : 'Username', type: 'text', width: '220px', disabled: credentialsDisabled },
-                    { key: 'password', label: (p) => p.scheme === 'S3' ? 'AWS Secret Access Key' : 'Password', type: 'password', width: '220px', disabled: credentialsDisabled },
-                    { key: 'timeout', label: 'Timeout (ms)', type: 'number', width: '120px', disabled: (p) => !timeoutEnabled(p) },
-                    { key: 'secure', label: 'Secure Mode', type: 'radio', options: YES_NO, disabled: (p) => !secureEnabled(p) },
-                    { key: 'passive', label: 'Passive Mode', type: 'radio', options: YES_NO, disabled: (p) => !passiveEnabled(p) },
-                    { key: 'validateConnection', label: 'Validate Connection', type: 'radio', options: YES_NO, disabled: (p) => !validateEnabled(p) },
+                    { key: 'username', label: (p) => p.scheme === 'S3' ? 'AWS 访问密钥 ID' : '用户名', type: 'text', width: '220px', disabled: credentialsDisabled },
+                    { key: 'password', label: (p) => p.scheme === 'S3' ? 'AWS 私有访问密钥' : '密码', type: 'password', width: '220px', disabled: credentialsDisabled },
+                    { key: 'timeout', label: '超时（毫秒）', type: 'number', width: '120px', disabled: (p) => !timeoutEnabled(p) },
+                    { key: 'secure', label: '安全模式', type: 'radio', options: YES_NO, disabled: (p) => !secureEnabled(p) },
+                    { key: 'passive', label: '被动模式', type: 'radio', options: YES_NO, disabled: (p) => !passiveEnabled(p) },
+                    { key: 'validateConnection', label: '验证连接', type: 'radio', options: YES_NO, disabled: (p) => !validateEnabled(p) },
                     ...schemeSettingsFields(),
-                    { section: 'After Processing' },
+                    { section: '处理后' },
                     afterProcessingBlock(properties, onChange),
-                    { key: 'checkFileAge', label: 'Check File Age', type: 'radio', options: YES_NO, refresh: true },
-                    { key: 'fileAge', label: 'File Age (ms)', type: 'number', width: '120px', disabled: (p) => !asBool(p.checkFileAge) },
+                    { key: 'checkFileAge', label: '检查文件年龄', type: 'radio', options: YES_NO, refresh: true },
+                    { key: 'fileAge', label: '文件年龄（毫秒）', type: 'number', width: '120px', disabled: (p) => !asBool(p.checkFileAge) },
                     // Swing renders File Size as one row: [min] - [max] [Ignore Maximum].
                     // Min/Max stay as separate typed fields (a typed input cannot live
                     // in `append`, which is rebuilt on every repaint); the Ignore Maximum
                     // checkbox is appended to the Maximum field and greys it out when set
                     // (ignoreFileSizeMaximumCheckBox.setEnabled), matching Swing.
-                    { key: 'fileSizeMinimum', label: 'File Size (bytes)', type: 'number', width: '120px' },
+                    { key: 'fileSizeMinimum', label: '文件大小（字节）', type: 'number', width: '120px' },
                     {
-                        key: 'fileSizeMaximum', label: 'to', type: 'number', width: '120px', refresh: true,
+                        key: 'fileSizeMaximum', label: '至', type: 'number', width: '120px', refresh: true,
                         disabled: (p) => asBool(p.ignoreFileSizeMaximum),
-                        append: (p, ctx) => checkbox('Ignore Maximum', asBool(p.ignoreFileSizeMaximum), {
+                        append: (p, ctx) => checkbox('忽略最大值', asBool(p.ignoreFileSizeMaximum), {
                             onChange: (e) => { p.ignoreFileSizeMaximum = e.target.checked; ctx.onChange(); ctx.repaint && ctx.repaint(); }
                         }).el
                     },
-                    { key: 'sortBy', label: 'Sort Files By', type: 'select', width: '120px', options: [
-                            { value: 'date', label: 'Date' },
-                            { value: 'name', label: 'Name' },
-                            { value: 'size', label: 'Size' }
+                    { key: 'sortBy', label: '文件排序方式', type: 'select', width: '120px', options: [
+                            { value: 'date', label: '日期' },
+                            { value: 'name', label: '名称' },
+                            { value: 'size', label: '大小' }
                         ] },
                     {
-                        key: 'binary', label: 'File Type', type: 'radio', refresh: true,
+                        key: 'binary', label: '文件类型', type: 'radio', refresh: true,
                         onSet: onFileTypeSet, options: FILE_TYPE_OPTIONS
                     },
-                    { key: 'charsetEncoding', label: 'Encoding', type: 'select', options: CHARSETS, width: '160px', disabled: (p) => asBool(p.binary) }
+                    { key: 'charsetEncoding', label: '编码', type: 'select', options: CHARSETS, width: '160px', disabled: (p) => asBool(p.binary) }
                 ] })));
     },
     // FileReader.checkProperties / setDirHostPath: Directory (FILE) or Host
@@ -671,15 +671,15 @@ const fileReader = {
     // maximum required unless Ignore Maximum is set.
     validate(properties) {
         return requireFields(properties, [
-            { key: 'host', label: 'Directory', when: (p) => p.scheme === 'FILE' },
-            { key: 'host', label: 'Host', when: (p) => p.scheme !== 'FILE' },
-            { key: 'fileFilter', label: 'Filename Filter Pattern' },
-            { key: 'username', label: 'Username', when: credentialsRequired },
-            { key: 'password', label: 'Password', when: passwordRequired },
-            { key: 'timeout', label: 'Timeout', when: (p) => ['FTP', 'SFTP', 'SMB'].includes(p.scheme) },
-            { key: 'fileAge', label: 'File Age', when: (p) => asBool(p.checkFileAge) },
-            { key: 'fileSizeMinimum', label: 'File Size (bytes)' },
-            { key: 'fileSizeMaximum', label: 'File Size Maximum', when: (p) => !asBool(p.ignoreFileSizeMaximum) }
+            { key: 'host', label: '目录', when: (p) => p.scheme === 'FILE' },
+            { key: 'host', label: '主机', when: (p) => p.scheme !== 'FILE' },
+            { key: 'fileFilter', label: '文件名筛选模式' },
+            { key: 'username', label: '用户名', when: credentialsRequired },
+            { key: 'password', label: '密码', when: passwordRequired },
+            { key: 'timeout', label: '超时', when: (p) => ['FTP', 'SFTP', 'SMB'].includes(p.scheme) },
+            { key: 'fileAge', label: '文件年龄', when: (p) => asBool(p.checkFileAge) },
+            { key: 'fileSizeMinimum', label: '文件大小（字节）' },
+            { key: 'fileSizeMaximum', label: '文件大小上限', when: (p) => !asBool(p.ignoreFileSizeMaximum) }
         ]);
     }
 };
@@ -714,39 +714,39 @@ const fileWriter = {
         ensureSchemeProperties(properties);
         return (React.createElement("div", null,
             React.createElement(ConnectorForm, { properties: properties, onChange: onChange, fields: [
-                    { section: 'Connection Settings' },
-                    { key: 'scheme', label: 'Method', type: 'select', options: SCHEMES, refresh: true, width: '160px', onSet: onWriterSchemeChange, append: () => connectorTestButton({ label: 'Test Write', icon: 'folder', path: '/connectors/file/_testWrite', channel, properties }) },
-                    { key: 'host', label: 'Directory', type: 'text', width: '420px', disabled: (p) => p.scheme !== 'FILE' },
+                    { section: '连接设置' },
+                    { key: 'scheme', label: '方式', type: 'select', options: SCHEMES, refresh: true, width: '160px', onSet: onWriterSchemeChange, append: () => connectorTestButton({ label: '测试写入', icon: 'folder', path: '/connectors/file/_testWrite', channel, properties }) },
+                    { key: 'host', label: '目录', type: 'text', width: '420px', disabled: (p) => p.scheme !== 'FILE' },
                     hostPathField(onChange),
-                    { key: 'outputPattern', label: 'File Name', type: 'text', width: '220px' },
+                    { key: 'outputPattern', label: '文件名', type: 'text', width: '220px' },
                     {
-                        key: 'anonymous', label: 'Anonymous', type: 'radio', options: YES_NO, refresh: true,
+                        key: 'anonymous', label: '匿名访问', type: 'radio', options: YES_NO, refresh: true,
                         disabled: (p) => !anonymousEnabled(p), onSet: applyAnonymous
                     },
-                    { key: 'username', label: (p) => p.scheme === 'S3' ? 'AWS Access Key ID' : 'Username', type: 'text', width: '220px', disabled: credentialsDisabled },
-                    { key: 'password', label: (p) => p.scheme === 'S3' ? 'AWS Secret Access Key' : 'Password', type: 'password', width: '220px', disabled: credentialsDisabled },
-                    { key: 'timeout', label: 'Timeout (ms)', type: 'number', width: '120px', disabled: (p) => !timeoutEnabled(p) },
-                    { key: 'keepConnectionOpen', label: 'Keep Connection Open', type: 'radio', options: YES_NO, refresh: true },
-                    { key: 'maxIdleTime', label: 'Max Idle Time (ms)', type: 'number', width: '120px', disabled: (p) => !asBool(p.keepConnectionOpen) },
-                    { key: 'secure', label: 'Secure Mode', type: 'radio', options: YES_NO, disabled: (p) => !secureEnabled(p) },
-                    { key: 'passive', label: 'Passive Mode', type: 'radio', options: YES_NO, disabled: (p) => !passiveEnabled(p) },
-                    { key: 'validateConnection', label: 'Validate Connection', type: 'radio', options: YES_NO, disabled: (p) => !validateEnabled(p) },
+                    { key: 'username', label: (p) => p.scheme === 'S3' ? 'AWS 访问密钥 ID' : '用户名', type: 'text', width: '220px', disabled: credentialsDisabled },
+                    { key: 'password', label: (p) => p.scheme === 'S3' ? 'AWS 私有访问密钥' : '密码', type: 'password', width: '220px', disabled: credentialsDisabled },
+                    { key: 'timeout', label: '超时（毫秒）', type: 'number', width: '120px', disabled: (p) => !timeoutEnabled(p) },
+                    { key: 'keepConnectionOpen', label: '保持连接打开', type: 'radio', options: YES_NO, refresh: true },
+                    { key: 'maxIdleTime', label: '最大空闲时间（毫秒）', type: 'number', width: '120px', disabled: (p) => !asBool(p.keepConnectionOpen) },
+                    { key: 'secure', label: '安全模式', type: 'radio', options: YES_NO, disabled: (p) => !secureEnabled(p) },
+                    { key: 'passive', label: '被动模式', type: 'radio', options: YES_NO, disabled: (p) => !passiveEnabled(p) },
+                    { key: 'validateConnection', label: '验证连接', type: 'radio', options: YES_NO, disabled: (p) => !validateEnabled(p) },
                     ...schemeSettingsFields(),
-                    { section: 'File Writer Settings' },
+                    { section: '文件写入器设置' },
                     fileExistsField(),
                     {
                         // Create Temp File is disabled when File Exists=Append
                         // (fileExistsAppendRadioActionPerformed) or scheme=S3.
-                        key: 'temporary', label: 'Create Temp File', type: 'radio', options: YES_NO,
+                        key: 'temporary', label: '创建临时文件', type: 'radio', options: YES_NO,
                         disabled: (p) => asBool(p.outputAppend) || p.scheme === 'S3'
                     },
                     {
-                        key: 'binary', label: 'File Type', type: 'radio', refresh: true,
+                        key: 'binary', label: '文件类型', type: 'radio', refresh: true,
                         onSet: onFileTypeSet, options: FILE_TYPE_OPTIONS
                     },
-                    { key: 'charsetEncoding', label: 'Encoding', type: 'select', options: CHARSETS, width: '160px', disabled: (p) => asBool(p.binary) },
-                    { section: 'Template' },
-                    { key: 'template', label: 'Template', type: 'code', minHeight: '260px' }
+                    { key: 'charsetEncoding', label: '编码', type: 'select', options: CHARSETS, width: '160px', disabled: (p) => asBool(p.binary) },
+                    { section: '模板' },
+                    { key: 'template', label: '模板', type: 'code', minHeight: '260px' }
                 ] })));
     },
     // FileWriter.checkProperties / setDirHostPath: Directory (FILE) or Host
@@ -756,13 +756,13 @@ const fileWriter = {
     // check, so it is intentionally skipped here.)
     validate(properties) {
         return requireFields(properties, [
-            { key: 'host', label: 'Directory', when: (p) => p.scheme === 'FILE' },
-            { key: 'host', label: 'Host', when: (p) => p.scheme !== 'FILE' },
-            { key: 'outputPattern', label: 'File Name' },
-            { key: 'template', label: 'Template' },
-            { key: 'username', label: 'Username', when: credentialsRequired },
-            { key: 'password', label: 'Password', when: passwordRequired },
-            { key: 'timeout', label: 'Timeout', when: (p) => ['FTP', 'SFTP', 'SMB'].includes(p.scheme) }
+            { key: 'host', label: '目录', when: (p) => p.scheme === 'FILE' },
+            { key: 'host', label: '主机', when: (p) => p.scheme !== 'FILE' },
+            { key: 'outputPattern', label: '文件名' },
+            { key: 'template', label: '模板' },
+            { key: 'username', label: '用户名', when: credentialsRequired },
+            { key: 'password', label: '密码', when: passwordRequired },
+            { key: 'timeout', label: '超时', when: (p) => ['FTP', 'SFTP', 'SMB'].includes(p.scheme) }
         ]);
     }
 };

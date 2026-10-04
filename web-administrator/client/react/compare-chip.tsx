@@ -25,12 +25,12 @@ export function CompareChip() {
         <div className="compare-chip" role="status" aria-live="polite">
             <Icon name="compare" size={15} />
             <div className="compare-chip-body">
-                <div className="compare-chip-title">Selected for compare</div>
+                <div className="compare-chip-title">已选作对比</div>
                 <div className="compare-chip-ref mono">{describeRef(anchor)}</div>
             </div>
-            <button type="button" className="icon-btn" title="Clear compare selection"
-                aria-label="Clear compare selection"
-                onClick={() => { clearCompare(); toast('Compare selection cleared'); }}>
+            <button type="button" className="icon-btn" title="清除对比选择"
+                aria-label="清除对比选择"
+                onClick={() => { clearCompare(); toast('已清除对比选择'); }}>
                 <Icon name="x" size={13} />
             </button>
         </div>

@@ -37,9 +37,9 @@ const MAX_RESULTS = 20;
 const MAX_RECENT = 5;
 
 const SCOPES = {
-    '>': { kind: 'command', label: 'Commands' },
-    '#': { kind: 'channel', label: 'Channels' },
-    '/': { kind: 'view', label: 'Views' }
+    '>': { kind: 'command', label: '命令' },
+    '#': { kind: 'channel', label: '通道' },
+    '/': { kind: 'view', label: '视图' }
 };
 
 /* State pip colour, matching the dashboard's vocabulary. */
@@ -72,7 +72,7 @@ function viewEntries() {
         .filter((item: any) => !item.task || checkTask(item.rbac || 'view', item.task))
         .map((item: any) => ({
             kind: 'view', id: 'view:' + item.id, label: item.label, icon: item.icon || 'chevR',
-            group: 'Views', hint: item.path || '', path: item.path, run: item.action
+            group: '视图', hint: item.path || '', path: item.path, run: item.action
         }));
 }
 
@@ -81,7 +81,7 @@ function commandEntries() {
         .filter((c: any) => !c.task || checkTask(c.rbac || 'view', c.task))
         .map((c: any) => ({
             kind: 'command', id: 'cmd:' + c.id, label: c.label, icon: c.icon || 'chevR',
-            group: c.section || 'Commands', hint: c.hint || '', path: c.path, run: c.run,
+            group: c.section || '命令', hint: c.hint || '', path: c.path, run: c.run,
             keywords: c.keywords || ''
         }));
 }
@@ -115,13 +115,13 @@ function channelEntries(fallback: any) {
         seen.add(c.id);
         return true;
     }).flatMap((c: any) => {
-        const base = { kind: 'channel', label: c.name || c.id, group: 'Channels', state: c.state };
+        const base = { kind: 'channel', label: c.name || c.id, group: '通道', state: c.state };
         // Gated through the same (group, task) pairs as the nav/menu twins, per
         // this file's own header contract — the palette must never surface an
         // entry RBAC hides elsewhere.
         return [
-            checkTask('view', 'doShowChannel') ? { ...base, id: 'chan:' + c.id, hint: 'edit', path: '/channels/' + c.id + '/edit' } : null,
-            checkTask('view', 'doShowMessages') ? { ...base, id: 'chanmsg:' + c.id, hint: 'messages', path: '/messages/' + c.id } : null
+            checkTask('view', 'doShowChannel') ? { ...base, id: 'chan:' + c.id, hint: '编辑', path: '/channels/' + c.id + '/edit' } : null,
+            checkTask('view', 'doShowMessages') ? { ...base, id: 'chanmsg:' + c.id, hint: '消息', path: '/messages/' + c.id } : null
         ].filter(Boolean);
     });
 }
@@ -180,7 +180,7 @@ export function CommandPalette() {
             const found = recent
                 .map((id: any) => pool.find((e: any) => e.id === id))
                 .filter(Boolean)
-                .map((e: any) => ({ ...e, group: 'Recent' }));
+                .map((e: any) => ({ ...e, group: '最近使用' }));
             return found.length ? found : pool.filter((e: any) => e.kind === 'view').slice(0, MAX_RESULTS);
         }
         return pool
@@ -237,27 +237,27 @@ export function CommandPalette() {
                             e.preventDefault();
                             listRef.current?.parentElement?.querySelector('input')?.focus();
                         }}>
-                        <Dialog.Title className="cmdk-sr">Command palette</Dialog.Title>
+                        <Dialog.Title className="cmdk-sr">命令面板</Dialog.Title>
                         <div className="cmdk-field">
                             <Icon name="search" size={15} />
                             <input type="text" autoComplete="off" spellCheck="false"
-                                placeholder="Search views, channels and commands…"
+                                placeholder="搜索视图、通道与命令…"
                                 value={query}
                                 role="combobox"
                                 aria-expanded="true"
                                 aria-controls="cmdk-results"
                                 aria-autocomplete="list"
                                 aria-activedescendant={results[cursor] ? 'cmdk-opt-' + cursor : undefined}
-                                aria-label="Search views, channels and commands"
+                                aria-label="搜索视图、通道与命令"
                                 onChange={(e: any) => setQuery(e.target.value)}
                                 onKeyDown={onKeyDown} />
                             {scope && <span className="cmdk-scope">{scope.label}</span>}
                         </div>
 
                         <div className="cmdk-list" id="cmdk-results" role="listbox"
-                            aria-label="Results" ref={listRef}>
+                            aria-label="结果" ref={listRef}>
                             {results.length === 0 && (
-                                <div className="cmdk-empty">Nothing matches “{query}”.</div>
+                                <div className="cmdk-empty">没有与“{query}”匹配的结果</div>
                             )}
                             {results.map((entry: any, i: any) => {
                                 const head = entry.group !== lastGroup ? (lastGroup = entry.group) : null;
@@ -282,11 +282,11 @@ export function CommandPalette() {
                         </div>
 
                         <div className="cmdk-foot">
-                            <span><kbd>↑↓</kbd> move</span>
-                            <span><kbd>⏎</kbd> run</span>
-                            <span><kbd>esc</kbd> close</span>
+                            <span><kbd>↑↓</kbd> 移动</span>
+                            <span><kbd>⏎</kbd> 执行</span>
+                            <span><kbd>esc</kbd> 关闭</span>
                             <span className="cmdk-grammar">
-                                <kbd>&gt;</kbd> commands <kbd>#</kbd> channels <kbd>/</kbd> views
+                                <kbd>&gt;</kbd> 命令 <kbd>#</kbd> 通道 <kbd>/</kbd> 视图
                             </span>
                         </div>
                     </Dialog.Content>

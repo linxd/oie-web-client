@@ -30,8 +30,8 @@ export function saveViewMode(mode: ViewMode) {
 }
 
 export const VIEW_MODE_OPTIONS = [
-    { value: 'group', icon: 'folder', title: 'Group view' },
-    { value: 'channel', icon: 'channels', title: 'Channel view' }
+    { value: 'group', icon: 'folder', title: '分组视图' },
+    { value: 'channel', icon: 'channels', title: '通道视图' }
 ];
 
 /* Tags as names / icons / hidden — Swing's two tag-mode toggle buttons, where
@@ -46,9 +46,9 @@ export function saveTagMode(mode: TagMode) {
 }
 
 export const TAG_MODE_OPTIONS = [
-    { value: 'names', label: 'Names', title: 'Show tags as names' },
-    { value: 'icons', label: 'Icons', title: 'Show tags as icons' },
-    { value: 'off', label: 'Off', title: 'Hide tags' }
+    { value: 'names', label: '名称', title: '以名称显示标签' },
+    { value: 'icons', label: '图标', title: '以图标显示标签' },
+    { value: 'off', label: '关闭', title: '隐藏标签' }
 ];
 
 /* ChannelTag backgroundColor arrives as {red, green, blue, alpha}. */

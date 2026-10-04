@@ -64,26 +64,26 @@ function msToFreq(ms: any) {
 /* MessageWriterOptions "Content" combo: (contentType enum name, destinationContent).
    "XML serialized message" == null contentType. Mirrors MessageExportPanel order. */
 const CONTENT_OPTIONS = [
-    { key: 'xml', label: 'XML serialized message', contentType: null, dest: false },
-    { key: 'src-RAW', label: 'Source - Raw', contentType: 'RAW', dest: false },
-    { key: 'src-PROCESSED_RAW', label: 'Source - Processed raw', contentType: 'PROCESSED_RAW', dest: false },
-    { key: 'src-TRANSFORMED', label: 'Source - Transformed', contentType: 'TRANSFORMED', dest: false },
-    { key: 'src-ENCODED', label: 'Source - Encoded', contentType: 'ENCODED', dest: false },
-    { key: 'src-RESPONSE', label: 'Source - Response', contentType: 'RESPONSE', dest: false },
-    { key: 'dst-RAW', label: 'Destination - Raw', contentType: 'RAW', dest: true },
-    { key: 'dst-TRANSFORMED', label: 'Destination - Transformed', contentType: 'TRANSFORMED', dest: true },
-    { key: 'dst-ENCODED', label: 'Destination - Encoded', contentType: 'ENCODED', dest: true },
-    { key: 'dst-SENT', label: 'Destination - Sent', contentType: 'SENT', dest: true },
-    { key: 'dst-RESPONSE', label: 'Destination - Response', contentType: 'RESPONSE', dest: true },
-    { key: 'dst-PROCESSED_RESPONSE', label: 'Destination - Processed response', contentType: 'PROCESSED_RESPONSE', dest: true },
-    { key: 'map-SOURCE_MAP', label: 'Source map', contentType: 'SOURCE_MAP', dest: false },
-    { key: 'map-CHANNEL_MAP', label: 'Channel map', contentType: 'CHANNEL_MAP', dest: false },
-    { key: 'map-RESPONSE_MAP', label: 'Response map', contentType: 'RESPONSE_MAP', dest: false }
+    { key: 'xml', label: 'XML 序列化消息', contentType: null, dest: false },
+    { key: 'src-RAW', label: '源 - 原始', contentType: 'RAW', dest: false },
+    { key: 'src-PROCESSED_RAW', label: '源 - 处理后原始', contentType: 'PROCESSED_RAW', dest: false },
+    { key: 'src-TRANSFORMED', label: '源 - 转换后', contentType: 'TRANSFORMED', dest: false },
+    { key: 'src-ENCODED', label: '源 - 编码后', contentType: 'ENCODED', dest: false },
+    { key: 'src-RESPONSE', label: '源 - 响应', contentType: 'RESPONSE', dest: false },
+    { key: 'dst-RAW', label: '目的地 - 原始', contentType: 'RAW', dest: true },
+    { key: 'dst-TRANSFORMED', label: '目的地 - 转换后', contentType: 'TRANSFORMED', dest: true },
+    { key: 'dst-ENCODED', label: '目的地 - 编码后', contentType: 'ENCODED', dest: true },
+    { key: 'dst-SENT', label: '目的地 - 已发送', contentType: 'SENT', dest: true },
+    { key: 'dst-RESPONSE', label: '目的地 - 响应', contentType: 'RESPONSE', dest: true },
+    { key: 'dst-PROCESSED_RESPONSE', label: '目的地 - 处理后响应', contentType: 'PROCESSED_RESPONSE', dest: true },
+    { key: 'map-SOURCE_MAP', label: '源映射', contentType: 'SOURCE_MAP', dest: false },
+    { key: 'map-CHANNEL_MAP', label: '通道映射', contentType: 'CHANNEL_MAP', dest: false },
+    { key: 'map-RESPONSE_MAP', label: '响应映射', contentType: 'RESPONSE_MAP', dest: false }
 ];
 
 /* MessageWriterOptions archiveFormat/compressFormat pairs (ArchiveFormat enum). */
 const COMPRESS_OPTIONS = [
-    { key: 'none', label: 'none', archive: null, compress: null },
+    { key: 'none', label: '无', archive: null, compress: null },
     { key: 'zip', label: 'zip', archive: 'zip', compress: null },
     { key: 'tar.gz', label: 'tar.gz', archive: 'tar', compress: 'gz' },
     { key: 'tar.bz2', label: 'tar.bz2', archive: 'tar', compress: 'bzip2' }
@@ -91,7 +91,7 @@ const COMPRESS_OPTIONS = [
 
 /* EncryptionType enum name -> display label. */
 const ENCRYPTION_OPTIONS = [
-    { value: 'STANDARD', label: 'Standard' },
+    { value: 'STANDARD', label: '标准' },
     { value: 'AES128', label: 'AES-128' },
     { value: 'AES256', label: 'AES-256' }
 ];
@@ -101,15 +101,15 @@ const ENCRYPTION_OPTIONS = [
    VariableListHandler inserts on drag. Drag an item into (or click to insert
    it at the cursor of) the Root Path / File Pattern fields. */
 const ARCHIVE_VARS = [
-    { label: 'Message ID', token: '${message.messageId}' },
-    { label: 'Server ID', token: '${message.serverId}' },
-    { label: 'Channel ID', token: '${message.channelId}' },
-    { label: 'Original File Name', token: '${originalFilename}' },
-    { label: 'Formatted Message Date', token: "${date.format('yyyy-MM-dd',$message.getConnectorMessages().get(0).getReceivedDate())}" },
-    { label: 'Formatted Current Date', token: "${date.get('yyyy-MM-dd')}" },
-    { label: 'Timestamp', token: '${SYSTIME}' },
-    { label: 'Unique ID', token: '${UUID}' },
-    { label: 'Count', token: '${COUNT}' }
+    { label: '消息 ID', token: '${message.messageId}' },
+    { label: '服务器 ID', token: '${message.serverId}' },
+    { label: '通道 ID', token: '${message.channelId}' },
+    { label: '原始文件名', token: '${originalFilename}' },
+    { label: '格式化消息日期', token: "${date.format('yyyy-MM-dd',$message.getConnectorMessages().get(0).getReceivedDate())}" },
+    { label: '格式化当前日期', token: "${date.get('yyyy-MM-dd')}" },
+    { label: '时间戳', token: '${SYSTIME}' },
+    { label: '唯一 ID', token: '${UUID}' },
+    { label: '计数', token: '${COUNT}' }
 ];
 const ARCHIVE_VAR_MIME = 'application/x-oie-archivevar';
 
@@ -188,11 +188,11 @@ export function register(platform: Platform) {
             <div className="radio-group inline-row">
                 <label>
                     <input type="radio" name={name} value="yes" checked={value === true}
-                        disabled={disabled} onChange={() => onChange(true)} /> Yes
+                        disabled={disabled} onChange={() => onChange(true)} /> 是
                 </label>
                 <label>
                     <input type="radio" name={name} value="no" checked={value === false}
-                        disabled={disabled} onChange={() => onChange(false)} /> No
+                        disabled={disabled} onChange={() => onChange(false)} /> 否
                 </label>
             </div>
         );
@@ -208,7 +208,7 @@ export function register(platform: Platform) {
         );
     }
 
-    function Loading({ text = 'Loading…' }: any) {
+    function Loading({ text = '加载中…' }: any) {
         return <div className="loading-block"><div className="spinner" />{text}</div>;
     }
 
@@ -430,7 +430,7 @@ export function register(platform: Platform) {
                 const raw = await api.get('/extensions/datapruner/status');
                 setStatusState({ phase: 'ready', pairs: statusPairs(raw), message: '' });
             } catch (e: any) {
-                setStatusState({ phase: 'error', pairs: [], message: `Status unavailable: ${e.message}` });
+                setStatusState({ phase: 'error', pairs: [], message: `无法获取状态：${e.message}` });
             }
         }
 
@@ -448,7 +448,7 @@ export function register(platform: Platform) {
                 refreshStatus();
             } catch (e: any) {
                 if (!mountedRef.current) return;
-                toast(`Failed to load Data Pruner properties: ${e.message}`, 'error');
+                toast(`加载数据修剪器属性失败：${e.message}`, 'error');
                 setErrorMessage(String(e.message || e));
                 setPhase('error');
             } finally {
@@ -533,7 +533,7 @@ export function register(platform: Platform) {
                    unchanged. */
                 await api.extensions.setProperties('Data Pruner', listToProps(propListRef.current));
                 if (!mountedRef.current) return false;
-                toast('Data Pruner settings saved');
+                toast('数据修剪器设置已保存');
                 // Only the submitted values became clean. Keep newer edits and
                 // refuse a pending Save-and-leave while they still need saving.
                 cleanRef.current = submittedSnapshot;
@@ -541,7 +541,7 @@ export function register(platform: Platform) {
                 if (dirtyRef.current) markDirty(); else markClean();
                 return !dirtyRef.current;
             } catch (e: any) {
-                if (mountedRef.current) toast(`Save failed: ${e.message}`, 'error');
+                if (mountedRef.current) toast(`保存失败：${e.message}`, 'error');
                 return false;
             } finally {
                 operationRef.current = false;
@@ -550,12 +550,12 @@ export function register(platform: Platform) {
         }
 
         async function pruneNow() {
-            if (await confirmDialog('Prune Now', 'Start the Data Pruner now? Pruning may take a long time on large message stores.', { okLabel: 'Start' })) {
+            if (await confirmDialog('立即修剪', '确定要立即启动数据修剪器吗？在大型消息库上修剪可能耗时较长', { okLabel: '启动' })) {
                 try {
                     await api.post('/extensions/datapruner/_start');
-                    toast('Data Pruner started');
+                    toast('数据修剪器已启动');
                 } catch (e: any) {
-                    toast(`Start failed: ${e.message}`, 'error');
+                    toast(`启动失败：${e.message}`, 'error');
                 }
                 refreshStatus();
             }
@@ -564,9 +564,9 @@ export function register(platform: Platform) {
         async function stopPruner() {
             try {
                 await api.post('/extensions/datapruner/_stop');
-                toast('Stop requested');
+                toast('已请求停止');
             } catch (e: any) {
-                toast(`Stop failed: ${e.message}`, 'error');
+                toast(`停止失败：${e.message}`, 'error');
             }
             refreshStatus();
         }
@@ -588,12 +588,12 @@ export function register(platform: Platform) {
             // markDirty engage, and the framework's tab-switch + route-leave prompts
             // can save on the user's behalf.
             setSave(save);
-            setTasks('Data Pruner Tasks', [
-                taskButton('Refresh', 'refresh', () => { load(); }, { disabled: busy }),
-                taskButton('Save', 'save', save, { primary: true, disabled: busy || phase !== 'ready' }),
-                taskButton('View Events', 'events', () => platform.router.navigate('/events')),
-                taskButton('Prune Now', 'play', pruneNow),
-                taskButton('Stop Pruner', 'stop', stopPruner, { danger: true })
+            setTasks('数据修剪器任务', [
+                taskButton('刷新', 'refresh', () => { load(); }, { disabled: busy }),
+                taskButton('保存', 'save', save, { primary: true, disabled: busy || phase !== 'ready' }),
+                taskButton('查看事件', 'events', () => platform.router.navigate('/events')),
+                taskButton('立即修剪', 'play', pruneNow),
+                taskButton('停止修剪', 'stop', stopPruner, { danger: true })
             ]);
             // eslint-disable-next-line react-hooks/exhaustive-deps
         }, [busy, phase, enabled, blockSize, pruneEvents, maxEventAge, archiveEnabled, archiverBlockSize,
@@ -630,7 +630,7 @@ export function register(platform: Platform) {
                             <path d="M12 3l9 16H3zM12 10v4M12 17.5v.5" />
                         </svg>
                     </div>
-                    <div>Failed to load</div>
+                    <div>加载失败</div>
                     <div className="text-text-faint mt-[13px]">{errorMessage}</div>
                 </div>
             );
@@ -646,9 +646,9 @@ export function register(platform: Platform) {
         return (
             <div>
                 <div className="panel">
-                    <div className="panel-header">Status</div>
+                    <div className="panel-header">状态</div>
                     <div className="panel-body">
-                        {statusState.phase === 'loading' && <Loading text="Loading status…" />}
+                        {statusState.phase === 'loading' && <Loading text="正在加载状态…" />}
                         {statusState.phase === 'error' && <div className="text-text-faint">{statusState.message}</div>}
                         {statusState.phase === 'ready' && (
                             statusState.pairs.length
@@ -658,30 +658,30 @@ export function register(platform: Platform) {
                                         <dd>{v}</dd>
                                     </React.Fragment>
                                 ))}</dl>
-                                : <div className="text-text-faint">No status reported</div>
+                                : <div className="text-text-faint">未上报状态</div>
                         )}
                     </div>
                 </div>
 
                 <div className="panel">
-                    <div className="panel-header">Schedule</div>
+                    <div className="panel-header">调度</div>
                     <div className="panel-body">
                         <div className="field">
-                            <label>Enable</label>
+                            <label>启用</label>
                             <YesNo value={enabled} onChange={setEnabled} />
                         </div>
                         {hasSchedule ? (
                             <div className="form-grid">
-                                <Field label="Schedule Type">
+                                <Field label="调度方式">
                                     <select value={scheduleType} disabled={!enabled}
                                         onChange={(e: any) => { setScheduleType(e.target.value); setScheduleDirty(true); }}>
-                                        <option value="INTERVAL">Interval</option>
-                                        <option value="TIME">Time</option>
+                                        <option value="INTERVAL">间隔</option>
+                                        <option value="TIME">时间</option>
                                         <option value="CRON">Cron</option>
                                     </select>
                                 </Field>
                                 {scheduleType === 'INTERVAL' && (
-                                    <Field label="Interval" hint="Must be between 1 and 24 hours when converted to milliseconds.">
+                                    <Field label="间隔" hint="换算为毫秒后必须在 1 至 24 小时之间">
                                         <div className="flex items-center gap-2">
                                             <input type="number" min="0" step="any" className="max-w-[108px]"
                                                 value={freqValue} disabled={!enabled}
@@ -689,16 +689,16 @@ export function register(platform: Platform) {
                                                 onChange={(e: any) => { setFreqValue(e.target.value); setScheduleDirty(true); }} />
                                             <select className="max-w-[126px]" value={freqUnit} disabled={!enabled}
                                                 onChange={(e: any) => { setFreqUnit(e.target.value); setScheduleDirty(true); }}>
-                                                <option value="milliseconds">milliseconds</option>
-                                                <option value="seconds">seconds</option>
-                                                <option value="minutes">minutes</option>
-                                                <option value="hours">hours</option>
+                                                <option value="milliseconds">毫秒</option>
+                                                <option value="seconds">秒</option>
+                                                <option value="minutes">分钟</option>
+                                                <option value="hours">小时</option>
                                             </select>
                                         </div>
                                     </Field>
                                 )}
                                 {scheduleType === 'TIME' && (
-                                    <Field label="Time" hint="Prune once a day at this time of day.">
+                                    <Field label="时间" hint="每天在此时间修剪一次">
                                         <input type="time" className="max-w-[126px]" value={pollTime} disabled={!enabled}
                                             onInput={(e: any) => { setPollTime(e.target.value); setScheduleDirty(true); }}
                                             onChange={(e: any) => { setPollTime(e.target.value); setScheduleDirty(true); }} />
@@ -706,15 +706,15 @@ export function register(platform: Platform) {
                                 )}
                                 {scheduleType === 'CRON' && (
                                     <div className="field span-2">
-                                        <label>Cron Jobs</label>
+                                        <label>Cron 任务</label>
                                         <div className="dt-wrap">
                                             <table className="dt">
                                                 <thead>
-                                                    <tr><th>Expression</th><th>Description</th><th /></tr>
+                                                    <tr><th>表达式</th><th>描述</th><th /></tr>
                                                 </thead>
                                                 <tbody>
                                                     {cronJobs.length === 0 && (
-                                                        <tr><td colSpan={3} className="text-text-faint">No cron jobs defined.</td></tr>
+                                                        <tr><td colSpan={3} className="text-text-faint">未定义 Cron 任务</td></tr>
                                                     )}
                                                     {cronJobs.map((job: any, idx: any) => (
                                                         <tr key={idx}>
@@ -733,7 +733,7 @@ export function register(platform: Platform) {
                                                             <td>
                                                                 <button type="button" className="btn btn-sm btn-danger" disabled={!enabled}
                                                                     onClick={() => { setCronJobs(cronJobs.filter((_: any, i: any) => i !== idx)); setScheduleDirty(true); }}>
-                                                                    Delete
+                                                                    删除
                                                                 </button>
                                                             </td>
                                                         </tr>
@@ -744,37 +744,37 @@ export function register(platform: Platform) {
                                         <div className="mt-[7px]">
                                             <button type="button" className="btn btn-sm" disabled={!enabled}
                                                 onClick={() => { setCronJobs([...cronJobs, { expression: '', description: '' }]); setScheduleDirty(true); }}>
-                                                Add
+                                                添加
                                             </button>
                                         </div>
                                         <div className="hint mt-[5px]">
-                                            Quartz cron expressions with at least 6 fields (seconds minutes hours day-of-month month day-of-week [year]).
+                                            Quartz cron 表达式，至少 6 个字段（秒 分 时 日 月 周 [年]）
                                         </div>
                                     </div>
                                 )}
                             </div>
                         ) : (
                             <div className="hint">
-                                The polling schedule (pollingProperties) could not be parsed; it will be preserved unchanged.
+                                无法解析轮询调度（pollingProperties），将原样保留
                             </div>
                         )}
                     </div>
                 </div>
 
                 <div className="panel">
-                    <div className="panel-header">Prune Settings</div>
+                    <div className="panel-header">修剪设置</div>
                     <div className="panel-body">
                         <div className="form-grid">
-                            <Field label="Block Size">
+                            <Field label="块大小">
                                 <input type="number" min="50" value={blockSize}
                                     onInput={(e: any) => setBlockSize(e.target.value)}
                                     onChange={(e: any) => setBlockSize(e.target.value)} />
                             </Field>
                             <div className="field">
-                                <label>Prune Events</label>
+                                <label>修剪事件</label>
                                 <YesNo value={pruneEvents} onChange={setPruneEvents} />
                             </div>
-                            <Field label="Prune Event Age (days)">
+                            <Field label="修剪事件保留天数">
                                 <input type="number" min="1" value={maxEventAge} disabled={!pruneEvents}
                                     onInput={(e: any) => setMaxEventAge(e.target.value)}
                                     onChange={(e: any) => setMaxEventAge(e.target.value)} />
@@ -784,14 +784,14 @@ export function register(platform: Platform) {
                 </div>
 
                 <div className="panel">
-                    <div className="panel-header">Archive Settings</div>
+                    <div className="panel-header">归档设置</div>
                     <div className="panel-body">
                         <div className="form-grid">
                             <div className="field">
-                                <label>Enable Archiving</label>
+                                <label>启用归档</label>
                                 <YesNo value={archiveEnabled} onChange={setArchiveEnabled} />
                             </div>
-                            <Field label="Archiver Block Size">
+                            <Field label="归档器块大小">
                                 <input type="number" min="1" value={archiverBlockSize} disabled={!archiveEnabled}
                                     onInput={(e: any) => setArchiverBlockSize(e.target.value)}
                                     onChange={(e: any) => setArchiverBlockSize(e.target.value)} />
@@ -800,7 +800,7 @@ export function register(platform: Platform) {
 
                         {hasArchiver ? (
                             <div className="form-grid mt-[11px]">
-                                <Field label="Content">
+                                <Field label="内容">
                                     <select value={contentKey} disabled={!archiveEnabled}
                                         onChange={(e: any) => {
                                             const key = e.target.value;
@@ -814,21 +814,21 @@ export function register(platform: Platform) {
                                     </select>
                                 </Field>
                                 <div className="field">
-                                    <label>Encrypt</label>
+                                    <label>加密</label>
                                     <label className="inline-flex items-center gap-2">
                                         <input type="checkbox" checked={encrypt} disabled={!archiveEnabled}
                                             onChange={(e: any) => { setEncrypt(e.target.checked); setArchiverDirty(true); }} />
-                                        Encrypt exported content
+                                        加密导出的内容
                                     </label>
                                 </div>
                                 {includeAttachments !== null && (
                                     <div className="field">
-                                        <label>Include Attachments</label>
+                                        <label>包含附件</label>
                                         <YesNo value={includeAttachments} disabled={!attachmentsEnabled}
                                             onChange={(v: any) => { setIncludeAttachments(v); setArchiverDirty(true); }} />
                                     </div>
                                 )}
-                                <Field label="Compression">
+                                <Field label="压缩方式">
                                     <select value={compressKey} disabled={!archiveEnabled}
                                         onChange={(e: any) => { setCompressKey(e.target.value); setArchiverDirty(true); }}>
                                         {COMPRESS_OPTIONS.map(o => (
@@ -837,17 +837,17 @@ export function register(platform: Platform) {
                                     </select>
                                 </Field>
                                 <div className="field">
-                                    <label>Password Protect</label>
+                                    <label>密码保护</label>
                                     <YesNo value={passwordEnabled} disabled={!passwordSectionEnabled}
                                         onChange={(v: any) => { setPasswordEnabled(v); setArchiverDirty(true); }} />
                                 </div>
-                                <Field label="Password">
+                                <Field label="密码">
                                     <input type="password" value={password}
                                         disabled={!passwordSectionEnabled || !passwordEnabled}
                                         onInput={(e: any) => { setPassword(e.target.value); setArchiverDirty(true); }}
                                         onChange={(e: any) => { setPassword(e.target.value); setArchiverDirty(true); }} />
                                 </Field>
-                                <Field label="Encryption">
+                                <Field label="加密类型">
                                     <select value={encryptionType}
                                         disabled={!passwordSectionEnabled || !passwordEnabled}
                                         onChange={(e: any) => { setEncryptionType(e.target.value); setArchiverDirty(true); }}>
@@ -858,14 +858,14 @@ export function register(platform: Platform) {
                                 </Field>
                                 <div className="span-2 flex gap-3 items-stretch">
                                     <div className="flex-1 min-w-0 flex flex-col gap-2">
-                                        <Field label="Root Path">
+                                        <Field label="根路径">
                                             <input ref={rootInputRef} type="text" value={rootFolder} disabled={!archiveEnabled}
                                                 onFocus={() => { lastVarTargetRef.current = rootInputRef.current; }}
                                                 onDragOver={onArchiveVarDragOver} onDrop={onArchiveVarDrop}
                                                 onInput={(e: any) => { setRootFolder(e.target.value); setArchiverDirty(true); }}
                                                 onChange={(e: any) => { setRootFolder(e.target.value); setArchiverDirty(true); }} />
                                         </Field>
-                                        <Field label="File Pattern">
+                                        <Field label="文件模式">
                                             <input ref={patternInputRef} type="text" value={filePattern} disabled={!archiveEnabled}
                                                 onFocus={() => { lastVarTargetRef.current = patternInputRef.current; }}
                                                 onDragOver={onArchiveVarDragOver} onDrop={onArchiveVarDrop}
@@ -876,7 +876,7 @@ export function register(platform: Platform) {
                                     {/* Draggable template-variable list (Swing MessageExportPanel). */}
                                     <div className="border border-line rounded-[4px] py-1 min-w-[162px] max-w-[207px] bg-bg1 overflow-auto self-stretch"
                                         style={{ opacity: archiveEnabled ? 1 : 0.5 }}
-                                        title="Drag a variable into Root Path / File Pattern, or click to insert it at the last-focused one">
+                                        title="拖动变量到根路径 / 文件模式，或点击插入到最近聚焦的输入框">
                                         {ARCHIVE_VARS.map((v: any) => (
                                             <div key={v.label} draggable={archiveEnabled}
                                                 className="py-[3px] px-3 text-[11px] select-none cursor-grab hover:bg-bg2"
@@ -894,7 +894,7 @@ export function register(platform: Platform) {
                             </div>
                         ) : (
                             <div className="hint mt-[11px]">
-                                Advanced archiver options (archiverOptions) could not be parsed; they will be preserved unchanged.
+                                无法解析归档高级选项（archiverOptions），将原样保留
                             </div>
                         )}
                     </div>

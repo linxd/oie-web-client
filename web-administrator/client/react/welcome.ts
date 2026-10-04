@@ -13,7 +13,7 @@ import { h, modal, field, textInput, select, toast } from '@oie/web-ui';
 import api from '@oie/web-api';
 import { passwordRequirementHints } from '../core/passwords.js';
 
-export const DEFAULT_OPTION = '--Select an option--';
+export const DEFAULT_OPTION = '--请选择--';
 
 /* US state/territory codes (Swing UserEditPanel.STATE_TERRITORY_CODES). The
    State/Territory field is US-only — disabled for any other country. */
@@ -303,7 +303,7 @@ function showWelcomeDialog(user: any) {
         const confirmInput = h('input', { type: 'password', autocomplete: 'new-password' });
         const pwHint = h('div.hint.span-2');
         api.server.passwordRequirements()
-            .then((req: any) => { const hs = passwordRequirementHints(req); if (hs.length) pwHint.textContent = `Password must include ${hs.join(', ')}.`; })
+            .then((req: any) => { const hs = passwordRequirementHints(req); if (hs.length) pwHint.textContent = `密码须包含 ${hs.join(', ')}`; })
             .catch(() => { /* requirements unavailable */ });
         const firstName = textInput(user.firstName || '');
         const lastName = textInput(user.lastName || '');
@@ -328,35 +328,35 @@ function showWelcomeDialog(user: any) {
 
         const body = h('div',
             h('div.hint', { style: { marginBottom: '12px' } },
-                'You may now customize your account information. You also have the option of changing your account password.'),
+                '您现在可以完善账号信息，也可以更改账号密码。'),
             h('div.form-grid',
-                field('Username', usernameInput),
-                field(req('New Password'), pwInput),
-                field(req('Confirm New Password'), confirmInput),
+                field('用户名', usernameInput),
+                field(req('新密码'), pwInput),
+                field(req('确认新密码'), confirmInput),
                 pwHint,
-                field('First Name', firstName),
-                field('Last Name', lastName),
-                field('Email', email),
-                field('Country', country),
-                field('State/Territory', state),
-                field('Phone', phone),
-                field('Organization', organization),
-                field('Role', role),
-                field('Business', industry),
-                field('Description', description)));
+                field('名字', firstName),
+                field('姓氏', lastName),
+                field('电子邮箱', email),
+                field('国家/地区', country),
+                field('州/地区', state),
+                field('电话', phone),
+                field('机构', organization),
+                field('角色', role),
+                field('所属行业', industry),
+                field('描述', description)));
 
         modal({
-            title: 'Welcome to Open Integration Engine',
+            title: '欢迎使用 Open Integration Engine',
             size: 'wide',
             body,
             onClose: () => resolve(),
             buttons: [
                 {
-                    label: 'Finish', primary: true,
+                    label: '完成', primary: true,
                     onClick: async () => {
                         const pw = (pwInput as any).value;
-                        if (!pw) { toast('New Password is required', 'warn'); return false; }
-                        if (pw !== (confirmInput as any).value) { toast('Passwords do not match', 'warn'); return false; }
+                        if (!pw) { toast('请填写新密码', 'warn'); return false; }
+                        if (pw !== (confirmInput as any).value) { toast('两次输入的密码不一致', 'warn'); return false; }
                         try {
                             // Set the password first (Swing order); the engine answers
                             // with a list of policy violations if it's rejected.
@@ -376,10 +376,10 @@ function showWelcomeDialog(user: any) {
                             user.description = (description as any).value;
                             await api.users.update(user.id, user);
                             await api.users.setPreference(user.id, 'firstlogin', 'false');
-                            toast('Welcome — your account is ready');
+                            toast('欢迎 — 您的账号已就绪');
                             return true;   // closes the modal → onClose resolves
                         } catch (e: any) {
-                            toast(e.message || 'Could not complete setup', 'error');
+                            toast(e.message || '无法完成初始设置', 'error');
                             return false;
                         }
                     }

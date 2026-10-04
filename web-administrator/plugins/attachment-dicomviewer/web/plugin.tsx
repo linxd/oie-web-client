@@ -24,9 +24,9 @@ function typeOf(att: any) {
 
 /* Header tags surfaced in the metadata table (dicom-parser tag form: xGGGGEEEE). */
 const META = [
-    ['x00100010', 'Patient Name'], ['x00100020', 'Patient ID'],
-    ['x00080060', 'Modality'], ['x00080020', 'Study Date'], ['x00081030', 'Study Description'],
-    ['x00280010', 'Rows'], ['x00280011', 'Columns']
+    ['x00100010', '患者姓名'], ['x00100020', '患者 ID'],
+    ['x00080060', '成像模态'], ['x00080020', '检查日期'], ['x00081030', '检查描述'],
+    ['x00280010', '行数'], ['x00280011', '列数']
 ];
 
 /* Transfer-syntax UIDs → capability. Uncompressed we render directly; JPEG
@@ -187,7 +187,7 @@ function Filmstrip({ state, frame, win, onPick, expanded }: any) {
                 ? 'flex gap-1.5 overflow-x-auto py-1.5 px-3.5 border-t border-line bg-bg1 flex-none'
                 : 'flex gap-1.5 overflow-x-auto py-1.5 px-1 border border-line rounded-[5px] bg-bg1'}>
             {frames.map((f: any) => (
-                <button key={f} type="button" title={`Frame ${f + 1}`} aria-label={`Frame ${f + 1}`}
+                <button key={f} type="button" title={`第 ${f + 1} 帧`} aria-label={`第 ${f + 1} 帧`}
                     aria-pressed={f === frame}
                     onClick={() => onPick(f)}
                     className={f === frame
@@ -260,11 +260,11 @@ export function register(platform: Platform) {
                     const entries = platform.api.asList(msg?.connectorMessages?.entry ?? msg?.connectorMessages);
                     const cms = entries.map((e: any) => e.connectorMessage ?? e).filter(Boolean);
                     const cm = cms.find((c: any) => String(c.metaDataId) === '0') || cms[0];
-                    if (!cm) throw new Error('no connector message found for this message');
+                    if (!cm) throw new Error('未找到该消息对应的连接消息');
                     const b64 = String(await platform.api.messages.getDicom(channelId, messageId, cm) ?? '').replace(/\s+/g, '');
-                    if (!b64) throw new Error('the reassembled DICOM is empty');
+                    if (!b64) throw new Error('重组后的 DICOM 为空');
                     let bin: any;
-                    try { bin = atob(b64); } catch { throw new Error('the attachment content is not valid Base64'); }
+                    try { bin = atob(b64); } catch { throw new Error('附件内容不是有效的 Base64'); }
                     const bytes = new Uint8Array(bin.length);
                     for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
 
@@ -273,12 +273,12 @@ export function register(platform: Platform) {
                     // parser throw (dicom-parser throws bare objects, not Errors).
                     if (bytes.length < 132 ||
                         String.fromCharCode(bytes[128], bytes[129], bytes[130], bytes[131]) !== 'DICM') {
-                        throw new Error('not a valid DICOM object (missing the DICM header) — the message content may not be raw binary DICOM');
+                        throw new Error('不是有效的 DICOM 对象（缺少 DICM 头）— 消息内容可能不是原始二进制 DICOM');
                     }
 
                     let ds: any;
                     try { ds = dicomParser.parseDicom(bytes); }
-                    catch (pe: any) { throw new Error('could not parse the DICOM dataset' + (pe && (pe.message || pe.exception) ? `: ${pe.message || pe.exception}` : '')); }
+                    catch (pe: any) { throw new Error('无法解析 DICOM 数据集' + (pe && (pe.message || pe.exception) ? `: ${pe.message || pe.exception}` : '')); }
                     const ts = (ds.string('x00020010') || '').trim();
                     const info = imageInfo(ds);
                     const meta: any = {};
@@ -322,7 +322,7 @@ export function register(platform: Platform) {
                     let current = true;
                     cv.getContext('2d').clearRect(0, 0, cv.width, cv.height);
                     drawJpegFrame(cv, state.ds, state.info, frame, () => current)
-                        .catch((e: any) => { if (current) setDecodeError(e && e.message ? e.message : 'the browser could not decode this frame'); });
+                        .catch((e: any) => { if (current) setDecodeError(e && e.message ? e.message : '浏览器无法解码此帧'); });
                     return () => { current = false; };
                 }
                 if (state.kind !== 'raw') return;
@@ -529,10 +529,10 @@ export function register(platform: Platform) {
         });
 
         if (state.key !== key || state.status === 'loading') {
-            return <div className="mt-[13px]"><div className="text-text-faint text-[10px]">Loading DICOM…</div></div>;
+            return <div className="mt-[13px]"><div className="text-text-faint text-[10px]">正在加载 DICOM…</div></div>;
         }
         if (state.status === 'error') {
-            return <div className="mt-[13px]"><div className="text-text-faint">{`Could not load DICOM: ${state.message}`}</div><button type="button" className="btn" onClick={() => retry()}>Retry</button></div>;
+            return <div className="mt-[13px]"><div className="text-text-faint">{`无法加载 DICOM：${state.message}`}</div><button type="button" className="btn" onClick={() => retry()}>重试</button></div>;
         }
 
         // `info` is already in scope (the gesture handlers above need it before
@@ -550,9 +550,9 @@ export function register(platform: Platform) {
             try {
                 await platform.ui.saveFile(`attachment-${attachment.id}.dcm`, 'application/dicom',
                     () => new Blob([bytes], { type: 'application/dicom' }),
-                    () => { if (!current()) throw new Error('The DICOM viewer is no longer active.'); });
+                    () => { if (!current()) throw new Error('DICOM 查看器已不再处于活动状态'); });
             } catch (error: any) {
-                if (current()) platform.ui.toast(`Failed to save DICOM: ${error.message || error}`, 'error');
+                if (current()) platform.ui.toast(`保存 DICOM 失败：${error.message || error}`, 'error');
             }
         };
 
@@ -560,8 +560,8 @@ export function register(platform: Platform) {
             <tr key={tag}><td className="font-semibold pr-4">{label}</td><td className="mono">{meta[tag]}</td></tr>
         ));
 
-        const title = `DICOM object — ${info.cols}×${info.rows}`
-            + `${info.numFrames > 1 ? `, ${info.numFrames} frames` : ''} — ${bytes.length.toLocaleString()} bytes`;
+        const title = `DICOM 对象 — ${info.cols}×${info.rows}`
+            + `${info.numFrames > 1 ? `，${info.numFrames} 帧` : ''} — ${bytes.length.toLocaleString()} 字节`;
 
         /* Full screen re-classes THIS container — the stage, canvas and controls
            below are the same nodes either way, which is what lets the view carry
@@ -591,34 +591,34 @@ export function register(platform: Platform) {
                 )}
                 {info.numFrames > 1 && (
                     <span className="inline-flex items-center gap-1.5">
-                        <button className="btn btn-sm" title="Previous frame (←)"
+                        <button className="btn btn-sm" title="上一帧（←）"
                             disabled={frame <= 0} onClick={() => stepFrame(-1)}>‹</button>
-                        <span className="mono">{`Frame ${frame + 1} / ${info.numFrames}`}</span>
-                        <button className="btn btn-sm" title="Next frame (→)"
+                        <span className="mono">{`帧 ${frame + 1} / ${info.numFrames}`}</span>
+                        <button className="btn btn-sm" title="下一帧（→）"
                             disabled={frame >= info.numFrames - 1} onClick={() => stepFrame(1)}>›</button>
                     </span>
                 )}
                 <span className="inline-flex items-center gap-1.5">
-                    <span className="text-text-faint">Zoom</span>
-                    <button className="btn btn-sm" title="Zoom out" onClick={() => zoomStep(1 / 1.25)}>−</button>
+                    <span className="text-text-faint">缩放</span>
+                    <button className="btn btn-sm" title="缩小" onClick={() => zoomStep(1 / 1.25)}>−</button>
                     <span className="mono w-[42px] text-center">{`${Math.round(zoom * 100)}%`}</span>
-                    <button className="btn btn-sm" title="Zoom in" onClick={() => zoomStep(1.25)}>+</button>
+                    <button className="btn btn-sm" title="放大" onClick={() => zoomStep(1.25)}>+</button>
                     <button className={fitMode ? 'btn btn-sm btn-primary' : 'btn btn-sm'}
-                        title="Fit the image to the pane" onClick={fit}>Fit</button>
-                    <button className="btn btn-sm" title="Show at actual size" onClick={actual}>1:1</button>
+                        title="使图像适应窗格" onClick={fit}>适应</button>
+                    <button className="btn btn-sm" title="按实际大小显示" onClick={actual}>1:1</button>
                 </span>
                 {grayscale && win && (
                     <span className="inline-flex items-center gap-1.5">
-                        <span className="text-text-faint">Level</span>
-                        <input type="range" aria-label="Level"
+                        <span className="text-text-faint">窗位</span>
+                        <input type="range" aria-label="窗位"
                             min={info.intercept} max={info.intercept + 4096 * info.slope} step="1"
                             value={win.c} onChange={(e: any) => setWin((w: any) => ({ ...w, c: parseFloat(e.target.value) }))} />
-                        <span className="text-text-faint">Window</span>
-                        <input type="range" aria-label="Window"
+                        <span className="text-text-faint">窗宽</span>
+                        <input type="range" aria-label="窗宽"
                             min="1" max={Math.max(2, 4096 * info.slope)} step="1"
                             value={win.w} onChange={(e: any) => setWin((w: any) => ({ ...w, w: parseFloat(e.target.value) }))} />
-                        <button className="btn btn-sm" title="Window/level from this frame's own range"
-                            onClick={autoWindow}>Auto</button>
+                        <button className="btn btn-sm" title="按当前帧自身范围设置窗宽/窗位"
+                            onClick={autoWindow}>自动</button>
                     </span>
                 )}
                 <span className="flex-1" />
@@ -627,16 +627,16 @@ export function register(platform: Platform) {
                     costs the image ~30px of height in an already short pane. */}
                 {(expanded || rootWidth >= 1400) && (
                     <span className="text-text-faint whitespace-nowrap">
-                        {grayscaleDrag ? 'drag = level/window · shift-drag = pan · wheel = zoom' : 'drag = pan · wheel = zoom'}
+                        {grayscaleDrag ? '拖动=窗位/窗宽 · Shift+拖动=平移 · 滚轮=缩放' : '拖动=平移 · 滚轮=缩放'}
                     </span>
                 )}
                 {/* Expanded, the dialog's own header ✕ and footer Close own
                     dismissal — a third exit in the toolbar just competes. */}
                 {!expanded && (
                     <>
-                        <button className="btn btn-sm" title="Open full screen"
-                            onClick={() => setExpanded(true)}>⤢ Full Screen</button>
-                        <button className="btn btn-sm" onClick={saveDicom}>Save DICOM</button>
+                        <button className="btn btn-sm" title="打开全屏"
+                            onClick={() => setExpanded(true)}>⤢ 全屏</button>
+                        <button className="btn btn-sm" onClick={saveDicom}>保存 DICOM</button>
                     </>
                 )}
             </div>
@@ -712,7 +712,7 @@ export function register(platform: Platform) {
                 <div className={expanded ? 'modal-header' : 'hidden'}>
                     <span>{title}</span>
                     {expanded && (
-                        <button className="icon-btn" title="Close (Esc)" aria-label="Close"
+                        <button className="icon-btn" title="关闭（Esc）" aria-label="关闭"
                             onClick={() => setExpanded(false)}>✕</button>
                     )}
                 </div>
@@ -730,7 +730,7 @@ export function register(platform: Platform) {
                 ) : (
                     <div className={expanded ? 'p-3.5 flex-1 overflow-auto' : ''}>
                         <div className="text-text-faint text-[11px]">
-                            {`This DICOM object uses a compressed transfer syntax (${tsName}). Inline preview currently supports uncompressed and JPEG DICOM — click Save DICOM to open it in a full viewer.`}
+                            {`该 DICOM 对象使用压缩传输语法（${tsName}）。内联预览目前仅支持未压缩与 JPEG DICOM——请点击“保存 DICOM”，在完整查看器中打开`}
                         </div>
                         {metaRows.length > 0 && <table className="dt mt-[13px]"><tbody>{metaRows}</tbody></table>}
                     </div>
@@ -738,7 +738,7 @@ export function register(platform: Platform) {
 
                 {decodeError && (
                     <div className={expanded ? 'text-text-faint text-[11px] px-3.5 py-1.5 flex-none' : 'text-text-faint text-[11px]'}>
-                        {`Could not decode this JPEG frame: ${decodeError}`}
+                        {`无法解码此 JPEG 帧：${decodeError}`}
                     </div>
                 )}
 
@@ -754,8 +754,8 @@ export function register(platform: Platform) {
 
                 {expanded && (
                     <div className="modal-foot">
-                        <button className="btn" onClick={saveDicom}>Save DICOM</button>
-                        <button className="btn btn-primary" onClick={() => setExpanded(false)}>Close</button>
+                        <button className="btn" onClick={saveDicom}>保存 DICOM</button>
+                        <button className="btn btn-primary" onClick={() => setExpanded(false)}>关闭</button>
                     </div>
                 )}
             </div>

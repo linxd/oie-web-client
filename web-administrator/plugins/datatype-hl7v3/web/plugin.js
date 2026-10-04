@@ -5,7 +5,7 @@ var PKG = "com.mirth.connect.plugins.datatypes.hl7v3";
 var bool = (key, label, def, hint) => ({ key, label, type: "checkbox", default: def, hint });
 var opt = (key, label, options, def, hint) => ({ key, label, type: "select", options, default: def, hint });
 var code = (key, label, def, hint) => ({ key, label, type: "code", default: def, hint });
-var BATCH_SCRIPT_HINT = "JavaScript that splits the batch and returns the next message. Has access to 'reader' (a Java BufferedReader); return null/empty to signal end of input. Only used when Process Batch is enabled in the connector.";
+var BATCH_SCRIPT_HINT = "\u62C6\u5206\u6279\u5904\u7406\u5E76\u8FD4\u56DE\u4E0B\u4E00\u6761\u6D88\u606F\u7684 JavaScript\uFF0C\u53EF\u8BBF\u95EE 'reader'\uFF08Java BufferedReader\uFF09\uFF0C\u8FD4\u56DE null/\u7A7A \u8868\u793A\u8F93\u5165\u7ED3\u675F\uFF1B\u4EC5\u5728\u8FDE\u63A5\u5668\u4E2D\u542F\u7528\u6279\u5904\u7406\u65F6\u4F7F\u7528";
 var DEF = {
   name: "HL7V3",
   label: "HL7 v3.x",
@@ -14,23 +14,23 @@ var DEF = {
   groups: [
     {
       key: "serializationProperties",
-      label: "Serialization",
+      label: "\u5E8F\u5217\u5316",
       class: `${PKG}.HL7V3SerializationProperties`,
       fields: [
-        bool("stripNamespaces", "Strip Namespaces", false, "Strip namespace definitions from the transformed XML message (prefixes are not removed).")
+        bool("stripNamespaces", "\u53BB\u9664\u547D\u540D\u7A7A\u95F4", false, "\u4ECE\u8F6C\u6362\u540E\u7684 XML \u6D88\u606F\u4E2D\u53BB\u9664\u547D\u540D\u7A7A\u95F4\u5B9A\u4E49\uFF08\u4E0D\u4F1A\u79FB\u9664\u524D\u7F00\uFF09")
       ]
     },
     {
       key: "batchProperties",
-      label: "Batch",
+      label: "\u6279\u5904\u7406",
       class: `${PKG}.HL7V3BatchProperties`,
       fields: [
         opt(
           "splitType",
-          "Split Batch By",
+          "\u6279\u5904\u7406\u62C6\u5206\u65B9\u5F0F",
           [{ value: "JavaScript", label: "JavaScript" }],
           "JavaScript",
-          "Method for splitting the batch message. Only used when Process Batch is enabled in the connector."
+          "\u62C6\u5206\u6279\u5904\u7406\u6D88\u606F\u7684\u65B9\u5F0F\uFF0C\u4EC5\u5728\u8FDE\u63A5\u5668\u4E2D\u542F\u7528\u6279\u5904\u7406\u65F6\u4F7F\u7528"
         ),
         code("batchScript", "JavaScript", null, BATCH_SCRIPT_HINT)
       ]

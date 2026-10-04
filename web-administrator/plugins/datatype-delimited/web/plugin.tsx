@@ -20,54 +20,54 @@ const bool = (key: any, label: any, def: any, hint?: any) => ({ key, label, type
 const opt = (key: any, label: any, options: any, def: any, hint?: any) => ({ key, label, type: 'select', options, default: def, hint });
 const code = (key: any, label: any, def: any, hint?: any) => ({ key, label, type: 'code', default: def, hint });
 
-const BATCH_SCRIPT_HINT = 'JavaScript that splits the batch and returns the next message. ' +
-    "Has access to 'reader' (a Java BufferedReader); return null/empty to signal end of input. " +
-    'Only used when Process Batch is enabled in the connector.';
+const BATCH_SCRIPT_HINT = '拆分批处理并返回下一条消息的 JavaScript，' +
+    "可访问 'reader'（Java BufferedReader），返回 null/空 表示输入结束；" +
+    '仅在连接器中启用批处理时使用';
 
 const DEF: any = {
-    name: 'DELIMITED', label: 'Delimited Text', order: 60,
+    name: 'DELIMITED', label: '分隔文本', order: 60,
     propertiesClass: `${PKG}.DelimitedDataTypeProperties`,
     groups: [
         {
-            key: 'serializationProperties', label: 'Serialization',
+            key: 'serializationProperties', label: '序列化',
             class: `${PKG}.DelimitedSerializationProperties`,
             fields: [
-                text('columnDelimiter', 'Column Delimiter', ',', 'Character(s) that separate columns (e.g. a comma in a CSV file).'),
-                text('recordDelimiter', 'Record Delimiter', '\\n', 'Character(s) that separate each record (e.g. a newline in a CSV file).'),
-                text('columnWidths', 'Column Widths', null, 'Comma separated list of fixed column widths; leave blank for delimited columns.'),
-                text('quoteToken', 'Quote Token', '"', 'Quote character(s) used to bracket values containing embedded special characters.'),
-                bool('escapeWithDoubleQuote', 'Double Quote Escaping', true, 'Two consecutive quote tokens are an embedded quote token; uncheck to use the Escape Token instead.'),
-                text('quoteEscapeToken', 'Escape Token', '\\', 'Character(s) used to escape embedded quote tokens (only when Double Quote Escaping is unchecked).'),
-                text('columnNames', 'Column Names', null, 'Comma separated list overriding the default column names (column1…columnN).'),
-                bool('numberedRows', 'Numbered Rows', false, 'Number each row in the XML representation of the message.'),
-                bool('ignoreCR', 'Ignore Carriage Returns', true, 'Carriage return (\\r) characters are skipped without processing.')
+                text('columnDelimiter', '列分隔符', ',', '分隔列的字符（例如 CSV 文件中的逗号）'),
+                text('recordDelimiter', '记录分隔符', '\\n', '分隔每条记录的字符（例如 CSV 文件中的换行符）'),
+                text('columnWidths', '列宽', null, '逗号分隔的固定列宽列表；分隔式列请留空'),
+                text('quoteToken', '引号符', '"', '用于包裹含内嵌特殊字符取值的引号字符'),
+                bool('escapeWithDoubleQuote', '双引号转义', true, '连续两个引号符表示内嵌引号；取消勾选则改用转义符'),
+                text('quoteEscapeToken', '转义符', '\\', '用于转义内嵌引号的字符（仅在未勾选双引号转义时生效）'),
+                text('columnNames', '列名', null, '逗号分隔的列表，覆盖默认列名（column1…columnN）'),
+                bool('numberedRows', '行编号', false, '在消息的 XML 表示中为每行编号'),
+                bool('ignoreCR', '忽略回车符', true, '跳过回车符（\\r），不作处理')
             ]
         },
         {
-            key: 'deserializationProperties', label: 'Deserialization',
+            key: 'deserializationProperties', label: '反序列化',
             class: `${PKG}.DelimitedDeserializationProperties`,
             fields: [
-                text('columnDelimiter', 'Column Delimiter', ',', 'Character(s) that separate columns (e.g. a comma in a CSV file).'),
-                text('recordDelimiter', 'Record Delimiter', '\\n', 'Character(s) that separate each record (e.g. a newline in a CSV file).'),
-                text('columnWidths', 'Column Widths', null, 'Comma separated list of fixed column widths; leave blank for delimited columns.'),
-                text('quoteToken', 'Quote Token', '"', 'Quote character(s) used to bracket values containing embedded special characters.'),
-                bool('escapeWithDoubleQuote', 'Double Quote Escaping', true, 'Two consecutive quote tokens are an embedded quote token; uncheck to use the Escape Token instead.'),
-                text('quoteEscapeToken', 'Escape Token', '\\', 'Character(s) used to escape embedded quote tokens (only when Double Quote Escaping is unchecked).')
+                text('columnDelimiter', '列分隔符', ',', '分隔列的字符（例如 CSV 文件中的逗号）'),
+                text('recordDelimiter', '记录分隔符', '\\n', '分隔每条记录的字符（例如 CSV 文件中的换行符）'),
+                text('columnWidths', '列宽', null, '逗号分隔的固定列宽列表；分隔式列请留空'),
+                text('quoteToken', '引号符', '"', '用于包裹含内嵌特殊字符取值的引号字符'),
+                bool('escapeWithDoubleQuote', '双引号转义', true, '连续两个引号符表示内嵌引号；取消勾选则改用转义符'),
+                text('quoteEscapeToken', '转义符', '\\', '用于转义内嵌引号的字符（仅在未勾选双引号转义时生效）')
             ]
         },
         {
-            key: 'batchProperties', label: 'Batch', class: `${PKG}.DelimitedBatchProperties`,
+            key: 'batchProperties', label: '批处理', class: `${PKG}.DelimitedBatchProperties`,
             fields: [
-                opt('splitType', 'Split Batch By', [
-                    { value: 'Record', label: 'Record' },
-                    { value: 'Delimiter', label: 'Delimiter' },
-                    { value: 'Grouping_Column', label: 'Grouping Column' },
+                opt('splitType', '批处理拆分方式', [
+                    { value: 'Record', label: '按记录' },
+                    { value: 'Delimiter', label: '按分隔符' },
+                    { value: 'Grouping_Column', label: '按分组列' },
                     { value: 'JavaScript', label: 'JavaScript' }
-                ], 'Record', 'Method for splitting the batch message. Only used when Process Batch is enabled in the connector.'),
-                num('batchSkipRecords', 'Number of Header Records', 0, 'Number of header records to skip.'),
-                text('batchMessageDelimiter', 'Batch Delimiter', null, 'Delimiter (character sequence) that separates messages.'),
-                bool('batchMessageDelimiterIncluded', 'Include Batch Delimiter', false, 'Include the batch delimiter in the message returned by the batch processor.'),
-                text('batchGroupingColumn', 'Grouping Column', null, 'Column used to group records; a change in its value marks a message boundary.'),
+                ], 'Record', '拆分批处理消息的方式，仅在连接器中启用批处理时使用'),
+                num('batchSkipRecords', '头部记录数', 0, '要跳过的头部记录数'),
+                text('batchMessageDelimiter', '批处理分隔符', null, '分隔消息的分隔符（字符序列）'),
+                bool('batchMessageDelimiterIncluded', '包含批处理分隔符', false, '在批处理器返回的消息中包含批处理分隔符'),
+                text('batchGroupingColumn', '分组列', null, '用于分组记录的列；其值变化即标志消息边界'),
                 code('batchScript', 'JavaScript', null, BATCH_SCRIPT_HINT)
             ]
         }

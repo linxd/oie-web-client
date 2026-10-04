@@ -25,7 +25,7 @@ import { Icon } from './bridges.jsx';
 
 /** Best-effort one-line summary of anything that can be thrown. */
 function messageOf(error: any) {
-    if (!error) return 'Unknown error';
+    if (!error) return '未知错误';
     if (typeof error === 'string') return error;
     return error.message || String(error);
 }
@@ -42,11 +42,11 @@ function DefaultFallback({ error, label, compact, onRetry }: any) {
             <div className="view-error-msg">{messageOf(error)}</div>
             <div className="view-error-actions">
                 <button type="button" className="btn" onClick={onRetry}>
-                    <Icon name="refresh" size={13} />Retry
+                    <Icon name="refresh" size={13} />重试
                 </button>
                 {!compact && (
                     <button type="button" className="btn" onClick={() => location.reload()}>
-                        Reload page
+                        重新加载页面
                     </button>
                 )}
             </div>
@@ -77,7 +77,7 @@ export class ErrorBoundary extends Component<any, any> {
 
     render() {
         const { error, resetKey } = this.state;
-        const { children, label = 'This section failed to render', compact = false, fallback } = this.props;
+        const { children, label = '此区域渲染失败', compact = false, fallback } = this.props;
         if (error) {
             if (typeof fallback === 'function') return fallback({ error, retry: this.retry });
             return <DefaultFallback error={error} label={label} compact={compact} onRetry={this.retry} />;

@@ -270,23 +270,23 @@ function DashFilterBar({
        and the inline bar are two homes for the same controls, not two copies. */
     const controls = (
         <>
-            <SegPill value={viewMode} onChange={onViewMode} label="Row grouping" options={VIEW_MODE_OPTIONS} />
+            <SegPill value={viewMode} onChange={onViewMode} label="行分组方式" options={VIEW_MODE_OPTIONS} />
             <span className="inline-flex items-center gap-[4px]">
-                <span className="text-text-faint text-[10px]">Tags:</span>
-                <SegPill value={tagMode} onChange={onTagMode} label="Tag display" options={TAG_MODE_OPTIONS} />
+                <span className="text-text-faint text-[10px]">标签：</span>
+                <SegPill value={tagMode} onChange={onTagMode} label="标签显示" options={TAG_MODE_OPTIONS} />
             </span>
             <span className="inline-flex items-center gap-[4px]">
-                <span className="text-text-faint text-[10px]">Stats:</span>
-                <SegPill value={showStats ? 'on' : 'off'} onChange={(v: any) => onShowStats(v === 'on')} label="Statistics strip" options={[
-                    { value: 'on', label: 'On', title: 'Show stat cards' },
-                    { value: 'off', label: 'Off', title: 'Hide stat cards' }
+                <span className="text-text-faint text-[10px]">统计：</span>
+                <SegPill value={showStats ? 'on' : 'off'} onChange={(v: any) => onShowStats(v === 'on')} label="统计条" options={[
+                    { value: 'on', label: '开', title: '显示统计卡片' },
+                    { value: 'off', label: '关', title: '隐藏统计卡片' }
                 ]} />
             </span>
             <span className="inline-flex items-center gap-[4px]">
-                <span className="text-text-faint text-[10px]">Range:</span>
-                <SegPill value={lifetime ? 'lifetime' : 'current'} onChange={(v: any) => onLifetime(v === 'lifetime')} label="Statistics range" options={[
-                    { value: 'current', label: 'Current' },
-                    { value: 'lifetime', label: 'Lifetime' }
+                <span className="text-text-faint text-[10px]">范围：</span>
+                <SegPill value={lifetime ? 'lifetime' : 'current'} onChange={(v: any) => onLifetime(v === 'lifetime')} label="统计范围" options={[
+                    { value: 'current', label: '当前' },
+                    { value: 'lifetime', label: '累计' }
                 ]} />
             </span>
         </>
@@ -295,7 +295,7 @@ function DashFilterBar({
     return (
         <div className="filterbar" ref={barRef}>
             <span className="flex items-center gap-2.5 flex-1 min-w-[198px]">
-                <label>Filter:</label>
+                <label>筛选：</label>
                 {chips.length > 0 && (
                     <span className="filter-chip-host gap-1 flex-wrap" style={{ display: 'inline-flex' }}>
                         {chips.map((chip: any) => {
@@ -307,7 +307,7 @@ function DashFilterBar({
                                     style={{ background: isTag ? (tagRgb(tag, 0.25) || 'var(--bg3)') : 'var(--bg3)' }}>
                                     <Icon name={isTag ? 'tag' : 'server'} size={12} />
                                     <span>{chip.value}</span>
-                                    <button title="Remove"
+                                    <button title="移除"
                                         className="appearance-none border-none cursor-pointer text-inherit text-[12.5px] leading-none py-0 px-px"
                                         style={{ background: 'none', fontFamily: 'inherit' }}
                                         onClick={() => removeChip(chip)}>×</button>
@@ -318,7 +318,7 @@ function DashFilterBar({
                 )}
                 {/* combobox over the suggestion list: the arrow-key cursor was
                     visual only, so a screen reader never heard the active item. */}
-                <input ref={inputRef} type="text" placeholder="Enter channel tag or name" autoComplete="off"
+                <input ref={inputRef} type="text" placeholder="输入通道标签或名称" autoComplete="off"
                     className="flex-1 min-w-0" value={filterText}
                     role="combobox"
                     aria-expanded={String(taOpen && taItems.length > 0) as any}
@@ -339,7 +339,7 @@ function DashFilterBar({
                 <Popover.Root>
                     <Popover.Trigger asChild>
                         <button type="button" className="btn dash-options-btn">
-                            <Icon name="eye" /><span>View</span><Icon name="chevD" />
+                            <Icon name="eye" /><span>视图</span><Icon name="chevD" />
                         </button>
                     </Popover.Trigger>
                     <Popover.Portal>
@@ -355,7 +355,7 @@ function DashFilterBar({
                 </div>
             )}
             {createPortal(
-                <div ref={taRef} id="dash-typeahead" role="listbox" aria-label="Filter suggestions"
+                <div ref={taRef} id="dash-typeahead" role="listbox" aria-label="筛选建议"
                     className={'typeahead' + (taOpen && taItems.length ? '' : ' hidden')}>
                     {taItems.map((item: any, i: any) => (
                         <div key={item.kind + ':' + item.value}
@@ -367,7 +367,7 @@ function DashFilterBar({
                             onClick={() => pickSuggestion(item)}>
                             <Icon name={item.kind === 'tag' ? 'tag' : 'server'} size={14} />
                             <span className="typeahead-label">{item.value}</span>
-                            <span className="typeahead-kind">{item.kind}</span>
+                            <span className="typeahead-kind">{item.kind === 'tag' ? '标签' : '通道'}</span>
                         </div>
                     ))}
                 </div>,
@@ -452,11 +452,11 @@ function DashboardView({ onToggleView }: any) {
        pane closure or context-menu builder) — no reads of selection state from
        long-lived closures, so a menu can never act on a stale selection. */
     async function controlChannels(action: any, label: any, ids: any) {
-        if (!ids.length) { toast('Select a channel first', 'warn'); return; }
+        if (!ids.length) { toast('请先选择通道', 'warn'); return; }
         try {
             if (await runLifecycle(action, ids)) refresh();
         } catch (e: any) {
-            toast(`${label} failed: ${e.message}`, 'error');
+            toast(`${label}失败：${e.message}`, 'error');
             refresh();
         }
     }
@@ -468,32 +468,32 @@ function DashboardView({ onToggleView }: any) {
        api.statistics.clear. Queued is a live queue depth, not a counter, so
        it cannot be cleared. */
     function openClearStatisticsDialog(ids: any) {
-        const received = checkbox('Received', true);
-        const filtered = checkbox('Filtered', true);
-        const sent = checkbox('Sent', true);
-        const errored = checkbox('Errored', true);
+        const received = checkbox('接收', true);
+        const filtered = checkbox('过滤', true);
+        const sent = checkbox('发送', true);
+        const errored = checkbox('错误', true);
         modal({
-            title: 'Clear Statistics',
+            title: '清除统计',
             body: h('div',
-                h('div.mb-[13px]', `Clear the selected statistics for ${ids.length} channel(s)? This cannot be undone.`),
+                h('div.mb-[13px]', `确定清除 ${ids.length} 个通道中所选的统计吗？此操作无法撤销`),
                 h('div', { class: 'flex flex-col gap-1.5' },
                     received.el, filtered.el, sent.el, errored.el),
-                h('div.hint.mt-[13px]', 'Queued statistics cannot be cleared.')),
+                h('div.hint.mt-[13px]', '无法清除排队统计')),
             buttons: [
-                { label: 'Cancel' },
+                { label: '取消' },
                 {
-                    label: 'Clear', primary: true,
+                    label: '清除', primary: true,
                     onClick: async () => {
                         const flags = [received, filtered, sent, errored].map(c => c.input.checked);
                         if (!flags.some(Boolean)) {
-                            toast('Select at least one statistic to clear', 'warn');
+                            toast('请至少选择一项要清除的统计', 'warn');
                             return false;
                         }
                         try {
                             await api.statistics.clear(Object.fromEntries(ids.map((id: any) => [id, null])), ...flags);
-                            toast('Statistics cleared');
+                            toast('统计已清除');
                         } catch (e: any) {
-                            toast(`Clear statistics failed: ${e.message}`, 'error');
+                            toast(`清除统计失败：${e.message}`, 'error');
                             return false;
                         }
                         refresh();
@@ -506,16 +506,16 @@ function DashboardView({ onToggleView }: any) {
     // Task handlers, mirroring the Swing context group (Send/View/Remove
     // All/Clear Statistics/Start/Pause/Stop/Halt/Undeploy). All take explicit ids.
     const needIds = (ids: any) => {
-        if (!ids.length) { toast('Select a channel first', 'warn'); return false; }
+        if (!ids.length) { toast('请先选择通道', 'warn'); return false; }
         return true;
     };
-    const startTask = (ids: any) => controlChannels('start', 'Start', ids);
-    const pauseTask = (ids: any) => controlChannels('pause', 'Pause', ids);
-    const stopTask = (ids: any) => controlChannels('stop', 'Stop', ids);
+    const startTask = (ids: any) => controlChannels('start', '启动', ids);
+    const pauseTask = (ids: any) => controlChannels('pause', '暂停', ids);
+    const stopTask = (ids: any) => controlChannels('stop', '停止', ids);
     async function haltTask(ids: any) {
         if (!needIds(ids)) return;
-        if (await confirmDialog('Halt channels', 'Halting forcibly kills processing threads. Halt the selected channels?', { danger: true, okLabel: 'Halt' })) {
-            controlChannels('halt', 'Halt', ids);
+        if (await confirmDialog('中止通道', '中止会强制终止处理线程。确定中止所选通道吗？', { danger: true, okLabel: '中止' })) {
+            controlChannels('halt', '中止', ids);
         }
     }
     function clearStatsTask(ids: any) {
@@ -524,12 +524,12 @@ function DashboardView({ onToggleView }: any) {
     async function undeployTask(ids: any) {
         if (!needIds(ids)) return;
         try { if (await runLifecycle('undeploy', ids)) refresh(); }
-        catch (e: any) { toast(`Undeploy failed: ${e.message}`, 'error'); refresh(); }
+        catch (e: any) { toast(`取消部署失败：${e.message}`, 'error'); refresh(); }
     }
     function sendMessageTask(ids: any) {
         if (!needIds(ids)) return;
         if (ids.length !== 1) {
-            toast('This operation can only be performed on a single channel.', 'warn');
+            toast('此操作只能对单个通道执行', 'warn');
             return;
         }
         openSendMessageDialog(platform, ids[0], () => refresh());
@@ -564,7 +564,7 @@ function DashboardView({ onToggleView }: any) {
         const defaults = statuses.filter(s => !used.has(s.channelId));
         if (defaults.length || !rows.length) {
             rows.unshift({
-                group: { id: '__default__', name: 'Default Group', description: 'Channels not part of a group will appear here.' },
+                group: { id: '__default__', name: '[缺省组]', description: '未加入任何组的通道会显示在这里' },
                 members: defaults
             });
         }
@@ -640,7 +640,7 @@ function DashboardView({ onToggleView }: any) {
        Statistics read the `lifetime` state flag. */
     const COLUMNS = [
         {
-            key: 'state', label: 'Status',
+            key: 'state', label: '状态',
             sortValue: (st: any) => stateLabel(st.state) || String(st.state || ''),
             renderChannel: (st: any) => <span className="status-cell"><span className={`pip ${statePip(st.state)}`} />{stateLabel(st.state)}</span>,
             renderGroupAggregate: (totals: any, ctx: any) => {
@@ -652,48 +652,48 @@ function DashboardView({ onToggleView }: any) {
                     const state = ctx.members[0].state;
                     return <span className="status-cell"><span className={`pip ${statePip(state)}`} />{stateLabel(state)}</span>;
                 }
-                return <span className="status-cell"><span className="pip warn" />Mixed</span>;
+                return <span className="status-cell"><span className="pip warn" />混合</span>;
             },
             renderConnector: (child: any) => <span className="status-cell"><span className={`pip ${statePip(child.state)}`} />{stateLabel(child.state)}</span>
         },
         {
-            key: 'name', label: 'Name', tree: true,
+            key: 'name', label: '名称', tree: true,
             sortValue: (st: any) => String(st.name || '').toLowerCase(),
             renderChannel: (st: any) => nameCell(st),
             renderGroupAggregate: (totals: any, ctx: any) => `[${ctx.group.name}]`,
             renderConnector: (child: any) => <span className="text-text-dim">{String(child.name ?? '')}</span>
         },
         {
-            key: 'type', label: 'Type',
+            key: 'type', label: '类型',
             sortValue: (st: any) => String(connectorTypes.get(st.channelId)?.get(0) || ''),
             renderChannel: (st: any) => connectorTypes.get(st.channelId)?.get(0) || '',
             renderGroupAggregate: () => '',
             renderConnector: (child: any) => <span className="text-text-dim">{connectorTypes.get(child.channelId)?.get(Number(child.metaDataId)) || ''}</span>
         },
         {
-            key: 'port', label: 'Port', mono: true,
+            key: 'port', label: '端口', mono: true,
             sortValue: (st: any) => Number(sourcePorts.get(st.channelId)) || 0,
             renderChannel: (st: any) => sourcePorts.get(st.channelId) || '',
             renderGroupAggregate: () => '',
             renderConnector: (child: any) => <span className="text-text-dim">{Number(child.metaDataId) === 0 ? (sourcePorts.get(child.channelId) || '') : ''}</span>
         },
         {
-            key: 'rev', label: 'Rev Δ', align: 'right', mono: true,
+            key: 'rev', label: '修订 Δ', align: 'right', mono: true,
             sortValue: (st: any) => Number(st.deployedRevisionDelta) || 0,
             renderChannel: (st: any) => {
                 const d = Number(st.deployedRevisionDelta) || 0;
                 // Out of sync on revision delta OR code-template changes (see channels.js).
                 const ct = st.codeTemplatesChanged === true || st.codeTemplatesChanged === 'true';
-                const title = d > 0 && ct ? 'Channel and code templates changed since last deployment'
-                    : d > 0 ? 'Channel changed since last deployment'
-                        : ct ? 'Code templates changed since last deployment' : undefined;
+                const title = d > 0 && ct ? '通道与代码模板自上次部署后已变更'
+                    : d > 0 ? '通道自上次部署后已变更'
+                        : ct ? '代码模板自上次部署后已变更' : undefined;
                 return (d > 0 || ct) ? <span className="cell-flag" title={title}>{String(d)}</span> : '0';
             },
             renderGroupAggregate: () => '--',
             renderConnector: () => ''
         },
         {
-            key: 'deployed', label: 'Last Deployed', mono: true,
+            key: 'deployed', label: '上次部署', mono: true,
             sortValue: (st: any) => st.deployedDate?.time ?? 0,
             renderChannel: (st: any) => isJustDeployed(st)
                 ? <span className="cell-flag">{fmtDate(st.deployedDate)}</span>
@@ -701,11 +701,11 @@ function DashboardView({ onToggleView }: any) {
             renderGroupAggregate: () => '--',
             renderConnector: () => ''
         },
-        statColumn('received', 'Received', 'RECEIVED'),
-        statColumn('filtered', 'Filtered', 'FILTERED'),
-        statColumn('queued', 'Queued', 'QUEUED', 'warn'),
-        statColumn('sent', 'Sent', 'SENT'),
-        statColumn('errored', 'Errored', 'ERROR', 'err')
+        statColumn('received', '接收', 'RECEIVED'),
+        statColumn('filtered', '过滤', 'FILTERED'),
+        statColumn('queued', '排队', 'QUEUED', 'warn'),
+        statColumn('sent', '发送', 'SENT'),
+        statColumn('errored', '错误', 'ERROR', 'err')
     ];
 
     // The built-in columns plus any plugin dashboard columns (rendered last). A
@@ -941,18 +941,18 @@ function DashboardView({ onToggleView }: any) {
         const first = members[0];
         const anyState = (fn: any) => members.some(fn);
         contextMenu(e.clientX, e.clientY, [
-            { label: 'Refresh', icon: 'refresh', task: 'doRefreshStatuses', onClick: () => refresh() },
+            { label: '刷新', icon: 'refresh', task: 'doRefreshStatuses', onClick: () => refresh() },
             '-',
-            { label: 'Send Message', icon: 'send', task: 'doSendMessage', onClick: () => sendMessageTask(ids) },
-            { label: 'View Messages', icon: 'messages', task: 'doShowMessages', onClick: () => router.navigate(`/messages/${first.channelId}`) },
-            { label: 'Remove All Messages', icon: 'trash', danger: true, task: 'doRemoveAllMessages', onClick: () => removeAllTask(ids) },
-            { label: 'Clear Statistics', icon: 'clear', hidden: lifetime, task: 'doClearStats', onClick: () => clearStatsTask(ids) },
+            { label: '发送消息', icon: 'send', task: 'doSendMessage', onClick: () => sendMessageTask(ids) },
+            { label: '查看消息', icon: 'messages', task: 'doShowMessages', onClick: () => router.navigate(`/messages/${first.channelId}`) },
+            { label: '移除全部消息', icon: 'trash', danger: true, task: 'doRemoveAllMessages', onClick: () => removeAllTask(ids) },
+            { label: '清除统计', icon: 'clear', hidden: lifetime, task: 'doClearStats', onClick: () => clearStatsTask(ids) },
             '-',
-            { label: 'Start', icon: 'play', hidden: !anyState((x: any) => x.state === 'STOPPED' || x.state === 'PAUSED'), task: 'doStart', onClick: () => controlChannels('start', 'Start', ids) },
-            { label: 'Pause', icon: 'pause', hidden: !anyState((x: any) => x.state === 'STARTED'), task: 'doPause', onClick: () => controlChannels('pause', 'Pause', ids) },
-            { label: 'Stop', icon: 'stop', hidden: !anyState((x: any) => x.state === 'STARTED' || x.state === 'PAUSED'), task: 'doStop', onClick: () => controlChannels('stop', 'Stop', ids) },
-            { label: 'Halt', icon: 'halt', hidden: !(members.length === 1 && isHaltable(members[0].state)), task: 'doHalt', onClick: () => haltTask(ids) },
-            { label: 'Undeploy Channels', icon: 'undeploy', hidden: anyState((x: any) => isHaltableNonSyncing(x.state)), task: 'doUndeployChannel', onClick: () => undeployTask(ids) }
+            { label: '启动', icon: 'play', hidden: !anyState((x: any) => x.state === 'STOPPED' || x.state === 'PAUSED'), task: 'doStart', onClick: () => controlChannels('start', '启动', ids) },
+            { label: '暂停', icon: 'pause', hidden: !anyState((x: any) => x.state === 'STARTED'), task: 'doPause', onClick: () => controlChannels('pause', '暂停', ids) },
+            { label: '停止', icon: 'stop', hidden: !anyState((x: any) => x.state === 'STARTED' || x.state === 'PAUSED'), task: 'doStop', onClick: () => controlChannels('stop', '停止', ids) },
+            { label: '中止', icon: 'halt', hidden: !(members.length === 1 && isHaltable(members[0].state)), task: 'doHalt', onClick: () => haltTask(ids) },
+            { label: '取消部署通道', icon: 'undeploy', hidden: anyState((x: any) => isHaltableNonSyncing(x.state)), task: 'doUndeployChannel', onClick: () => undeployTask(ids) }
         ], 'dashboard');
     }
 
@@ -988,24 +988,24 @@ function DashboardView({ onToggleView }: any) {
         const sel = statuses.filter(x => ids.includes(x.channelId));
         const anyState = (fn: any) => sel.some(fn);
         contextMenu(e.clientX, e.clientY, [
-            { label: 'Refresh', icon: 'refresh', task: 'doRefreshStatuses', onClick: () => refresh() },
+            { label: '刷新', icon: 'refresh', task: 'doRefreshStatuses', onClick: () => refresh() },
             '-',
-            { label: 'Send Message', icon: 'send', task: 'doSendMessage', onClick: () => sendMessageTask(ids) },
-            { label: 'View Messages', icon: 'messages', task: 'doShowMessages', onClick: () => router.navigate(`/messages/${st.channelId}`) },
-            { label: 'Remove All Messages', icon: 'trash', danger: true, task: 'doRemoveAllMessages', onClick: () => removeAllTask(ids) },
-            { label: 'Clear Statistics', icon: 'clear', hidden: lifetime, task: 'doClearStats', onClick: () => clearStatsTask(ids) },
+            { label: '发送消息', icon: 'send', task: 'doSendMessage', onClick: () => sendMessageTask(ids) },
+            { label: '查看消息', icon: 'messages', task: 'doShowMessages', onClick: () => router.navigate(`/messages/${st.channelId}`) },
+            { label: '移除全部消息', icon: 'trash', danger: true, task: 'doRemoveAllMessages', onClick: () => removeAllTask(ids) },
+            { label: '清除统计', icon: 'clear', hidden: lifetime, task: 'doClearStats', onClick: () => clearStatsTask(ids) },
             '-',
-            { label: 'Start', icon: 'play', hidden: !anyState((x: any) => x.state === 'STOPPED' || x.state === 'PAUSED'), task: 'doStart', onClick: () => controlChannels('start', 'Start', ids) },
-            { label: 'Pause', icon: 'pause', hidden: !anyState((x: any) => x.state === 'STARTED'), task: 'doPause', onClick: () => controlChannels('pause', 'Pause', ids) },
-            { label: 'Stop', icon: 'stop', hidden: !anyState((x: any) => x.state === 'STARTED' || x.state === 'PAUSED'), task: 'doStop', onClick: () => controlChannels('stop', 'Stop', ids) },
-            { label: 'Halt', icon: 'halt', hidden: !(sel.length === 1 && isHaltable(sel[0].state)), task: 'doHalt', onClick: () => haltTask(ids) },
-            { label: 'Undeploy Channel', icon: 'undeploy', hidden: anyState((x: any) => isHaltableNonSyncing(x.state)), task: 'doUndeployChannel', onClick: () => undeployTask(ids) },
+            { label: '启动', icon: 'play', hidden: !anyState((x: any) => x.state === 'STOPPED' || x.state === 'PAUSED'), task: 'doStart', onClick: () => controlChannels('start', '启动', ids) },
+            { label: '暂停', icon: 'pause', hidden: !anyState((x: any) => x.state === 'STARTED'), task: 'doPause', onClick: () => controlChannels('pause', '暂停', ids) },
+            { label: '停止', icon: 'stop', hidden: !anyState((x: any) => x.state === 'STARTED' || x.state === 'PAUSED'), task: 'doStop', onClick: () => controlChannels('stop', '停止', ids) },
+            { label: '中止', icon: 'halt', hidden: !(sel.length === 1 && isHaltable(sel[0].state)), task: 'doHalt', onClick: () => haltTask(ids) },
+            { label: '取消部署通道', icon: 'undeploy', hidden: anyState((x: any) => isHaltableNonSyncing(x.state)), task: 'doUndeployChannel', onClick: () => undeployTask(ids) },
             '-',
-            { label: 'Edit Channel', icon: 'edit', task: 'doEditChannel', group: 'channel', onClick: () => router.navigate(`/channels/${st.channelId}/edit`) },
+            { label: '编辑通道', icon: 'edit', task: 'doEditChannel', group: 'channel', onClick: () => router.navigate(`/channels/${st.channelId}/edit`) },
             // Tagged with Swing's channelEdit constants (CHANNEL_EDIT_FILTER/_TRANSFORMER)
             // so an RBAC policy that hides filter/transformer editing applies here too.
-            { label: 'Edit Filter', icon: 'filter', task: 'doEditFilter', group: 'channelEdit', onClick: () => router.navigate(`/channels/${st.channelId}/filter/0`) },
-            { label: 'Edit Transformer', icon: 'transform', task: 'doEditTransformer', group: 'channelEdit', onClick: () => router.navigate(`/channels/${st.channelId}/transformer/0`) }
+            { label: '编辑过滤器', icon: 'filter', task: 'doEditFilter', group: 'channelEdit', onClick: () => router.navigate(`/channels/${st.channelId}/filter/0`) },
+            { label: '编辑转换器', icon: 'transform', task: 'doEditTransformer', group: 'channelEdit', onClick: () => router.navigate(`/channels/${st.channelId}/transformer/0`) }
         ], 'dashboard');
     }
 
@@ -1027,22 +1027,22 @@ function DashboardView({ onToggleView }: any) {
         const stopConnector = async () => {
             if (Number(child.metaDataId) !== 0 && !queueEnabled) {
                 modal({
-                    title: 'Connector not stopped',
+                    title: '连接器未停止',
                     body: h('div',
-                        'This destination connector was not stopped because queueing is not enabled.',
+                        '未启用队列，此目的地连接器未被停止',
                         h('br'), h('br'),
-                        'Queueing must be enabled for a destination connector to be stopped individually.'),
-                    buttons: [{ label: 'OK', primary: true }]
+                        '需要启用队列才能单独停止目的地连接器'),
+                    buttons: [{ label: '确定', primary: true }]
                 });
                 return;
             }
             await runConnector('stopConnector')();
         };
         contextMenu(e.clientX, e.clientY, [
-            { label: 'Refresh', icon: 'refresh', task: 'doRefreshStatuses', onClick: () => refresh() },
+            { label: '刷新', icon: 'refresh', task: 'doRefreshStatuses', onClick: () => refresh() },
             '-',
-            { label: 'Start Connector', icon: 'play', hidden: !(child.state === 'STOPPED' || child.state === 'PAUSED'), task: 'doStartConnector', onClick: runConnector('startConnector') },
-            { label: 'Stop Connector', icon: 'stop', hidden: !(child.state === 'STARTED' || child.state === 'PAUSED'), task: 'doStopConnector', onClick: stopConnector }
+            { label: '启动连接器', icon: 'play', hidden: !(child.state === 'STOPPED' || child.state === 'PAUSED'), task: 'doStartConnector', onClick: runConnector('startConnector') },
+            { label: '停止连接器', icon: 'stop', hidden: !(child.state === 'STARTED' || child.state === 'PAUSED'), task: 'doStopConnector', onClick: stopConnector }
         ], 'dashboard');
     }
 
@@ -1060,7 +1060,7 @@ function DashboardView({ onToggleView }: any) {
         const jobs: any[] = [statusesQ.refetch(), groupsQ.refetch(), tagsQ.refetch()];
         if (manual) jobs.push(typesQ.refetch(), portsQ.refetch());
         const [st] = await Promise.all(jobs);
-        if (manual && st.error) toast(`Refresh failed: ${st.error.message}`, 'error');
+        if (manual && st.error) toast(`刷新失败：${st.error.message}`, 'error');
     }
 
     // Click on empty space (not a row) clears the channel selection, so the
@@ -1080,7 +1080,7 @@ function DashboardView({ onToggleView }: any) {
             lastClickedRef.current = null;
             applySelection(new Set(), null);
         }
-        contextMenu(e.clientX, e.clientY, [{ label: 'Refresh', icon: 'refresh', task: 'doRefreshStatuses', onClick: () => refresh() }], 'dashboard');
+        contextMenu(e.clientX, e.clientY, [{ label: '刷新', icon: 'refresh', task: 'doRefreshStatuses', onClick: () => refresh() }], 'dashboard');
     }
 
     /* Leaving the dashboard ends the one-time "just deployed" cue, so it won't
@@ -1125,36 +1125,36 @@ function DashboardView({ onToggleView }: any) {
     const treeData = buildTreeData();
     const collapsedKeys = buildCollapsedKeys();
     const selectedKeys = buildSelectedKeys();
-    const channelsText = `${statuses.length} Deployed Channel${statuses.length === 1 ? '' : 's'}`;
+    const channelsText = `${statuses.length} 个已部署通道`;
     const countsText = viewMode === 'channel'
         ? channelsText
-        : (() => { const rows = groupedStatuses(); return `${rows.length} Group${rows.length === 1 ? '' : 's'}, ${channelsText}`; })();
+        : (() => { const rows = groupedStatuses(); return `${rows.length} 个分组，${channelsText}`; })();
     const emptyText = loaded
         ? (
             <div className="dt-empty">
                 <div className="empty-icon"><Icon name="dashboard" size={30} /></div>
-                <div>No deployed channels</div>
-                <div className="text-text-faint mt-[13px]">Deploy a channel from the Channels view to see it here.</div>
+                <div>没有已部署的通道</div>
+                <div className="text-text-faint mt-[13px]">请在通道视图中部署通道，之后将在此处显示</div>
             </div>
         )
-        : 'Contacting engine…';
+        : '正在连接引擎…';
 
     return (
         <div className="view dash-shadcn">
             <ViewTasks>
-                <RailPane title="Dashboard Tasks" paneKey="tasks:Dashboard Tasks" group="dashboard">
+                <RailPane title="仪表盘任务" paneKey="tasks:Dashboard Tasks" group="dashboard">
                     <div className="taskbar" data-pane-title="Dashboard Tasks">
-                        {onToggleView && <TaskButton label="Card view" icon="dashboard" onClick={onToggleView} />}
-                        <TaskButton label="Refresh" icon="refresh" task="doRefreshStatuses" onClick={() => refresh(true)} />
-                        {hasSel && <TaskButton label="Send Message" icon="send" task="doSendMessage" onClick={() => sendMessageTask([...selected])} />}
-                        {hasSel && <TaskButton label="View Messages" icon="messages" task="doShowMessages" onClick={() => viewMessagesTask([...selected])} />}
-                        {hasSel && <TaskButton label="Remove All Messages" icon="trash" danger task="doRemoveAllMessages" onClick={() => removeAllTask([...selected])} />}
-                        {showClearStats && <TaskButton label="Clear Statistics" icon="clear" task="doClearStats" onClick={() => clearStatsTask([...selected])} />}
-                        {showStart && <TaskButton label="Start" icon="play" task="doStart" onClick={() => startTask([...selected])} />}
-                        {showPause && <TaskButton label="Pause" icon="pause" task="doPause" onClick={() => pauseTask([...selected])} />}
-                        {showStop && <TaskButton label="Stop" icon="stop" task="doStop" onClick={() => stopTask([...selected])} />}
-                        {showHalt && <TaskButton label="Halt" icon="halt" task="doHalt" onClick={() => haltTask([...selected])} />}
-                        {showUndeploy && <TaskButton label="Undeploy Channel" icon="undeploy" task="doUndeployChannel" onClick={() => undeployTask([...selected])} />}
+                        {onToggleView && <TaskButton label="卡片视图" icon="dashboard" onClick={onToggleView} />}
+                        <TaskButton label="刷新" icon="refresh" task="doRefreshStatuses" onClick={() => refresh(true)} />
+                        {hasSel && <TaskButton label="发送消息" icon="send" task="doSendMessage" onClick={() => sendMessageTask([...selected])} />}
+                        {hasSel && <TaskButton label="查看消息" icon="messages" task="doShowMessages" onClick={() => viewMessagesTask([...selected])} />}
+                        {hasSel && <TaskButton label="移除全部消息" icon="trash" danger task="doRemoveAllMessages" onClick={() => removeAllTask([...selected])} />}
+                        {showClearStats && <TaskButton label="清除统计" icon="clear" task="doClearStats" onClick={() => clearStatsTask([...selected])} />}
+                        {showStart && <TaskButton label="启动" icon="play" task="doStart" onClick={() => startTask([...selected])} />}
+                        {showPause && <TaskButton label="暂停" icon="pause" task="doPause" onClick={() => pauseTask([...selected])} />}
+                        {showStop && <TaskButton label="停止" icon="stop" task="doStop" onClick={() => stopTask([...selected])} />}
+                        {showHalt && <TaskButton label="中止" icon="halt" task="doHalt" onClick={() => haltTask([...selected])} />}
+                        {showUndeploy && <TaskButton label="取消部署通道" icon="undeploy" task="doUndeployChannel" onClick={() => undeployTask([...selected])} />}
                     </div>
                 </RailPane>
             </ViewTasks>
@@ -1170,24 +1170,24 @@ function DashboardView({ onToggleView }: any) {
                           <div className="dash-kpis-slide">
                             <div className="dash-kpis">
                                 <div className="dash-kpi">
-                                    <div className="k-lbl">Received</div><div className="k-val">{fmt(k.RECEIVED)}</div>
-                                    <div className="k-sub">{lifetime ? 'lifetime stats' : 'current stats'}</div>
+                                    <div className="k-lbl">接收</div><div className="k-val">{fmt(k.RECEIVED)}</div>
+                                    <div className="k-sub">{lifetime ? '累计统计' : '当前统计'}</div>
                                 </div>
                                 <div className="dash-kpi">
-                                    <div className="k-lbl">Filtered</div><div className="k-val">{fmt(k.FILTERED)}</div>
-                                    <div className="k-sub">{pct(k.FILTERED, k.RECEIVED)}% of received</div>
+                                    <div className="k-lbl">过滤</div><div className="k-val">{fmt(k.FILTERED)}</div>
+                                    <div className="k-sub">占接收 {pct(k.FILTERED, k.RECEIVED)}%</div>
                                 </div>
                                 <div className="dash-kpi warn">
-                                    <div className="k-lbl">Queued</div><div className="k-val">{fmt(k.QUEUED)}</div>
-                                    <div className="k-sub">across {k.queuedChannels} channel{k.queuedChannels === 1 ? '' : 's'}</div>
+                                    <div className="k-lbl">排队</div><div className="k-val">{fmt(k.QUEUED)}</div>
+                                    <div className="k-sub">涉及 {k.queuedChannels} 个通道</div>
                                 </div>
                                 <div className="dash-kpi good">
-                                    <div className="k-lbl">Sent</div><div className="k-val">{fmt(k.SENT)}</div>
-                                    <div className="k-sub">{pct(k.SENT, k.RECEIVED)}% delivered</div>
+                                    <div className="k-lbl">发送</div><div className="k-val">{fmt(k.SENT)}</div>
+                                    <div className="k-sub">送达率 {pct(k.SENT, k.RECEIVED)}%</div>
                                 </div>
                                 <div className="dash-kpi bad">
-                                    <div className="k-lbl">Errored</div><div className="k-val">{fmt(k.ERROR)}</div>
-                                    <div className="k-sub">{pct(k.ERROR, k.RECEIVED)}% error rate</div>
+                                    <div className="k-lbl">错误</div><div className="k-val">{fmt(k.ERROR)}</div>
+                                    <div className="k-sub">错误率 {pct(k.ERROR, k.RECEIVED)}%</div>
                                 </div>
                             </div>
                           </div>

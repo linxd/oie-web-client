@@ -28,7 +28,7 @@ function fullTemplates(library: Model): Model[] {
 
 function idOf(model: Model): string {
     if (model.id == null || model.id === '') return '';
-    if (typeof model.id !== 'string' || !model.id.trim()) throw new Error('Invalid code template or library ID');
+    if (typeof model.id !== 'string' || !model.id.trim()) throw new Error('代码模板或库 ID 无效');
     return model.id;
 }
 
@@ -37,11 +37,11 @@ function validateImported(libraries: Model[]): void {
     const templateIds = new Set<string>();
     for (const library of libraries) {
         const id = idOf(library);
-        if (id && libraryIds.has(id)) throw new Error(`Duplicate library ID in import: ${id}`);
+        if (id && libraryIds.has(id)) throw new Error(`导入中存在重复的库 ID：${id}`);
         if (id) libraryIds.add(id);
         for (const template of fullTemplates(library)) {
             const templateId = idOf(template);
-            if (templateId && templateIds.has(templateId)) throw new Error(`Duplicate code template ID in import: ${templateId}`);
+            if (templateId && templateIds.has(templateId)) throw new Error(`导入中存在重复的代码模板 ID：${templateId}`);
             if (templateId) templateIds.add(templateId);
         }
     }
@@ -50,17 +50,17 @@ function validateImported(libraries: Model[]): void {
 /** Read Swing single-library and list exports without coercing script/name/ID text. */
 export function parseLibraryImport(xml: string, version: string): Model[] {
     const doc = new DOMParser().parseFromString(xml.trim(), 'text/xml');
-    if (doc.querySelector('parsererror')) throw new Error('Not a valid XML file');
+    if (doc.querySelector('parsererror')) throw new Error('不是有效的 XML 文件');
     const root = doc.documentElement;
     if (root.tagName !== 'codeTemplateLibrary' && root.tagName !== 'list') {
-        throw new Error('Expected a <codeTemplateLibrary> or a <list> of libraries');
+        throw new Error('应为 <codeTemplateLibrary> 根节点，或包含库的 <list>');
     }
     const elements = root.tagName === 'codeTemplateLibrary'
         ? [root] : [...root.children].filter(child => child.tagName === 'codeTemplateLibrary');
-    if (!elements.length) throw new Error('No code template libraries found');
+    if (!elements.length) throw new Error('未找到代码模板库');
     const libraries = elements.map(element => {
         const library = xstreamObject(element);
-        if (!library || typeof library !== 'object') throw new Error('Invalid code template library');
+        if (!library || typeof library !== 'object') throw new Error('代码模板库无效');
         library['@version'] ||= version;
         const container = [...element.children].find(child => child.tagName === 'codeTemplates');
         const imported: Model[] = [];
@@ -86,10 +86,10 @@ export function parseLibraryImport(xml: string, version: string): Model[] {
 /** Individual Swing template exports use either one template or a list. */
 export function parseTemplateImport(xml: string, version: string): Model[] {
     const doc = new DOMParser().parseFromString(xml.trim(), 'text/xml');
-    if (doc.querySelector('parsererror')) throw new Error('Not a valid XML file');
+    if (doc.querySelector('parsererror')) throw new Error('不是有效的 XML 文件');
     const root = doc.documentElement;
     if (root.tagName !== 'codeTemplate' && root.tagName !== 'list') {
-        throw new Error('Expected a <codeTemplate> or a <list> of code templates');
+        throw new Error('应为 <codeTemplate> 根节点，或包含代码模板的 <list>');
     }
     const elements = root.tagName === 'codeTemplate' ? [root]
         : [...root.children].filter(child => child.tagName === 'codeTemplate');
@@ -99,7 +99,7 @@ export function parseTemplateImport(xml: string, version: string): Model[] {
     for (const element of elements) container.appendChild(element.cloneNode(true));
     library.appendChild(container);
     const imported = fullTemplates(parseLibraryImport(new XMLSerializer().serializeToString(library), version)[0]);
-    if (!imported.length) throw new Error('No code templates found in the file');
+    if (!imported.length) throw new Error('文件中未找到代码模板');
     return imported;
 }
 
@@ -108,7 +108,7 @@ export async function prepareTemplateImport(
     currentLibraries: Model[], importedTemplates: Model[], targetId: string, version: string, callbacks: LibraryImportCallbacks
 ): Promise<{ libraries: Model[]; templates: Model[] } | null> {
     const target = currentLibraries.find(library => library.id === targetId);
-    if (!target) throw new Error('The selected library no longer exists. Refresh and select a library before importing.');
+    if (!target) throw new Error('所选库已不存在，请刷新后选择库再导入');
     return prepareLibraryImport(currentLibraries, [{ ...target, name: String(target.name ?? ''), codeTemplates: { codeTemplate: importedTemplates } }], version, {
         ...callbacks,
         resolveConflict: (kind, name) => kind === 'library' ? Promise.resolve('overwrite') : callbacks.resolveConflict(kind, name)
@@ -145,13 +145,13 @@ export async function prepareLibraryImport(
     const pendingTemplates = new Map<string, Model>();
     for (const library of current) {
         const id = idOf(library);
-        if (!id || libraries.has(id)) throw new Error('Current libraries have missing or duplicate IDs; refresh before importing');
+        if (!id || libraries.has(id)) throw new Error('当前库存在缺失或重复的 ID，请刷新后再导入');
         libraries.set(id, library);
         for (const template of templates(library)) {
             const templateId = idOf(template);
-            if (!templateId) throw new Error('A current code template is missing its ID; refresh before importing');
+            if (!templateId) throw new Error('当前某个代码模板缺少 ID，请刷新后再导入');
             if (owners.has(templateId) && owners.get(templateId) !== id) {
-                throw new Error(`Code template ${templateId} belongs to multiple libraries; resolve this before importing`);
+                throw new Error(`代码模板 ${templateId} 属于多个库，请先处理后再导入`);
             }
             owners.set(templateId, id);
             knownTemplates.set(templateId, template);
@@ -170,7 +170,7 @@ export async function prepareLibraryImport(
 
     function generatedId(key: string): string {
         const id = callbacks.newId(key);
-        if (typeof id !== 'string' || !id.trim()) throw new Error('Could not generate an import ID');
+        if (typeof id !== 'string' || !id.trim()) throw new Error('无法生成导入 ID');
         return id;
     }
 
@@ -243,7 +243,7 @@ export async function prepareLibraryImport(
                 const resolved = await resolvePersistedCopy('template', generatedId(templateKey), templateKey, id => {
                     const previous = knownTemplates.get(id);
                     if (previous && owners.get(id) !== targetId) {
-                        throw new Error('Generated code template ID is already in use in another library');
+                        throw new Error('生成的代码模板 ID 已在其他库中使用');
                     }
                     return previous;
                 });
@@ -253,7 +253,7 @@ export async function prepareLibraryImport(
             }
             const previousTemplate = knownTemplates.get(templateId);
             if (previousTemplate && owners.get(templateId) !== targetId) {
-                throw new Error('Generated code template ID is already in use in another library');
+                throw new Error('生成的代码模板 ID 已在其他库中使用');
             }
             const templateName = await uniqueName('template', importedTemplate.name, candidate => [...references].some(
                 ([id, template]) => id !== templateId && String(template.name ?? '').toLowerCase() === candidate

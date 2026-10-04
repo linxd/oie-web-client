@@ -140,7 +140,7 @@ function attachCodeView(editor, opts) {
         e.stopPropagation();
         set(false);
     } };
-    const popBtn = h('button.ce-max-btn.ce-pop-btn', { type: 'button', title: 'Open code view' }, icon('popout'));
+    const popBtn = h('button.ce-max-btn.ce-pop-btn', { type: 'button', title: '打开代码视图' }, icon('popout'));
     function insertAtDrop(e, token) {
         if (editor.monaco) {
             const inst = editor.monaco;
@@ -178,7 +178,7 @@ function attachCodeView(editor, opts) {
                 onDragend: () => { dragToken = null; }
             }, label));
         }
-        return h('div.ce-popout-vars', h('div.ce-popout-vars-head', 'Variables'), list, h('div.ce-popout-vars-hint', 'Click or drag to insert.'));
+        return h('div.ce-popout-vars', h('div.ce-popout-vars-head', '变量'), list, h('div.ce-popout-vars-hint', '单击或拖拽以插入。'));
     }
     // Drag insertion. Monaco swallows/escapes native text drops, so the overlay
     // intercepts the drop over the editor and inserts the token itself.
@@ -212,7 +212,7 @@ function attachCodeView(editor, opts) {
         const rail = buildVarsRail();
         if (rail)
             body.appendChild(rail);
-        overlay = h('div.ce-popout-overlay', h('div.ce-popout-head', h('button.btn', { type: 'button', onClick: () => set(false) }, icon('chevL'), 'Back'), h('div.ce-popout-title', String(opts.popoutTitle || 'Code editor')), h('div.ce-popout-esc', 'Esc closes')), body);
+        overlay = h('div.ce-popout-overlay', h('div.ce-popout-head', h('button.btn', { type: 'button', onClick: () => set(false) }, icon('chevL'), '返回'), h('div.ce-popout-title', String(opts.popoutTitle || '代码编辑器')), h('div.ce-popout-esc', '按 Esc 关闭')), body);
         // Capture-phase so the insert wins over Monaco's own dnd handling.
         overlay.addEventListener('dragover', onOverlayDragOver, true);
         overlay.addEventListener('drop', onOverlayDrop, true);
@@ -246,7 +246,7 @@ function attachCodeView(editor, opts) {
             return;
         open = next;
         popBtn.replaceChildren(icon(open ? 'minimize' : 'popout'));
-        popBtn.title = open ? 'Close code view (Esc)' : 'Open code view';
+        popBtn.title = open ? '关闭代码视图（Esc）' : '打开代码视图';
         if (open) {
             openCodeView();
             document.addEventListener('keydown', onKey, true);

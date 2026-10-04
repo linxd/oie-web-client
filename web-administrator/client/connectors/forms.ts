@@ -96,7 +96,7 @@ export function requireFields(properties: any, specs: RequiredFieldSpec[]): Arra
    address). Returns a custom-field def for the connector form; pass the dotted
    property key holding the host (e.g. 'listenerConnectorProperties.host'). */
 let listenerAddrUid = 0;
-export function listenerAddressField(hostKey: string, label = 'Listener Address'): FormField {
+export function listenerAddressField(hostKey: string, label = '监听器地址'): FormField {
     return {
         label, type: 'custom', span: true,
         render: (p, ctx) => {
@@ -120,8 +120,8 @@ export function listenerAddressField(hostKey: string, label = 'Listener Address'
             specRadio.addEventListener('change', () => setMode('specific'));
             sync();
             return h('div', { class: 'flex items-center gap-[13px] flex-wrap' },
-                h('label.check', allRadio, 'All interfaces'),
-                h('label.check', specRadio, 'Specific interface:'),
+                h('label.check', allRadio, '所有接口'),
+                h('label.check', specRadio, '指定接口：'),
                 input);
         }
     };
@@ -189,11 +189,11 @@ function keyValueEditor(properties: any, f: FormField, onChange: () => void): HT
         clear(wrap);
         rows.forEach((row, i) => {
             wrap.appendChild(h('div', { class: 'flex gap-1.5 mb-1.5' },
-                textInput(row[0], { placeholder: 'Name', class: 'flex-1', onInput: (e: any) => { row[0] = e.target.value; commit(); } }),
-                textInput(row[1], { placeholder: 'Value', class: 'flex-[2]', onInput: (e: any) => { row[1] = e.target.value; commit(); } }),
-                h('button.icon-btn', { type: 'button', title: 'Remove', onClick: () => { rows.splice(i, 1); commit(); paint(); } }, icon('x'))));
+                textInput(row[0], { placeholder: '名称', class: 'flex-1', onInput: (e: any) => { row[0] = e.target.value; commit(); } }),
+                textInput(row[1], { placeholder: '值', class: 'flex-[2]', onInput: (e: any) => { row[1] = e.target.value; commit(); } }),
+                h('button.icon-btn', { type: 'button', title: '移除', onClick: () => { rows.splice(i, 1); commit(); paint(); } }, icon('x'))));
         });
-        wrap.appendChild(h('button.btn', { type: 'button', onClick: () => { rows.push(['', '']); paint(); } }, 'Add'));
+        wrap.appendChild(h('button.btn', { type: 'button', onClick: () => { rows.push(['', '']); paint(); } }, '添加'));
     }
     paint();
     return wrap;
@@ -368,7 +368,7 @@ function renderRow(grid: HTMLElement, properties: any, f: FormField, onChange: (
 /* 'Ports in Use' button shared by the TCP/HTTP/WS listener panels: fetches
    /channels/portsInUse and lists port → channel name in a modal. */
 export function portsInUseButton({ disabled = false }: { disabled?: boolean } = {}): HTMLElement {
-    const btn = taskButton('Ports in Use', 'search', async () => {
+    const btn = taskButton('使用中的端口', 'search', async () => {
         btn.disabled = true;
         try {
             const ports = await api.channels.portsInUse();
@@ -376,11 +376,11 @@ export function portsInUseButton({ disabled = false }: { disabled?: boolean } = 
                 .filter((p: any) => p && typeof p === 'object')
                 .map((p: any) => h('tr', h('td.num', String(p.port ?? '')), h('td', String(p.name ?? ''))));
             modal({
-                title: 'Ports in Use',
+                title: '使用中的端口',
                 body: h('table.dt',
-                    h('thead', h('tr', h('th', 'Port'), h('th', 'Channel Name'))),
-                    h('tbody', rows.length ? rows : h('tr', h('td', { colSpan: 2 }, 'No listener ports in use')))),
-                buttons: [{ label: 'Close', primary: true }]
+                    h('thead', h('tr', h('th', '端口'), h('th', '通道名称'))),
+                    h('tbody', rows.length ? rows : h('tr', h('td', { colSpan: 2 }, '没有正在使用的监听端口')))),
+                buttons: [{ label: '关闭', primary: true }]
             });
         } catch (e) {
             toast(apiErrorMessage(e), 'error');
@@ -396,8 +396,8 @@ export function portsInUseButton({ disabled = false }: { disabled?: boolean } = 
 }
 
 export const YES_NO: Array<{ value: boolean; label: string }> = [
-    { value: true, label: 'Yes' },
-    { value: false, label: 'No' }
+    { value: true, label: '是' },
+    { value: false, label: '否' }
 ];
 
 /* ---- polling schedule (PollConnectorProperties) ------------------------------- */
@@ -405,7 +405,7 @@ export const YES_NO: Array<{ value: boolean; label: string }> = [
 /* pollSettingsPanel wrapped as a classic fieldset-style section. */
 export function pollSection(properties: any, onChange: () => void): HTMLElement {
     return h('div.cform-section', { class: 'mt-4' },
-        h('div.cform-section-title', 'Polling Settings'),
+        h('div.cform-section-title', '轮询设置'),
         pollSettingsPanel(properties, onChange));
 }
 
@@ -424,22 +424,22 @@ export function pollSettingsPanel(properties: any, onChange: () => void): HTMLEl
         clear(host);
         const p = poll();
         const grid = h('div.form-grid');
-        grid.appendChild(field('Schedule Type', select([
-            { value: 'INTERVAL', label: 'Interval' },
-            { value: 'TIME', label: 'Time' },
+        grid.appendChild(field('调度方式', select([
+            { value: 'INTERVAL', label: '按间隔' },
+            { value: 'TIME', label: '按时分' },
             { value: 'CRON', label: 'Cron' }
         ], p.pollingType, { onChange: (e: any) => { p.pollingType = e.target.value; onChange(); paint(); } })));
 
         if (p.pollingType === 'INTERVAL') {
-            grid.appendChild(field('Polling Frequency (ms)', numberInput(p.pollingFrequency ?? 5000, {
+            grid.appendChild(field('轮询频率（毫秒）', numberInput(p.pollingFrequency ?? 5000, {
                 onInput: (e: any) => { p.pollingFrequency = parseInt(e.target.value, 10) || 0; onChange(); }
             })));
         } else if (p.pollingType === 'TIME') {
-            grid.appendChild(field('Hour (0-23)', numberInput(p.pollingHour ?? 0, {
+            grid.appendChild(field('小时（0-23）', numberInput(p.pollingHour ?? 0, {
                 min: 0, max: 23,
                 onInput: (e: any) => { p.pollingHour = parseInt(e.target.value, 10) || 0; onChange(); }
             })));
-            grid.appendChild(field('Minute (0-59)', numberInput(p.pollingMinute ?? 0, {
+            grid.appendChild(field('分钟（0-59）', numberInput(p.pollingMinute ?? 0, {
                 min: 0, max: 59,
                 onInput: (e: any) => { p.pollingMinute = parseInt(e.target.value, 10) || 0; onChange(); }
             })));
@@ -454,17 +454,17 @@ export function pollSettingsPanel(properties: any, onChange: () => void): HTMLEl
                 clear(cronWrap);
                 rows.forEach((row: any, i: number) => {
                     cronWrap.appendChild(h('div', { class: 'flex gap-1.5 mb-1.5' },
-                        textInput(row.expression, { placeholder: 'Cron expression (e.g. 0 */5 * ? * *)', class: 'flex-[2]', onInput: (e: any) => { row.expression = e.target.value; commit(); } }),
-                        textInput(row.description, { placeholder: 'Description', class: 'flex-1', onInput: (e: any) => { row.description = e.target.value; commit(); } }),
-                        h('button.icon-btn', { type: 'button', title: 'Remove', onClick: () => { rows.splice(i, 1); commit(); paintCron(); } }, icon('x'))));
+                        textInput(row.expression, { placeholder: 'Cron 表达式（如 0 */5 * ? * *）', class: 'flex-[2]', onInput: (e: any) => { row.expression = e.target.value; commit(); } }),
+                        textInput(row.description, { placeholder: '描述', class: 'flex-1', onInput: (e: any) => { row.description = e.target.value; commit(); } }),
+                        h('button.icon-btn', { type: 'button', title: '移除', onClick: () => { rows.splice(i, 1); commit(); paintCron(); } }, icon('x'))));
                 });
-                cronWrap.appendChild(h('button.btn', { type: 'button', onClick: () => { rows.push({ expression: '', description: '' }); paintCron(); } }, 'Add Cron Job'));
+                cronWrap.appendChild(h('button.btn', { type: 'button', onClick: () => { rows.push({ expression: '', description: '' }); paintCron(); } }, '添加 Cron 任务'));
             };
             paintCron();
-            grid.appendChild(field('Cron Jobs', cronWrap));
+            grid.appendChild(field('Cron 任务', cronWrap));
         }
 
-        const startCb = checkbox('Poll Once on Start', asBool(p.pollOnStart), {
+        const startCb = checkbox('启动时轮询一次', asBool(p.pollOnStart), {
             onChange: (e: any) => { p.pollOnStart = e.target.checked; onChange(); }
         });
         grid.appendChild(h('div.field', startCb.el));
@@ -598,13 +598,13 @@ export function postConnectorProperties(path: string, properties: any, channel: 
 
 /* 'Test Connection' style button: POSTs the connector properties to a
    /connectors/* test endpoint and toasts the ConnectionTestResponse. */
-export function connectorTestButton({ label = 'Test Connection', icon: iconName = 'link', path, channel, properties, disabled = false }: { label?: string; icon?: string; path: string; channel: any; properties: any; disabled?: boolean }): HTMLElement {
+export function connectorTestButton({ label = '连接测试', icon: iconName = 'link', path, channel, properties, disabled = false }: { label?: string; icon?: string; path: string; channel: any; properties: any; disabled?: boolean }): HTMLElement {
     const btn = taskButton(label, iconName, async () => {
         btn.disabled = true;
         try {
             const result = await postConnectorProperties(path, properties, channel);
             const type = result && typeof result === 'object' ? String(result.type ?? '') : '';
-            const message = (result && typeof result === 'object' && result.message) || type || 'No response received';
+            const message = (result && typeof result === 'object' && result.message) || type || '未收到响应';
             if (type === 'SUCCESS') {
                 successToast(message);
             } else {
@@ -624,7 +624,7 @@ export function connectorTestButton({ label = 'Test Connection', icon: iconName 
 }
 
 export const CHARSETS: Array<{ value: string; label: string }> = [
-    { value: 'DEFAULT_ENCODING', label: 'Default' },
+    { value: 'DEFAULT_ENCODING', label: '默认' },
     { value: 'UTF-8', label: 'UTF-8' },
     { value: 'ISO-8859-1', label: 'ISO-8859-1' },
     { value: 'US-ASCII', label: 'US-ASCII' },
@@ -692,7 +692,7 @@ export function frameModeSettingsDialog(tm: any, onChange: () => void, opts: { m
     const abbrevList = h('div', {
         class: 'max-h-[252px] overflow-auto border border-[var(--bg3)] rounded-[4px] p-1 min-w-[99px]'
     }, Object.entries(CONTROL_ABBR).map(([hex, abbr]) => h('div.tree-node', {
-        title: `Insert 0x${hex}`,
+        title: `插入 0x${hex}`,
         class: 'cursor-pointer font-mono text-[11px]',
         onClick: () => { lastFocused.value = (lastFocused.value || '') + hex; lastFocused.focus(); if (lastFocused.oninput) (lastFocused.oninput as any)(); }
     }, `<${abbr}>`)));
@@ -701,9 +701,9 @@ export function frameModeSettingsDialog(tm: any, onChange: () => void, opts: { m
         h('label', { class: 'min-w-[144px]' }, label), h('span.mono.text-text-faint', '0x'), input, abbrevEl || null);
 
     const leftRows = [
-        h('div', { class: 'font-[650] mb-2' }, mllp ? 'MLLP Settings' : 'Basic Settings'),
-        hexRow('Start of Message Bytes:', startInput, h('span.mono.text-text-faint', abbrevFor(tm.startOfMessageBytes))),
-        hexRow('End of Message Bytes:', endInput, h('span.mono.text-text-faint', abbrevFor(tm.endOfMessageBytes)))
+        h('div', { class: 'font-[650] mb-2' }, mllp ? 'MLLP 设置' : '基本设置'),
+        hexRow('消息起始字节：', startInput, h('span.mono.text-text-faint', abbrevFor(tm.startOfMessageBytes))),
+        hexRow('消息结束字节：', endInput, h('span.mono.text-text-faint', abbrevFor(tm.endOfMessageBytes)))
     ];
 
     // MLLP adds Use MLLPv2 + Commit ACK/NACK bytes + Max Retry Count, with the
@@ -724,10 +724,10 @@ export function frameModeSettingsDialog(tm: any, onChange: () => void, opts: { m
         const useV2 = asBool(tm.useMLLPv2);
         const v2Yes = h('input', { type: 'radio', name: 'mllpv2', checked: useV2 }) as HTMLInputElement;
         const v2No = h('input', { type: 'radio', name: 'mllpv2', checked: !useV2 }) as HTMLInputElement;
-        const ackRow = hexRow('Commit ACK Bytes:', ackInput, ackAbbrev);
-        const nackRow = hexRow('Commit NACK Bytes:', nackInput, nackAbbrev);
+        const ackRow = hexRow('提交 ACK 字节：', ackInput, ackAbbrev);
+        const nackRow = hexRow('提交 NACK 字节：', nackInput, nackAbbrev);
         const retryRow = h('div.flex', { class: 'items-center gap-1.5 mb-2' },
-            h('label', { class: 'min-w-[144px]' }, 'Max Retry Count:'), retryInput);
+            h('label', { class: 'min-w-[144px]' }, '最大重试次数：'), retryInput);
         const setV2Enabled = (on: boolean) => {
             [ackInput, nackInput, retryInput].forEach((el: any) => { el.disabled = !on; });
             [ackRow, nackRow, retryRow].forEach((r: any) => { r.style.opacity = on ? '1' : '0.5'; });
@@ -738,8 +738,8 @@ export function frameModeSettingsDialog(tm: any, onChange: () => void, opts: { m
 
         leftRows.push(
             h('div.flex', { class: 'items-center gap-1.5 mb-2' },
-                h('label', { class: 'min-w-[144px]' }, 'Use MLLPv2:'),
-                h('label.check', v2Yes, 'Yes'), h('label.check', v2No, 'No')),
+                h('label', { class: 'min-w-[144px]' }, '使用 MLLPv2：'),
+                h('label.check', v2Yes, '是'), h('label.check', v2No, '否')),
             ackRow, nackRow, retryRow);
 
         writeMllp = () => {
@@ -754,15 +754,15 @@ export function frameModeSettingsDialog(tm: any, onChange: () => void, opts: { m
     endInput.oninput = () => { leftRows[2].lastChild!.textContent = abbrevFor(endInput.value); };
 
     modal({
-        title: mllp ? 'MLLP Settings' : 'Transmission Mode Settings',
+        title: mllp ? 'MLLP 设置' : '传输模式设置',
         size: 'wide',
         body: h('div', { class: 'flex flex-wrap gap-[16px]' },
             h('div', { class: 'flex-1 min-w-[216px]' }, leftRows),
-            h('div', { class: 'min-w-[180px]' }, h('div', { class: 'font-[650] mb-2' }, 'Byte Abbreviations'), abbrevList)),
+            h('div', { class: 'min-w-[180px]' }, h('div', { class: 'font-[650] mb-2' }, '字节缩写'), abbrevList)),
         buttons: [
-            { label: 'Cancel' },
+            { label: '取消' },
             {
-                label: 'OK', primary: true,
+                label: '确定', primary: true,
                 onClick: () => {
                     tm.startOfMessageBytes = startInput.value.replace(/[^0-9a-fA-F]/g, '').toUpperCase();
                     tm.endOfMessageBytes = endInput.value.replace(/[^0-9a-fA-F]/g, '').toUpperCase();

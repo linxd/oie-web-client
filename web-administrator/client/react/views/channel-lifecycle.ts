@@ -3,6 +3,11 @@ import api from '@oie/web-api';
 
 export type LifecycleAction = 'deploy' | 'start' | 'stop' | 'pause' | 'halt' | 'undeploy';
 
+/* Display-only captions for the action keys above. */
+export const LIFECYCLE_ACTION_LABEL: Record<string, string> = {
+    deploy: '部署', start: '启动', stop: '停止', pause: '暂停', halt: '中止', undeploy: '取消部署'
+};
+
 function shouldInclude(action: LifecycleAction, status: any): boolean {
     if (!status) return false;
     const state = String(status.state || '').toUpperCase();
@@ -75,15 +80,15 @@ function promptForRelated(action: LifecycleAction, ids: string[], statuses: any[
     const names = new Map(channels.map(channel => [String(channel.id), channel.name || channel.id]));
     for (const status of statuses) names.set(String(status.channelId), status.name || status.channelId);
     return new Promise(resolve => modal({
-        title: 'Channel dependencies',
+        title: '通道依赖',
         body: h('div',
-            h('div.mb-2', `There ${ids.length === 1 ? 'is' : 'are'} ${ids.length} additional channel${ids.length === 1 ? '' : 's'} in the dependency chain:`),
+            h('div.mb-2', `依赖链中另有 ${ids.length} 个通道：`),
             h('ul.pl-5', ids.map(id => h('li', names.get(id) || id)))),
         onClose: () => resolve(null),
         buttons: [
-            { label: 'Cancel', onClick: () => resolve(null) },
-            { label: 'Selected only', onClick: () => resolve('selected') },
-            { label: `Include and ${action}`, primary: true, onClick: () => resolve('include') }
+            { label: '取消', onClick: () => resolve(null) },
+            { label: '仅所选通道', onClick: () => resolve('selected') },
+            { label: `包含这些通道并${LIFECYCLE_ACTION_LABEL[action]}`, primary: true, onClick: () => resolve('include') }
         ]
     }));
 }
@@ -105,7 +110,7 @@ export async function runLifecycle(action: LifecycleAction, selectedIds: string[
     if (action === 'deploy') {
         const enabled = new Map(channels.map(channel => [String(channel.id), channel?.exportData?.metadata?.enabled !== false]));
         const disabled = actionableIds.filter(id => enabled.get(id) === false);
-        if (disabled.length) toast('Disabled channels will not be deployed.', 'warn');
+        if (disabled.length) toast('已禁用的通道不会被部署', 'warn');
         actionableIds = actionableIds.filter(id => enabled.get(id) !== false);
         if (!actionableIds.length) return false;
     }

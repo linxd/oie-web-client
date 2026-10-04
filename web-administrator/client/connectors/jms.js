@@ -72,21 +72,21 @@ function connectionTemplatesField() {
     let selected = ''; // persists across form repaints (field built once)
     let serverTemplates = {};
     return {
-        label: 'Connection Template', type: 'custom', span: true,
+        label: '连接模板', type: 'custom', span: true,
         render: (p, ctx) => {
             const wrap = h('div', { class: 'flex items-center gap-1.5 flex-wrap' });
             const names = () => [...PREDEFINED_NAMES, ...Object.keys(serverTemplates).filter((n) => !isPredefined(n))];
             const templateFor = (name) => (isPredefined(name) ? PREDEFINED_TEMPLATES[name] : serverTemplates[name]);
             function paint() {
                 clear(wrap);
-                const sel = select([{ value: '', label: '— Select a template —' }, ...names().map((n) => ({ value: n, label: n }))], selected, { onChange: (e) => { selected = e.target.value; paint(); } });
+                const sel = select([{ value: '', label: '— 请选择模板 —' }, ...names().map((n) => ({ value: n, label: n }))], selected, { onChange: (e) => { selected = e.target.value; paint(); } });
                 sel.style.width = '240px';
-                wrap.append(sel, h('button.btn', { type: 'button', disabled: !selected, onClick: applyTemplate }, 'Load'), h('button.btn', { type: 'button', onClick: saveTemplate }, 'Save'), h('button.btn', { type: 'button', disabled: !selected || isPredefined(selected), onClick: deleteTemplate }, icon('x'), 'Delete'));
+                wrap.append(sel, h('button.btn', { type: 'button', disabled: !selected, onClick: applyTemplate }, '载入'), h('button.btn', { type: 'button', onClick: saveTemplate }, '保存'), h('button.btn', { type: 'button', disabled: !selected || isPredefined(selected), onClick: deleteTemplate }, icon('x'), '删除'));
             }
             function applyTemplate() {
                 const tpl = templateFor(selected);
                 if (!tpl) {
-                    toast('That template no longer exists on the server.', 'warn');
+                    toast('该模板在服务端已不存在。', 'warn');
                     return;
                 }
                 p.useJndi = asBool(tpl.useJndi);
@@ -99,12 +99,12 @@ function connectionTemplatesField() {
                 ctx.repaint(); // re-render the form so the loaded fields + map show
             }
             async function saveTemplate() {
-                const raw = await promptDialog('Save Connection Template', 'Template name', selected && !isPredefined(selected) ? selected : '');
+                const raw = await promptDialog('保存连接模板', '模板名称', selected && !isPredefined(selected) ? selected : '');
                 const name = raw ? raw.trim() : '';
                 if (!name)
                     return;
                 if (isPredefined(name)) {
-                    toast(`"${name}" is a reserved template and cannot be overwritten.`, 'warn');
+                    toast(`"${name}" 是内置模板，不能被覆盖。`, 'warn');
                     return;
                 }
                 const body = {
@@ -121,7 +121,7 @@ function connectionTemplatesField() {
                     serverTemplates = await loadServerTemplates();
                     selected = name;
                     paint();
-                    toast('Connection template saved');
+                    toast('连接模板已保存');
                 }
                 catch (e) {
                     toast(apiErrorMessage(e), 'error');
@@ -130,7 +130,7 @@ function connectionTemplatesField() {
             async function deleteTemplate() {
                 if (!selected || isPredefined(selected))
                     return;
-                if (!(await confirmDialog('Delete Template', `Delete the connection template "${selected}"?`, { danger: true, okLabel: 'Delete' })))
+                if (!(await confirmDialog('删除模板', `确定要删除连接模板 "${selected}" 吗？`, { danger: true, okLabel: '删除' })))
                     return;
                 try {
                     await api.del(`/connectors/jms/templates/${encodeURIComponent(selected)}`);
@@ -152,16 +152,16 @@ function connectionTemplatesField() {
 /* Connection fields shared by listener and sender. */
 function jmsConnectionFields() {
     return [
-        { section: 'Connection Settings' },
+        { section: '连接设置' },
         connectionTemplatesField(),
-        { key: 'useJndi', label: 'Use JNDI', type: 'radio', options: YES_NO, refresh: true },
-        { key: 'jndiProviderUrl', label: 'Provider URL', type: 'text', width: '420px', disabled: (p) => !usingJndi(p) },
-        { key: 'jndiInitialContextFactory', label: 'Initial Context Factory', type: 'text', width: '420px', disabled: (p) => !usingJndi(p) },
-        { key: 'jndiConnectionFactoryName', label: 'Connection Factory Name', type: 'text', width: '320px', disabled: (p) => !usingJndi(p) },
-        { key: 'connectionFactoryClass', label: 'Connection Factory Class', type: 'text', width: '420px', disabled: usingJndi },
-        { key: 'connectionProperties', label: 'Connection Properties', type: 'keyvalue' },
-        { key: 'username', label: 'Username', type: 'text', width: '220px' },
-        { key: 'password', label: 'Password', type: 'password', width: '220px' }
+        { key: 'useJndi', label: '使用 JNDI', type: 'radio', options: YES_NO, refresh: true },
+        { key: 'jndiProviderUrl', label: '提供者 URL', type: 'text', width: '420px', disabled: (p) => !usingJndi(p) },
+        { key: 'jndiInitialContextFactory', label: '初始上下文工厂', type: 'text', width: '420px', disabled: (p) => !usingJndi(p) },
+        { key: 'jndiConnectionFactoryName', label: '连接工厂名称', type: 'text', width: '320px', disabled: (p) => !usingJndi(p) },
+        { key: 'connectionFactoryClass', label: '连接工厂类', type: 'text', width: '420px', disabled: usingJndi },
+        { key: 'connectionProperties', label: '连接属性', type: 'keyvalue' },
+        { key: 'username', label: '用户名', type: 'text', width: '220px' },
+        { key: 'password', label: '密码', type: 'password', width: '220px' }
     ];
 }
 const jmsListener = {
@@ -179,27 +179,27 @@ const jmsListener = {
     component({ properties, onChange }) {
         return (React.createElement(ConnectorForm, { properties: properties, onChange: onChange, fields: [
                 ...jmsConnectionFields(),
-                { section: 'Destination Settings' },
+                { section: '目标设置' },
                 {
                     // Swing renders durableTopicCheckbox as a MirthCheckBox appended INLINE onto the
                     // Destination Type radio row (Queue / Topic / [x] Durable, one line). Mirror that
                     // with an append checkbox rather than a separate radio row. Same setEnabled gating:
                     // durable enabled only when Topic is selected (destinationTypeTopicActionPerformed
                     // enables it for the listener; destinationTypeQueueActionPerformed disables it).
-                    key: 'topic', label: 'Destination Type', type: 'radio', refresh: true,
+                    key: 'topic', label: '目标类型', type: 'radio', refresh: true,
                     options: [
-                        { value: false, label: 'Queue' },
-                        { value: true, label: 'Topic' }
+                        { value: false, label: '队列' },
+                        { value: true, label: '主题' }
                     ],
-                    append: (p, ctx) => checkbox('Durable', asBool(p.durableTopic), {
+                    append: (p, ctx) => checkbox('持久订阅', asBool(p.durableTopic), {
                         disabled: !asBool(p.topic),
                         onChange: (e) => { p.durableTopic = e.target.checked; ctx.onChange(); ctx.repaint(); }
                     }).el
                 },
-                { key: 'destinationName', label: 'Destination Name', type: 'text', width: '320px' },
-                { key: 'clientId', label: 'Client ID', type: 'text', width: '220px' },
-                { key: 'reconnectIntervalMillis', label: 'Reconnect Interval (ms)', type: 'number', width: '120px' },
-                { key: 'selector', label: 'Selector', type: 'text', width: '320px' }
+                { key: 'destinationName', label: '目标名称', type: 'text', width: '320px' },
+                { key: 'clientId', label: '客户端 ID', type: 'text', width: '220px' },
+                { key: 'reconnectIntervalMillis', label: '重连间隔（毫秒）', type: 'number', width: '120px' },
+                { key: 'selector', label: '选择器', type: 'text', width: '320px' }
             ] }));
     },
     // Swing JmsConnectorPanel.checkProperties (shared, connectorType == TYPE_LISTENER):
@@ -208,12 +208,12 @@ const jmsListener = {
     // destination is a durable Topic; destination name always required.
     validate(properties) {
         return requireFields(properties, [
-            { key: 'jndiProviderUrl', label: 'Provider URL', when: usingJndi },
-            { key: 'jndiInitialContextFactory', label: 'Initial Context Factory', when: usingJndi },
-            { key: 'jndiConnectionFactoryName', label: 'Connection Factory Name', when: usingJndi },
-            { key: 'connectionFactoryClass', label: 'Connection Factory Class', when: (p) => !usingJndi(p) },
-            { key: 'clientId', label: 'Client ID', when: (p) => !usingJndi(p) && asBool(p.topic) && asBool(p.durableTopic) },
-            { key: 'destinationName', label: 'Destination Name' }
+            { key: 'jndiProviderUrl', label: '提供者 URL', when: usingJndi },
+            { key: 'jndiInitialContextFactory', label: '初始上下文工厂', when: usingJndi },
+            { key: 'jndiConnectionFactoryName', label: '连接工厂名称', when: usingJndi },
+            { key: 'connectionFactoryClass', label: '连接工厂类', when: (p) => !usingJndi(p) },
+            { key: 'clientId', label: '客户端 ID', when: (p) => !usingJndi(p) && asBool(p.topic) && asBool(p.durableTopic) },
+            { key: 'destinationName', label: '目标名称' }
         ]);
     }
 };
@@ -230,15 +230,15 @@ const jmsSender = {
     component({ properties, onChange }) {
         return (React.createElement(ConnectorForm, { properties: properties, onChange: onChange, fields: [
                 ...jmsConnectionFields(),
-                { section: 'Destination Settings' },
-                { key: 'topic', label: 'Destination Type', type: 'radio', disabled: usingJndi, options: [
-                        { value: false, label: 'Queue' },
-                        { value: true, label: 'Topic' }
+                { section: '目标设置' },
+                { key: 'topic', label: '目标类型', type: 'radio', disabled: usingJndi, options: [
+                        { value: false, label: '队列' },
+                        { value: true, label: '主题' }
                     ] },
-                { key: 'destinationName', label: 'Destination Name', type: 'text', width: '320px' },
-                { key: 'clientId', label: 'Client ID', type: 'text', width: '220px' },
-                { section: 'Template' },
-                { key: 'template', label: 'Template', type: 'code', minHeight: '260px' }
+                { key: 'destinationName', label: '目标名称', type: 'text', width: '320px' },
+                { key: 'clientId', label: '客户端 ID', type: 'text', width: '220px' },
+                { section: '模板' },
+                { key: 'template', label: '模板', type: 'code', minHeight: '260px' }
             ] }));
     },
     // Swing JmsConnectorPanel.checkProperties (shared, connectorType == TYPE_SENDER):
@@ -247,11 +247,11 @@ const jmsSender = {
     // (The durable-topic client ID requirement is listener-only.)
     validate(properties) {
         return requireFields(properties, [
-            { key: 'jndiProviderUrl', label: 'Provider URL', when: usingJndi },
-            { key: 'jndiInitialContextFactory', label: 'Initial Context Factory', when: usingJndi },
-            { key: 'jndiConnectionFactoryName', label: 'Connection Factory Name', when: usingJndi },
-            { key: 'connectionFactoryClass', label: 'Connection Factory Class', when: (p) => !usingJndi(p) },
-            { key: 'destinationName', label: 'Destination Name' }
+            { key: 'jndiProviderUrl', label: '提供者 URL', when: usingJndi },
+            { key: 'jndiInitialContextFactory', label: '初始上下文工厂', when: usingJndi },
+            { key: 'jndiConnectionFactoryName', label: '连接工厂名称', when: usingJndi },
+            { key: 'connectionFactoryClass', label: '连接工厂类', when: (p) => !usingJndi(p) },
+            { key: 'destinationName', label: '目标名称' }
         ]);
     }
 };

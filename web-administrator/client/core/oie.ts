@@ -89,9 +89,15 @@ export function statePip(state: string): 'ok' | 'warn' | 'err' | 'busy' | '' {
     }
 }
 
+const STATE_LABELS: Record<string, string> = {
+    STARTED: '已启动', STARTING: '正在启动', STOPPED: '已停止', STOPPING: '正在停止',
+    PAUSED: '已暂停', PAUSING: '正在暂停', UNDEPLOYED: '未部署', DEPLOYING: '正在部署',
+    UNDEPLOYING: '正在取消部署', SYNCING: '正在同步'
+};
+
 export function stateLabel(state: string | null | undefined): string {
-    if (!state) return 'Unknown';
-    return state.charAt(0) + state.slice(1).toLowerCase();
+    if (!state) return '未知';
+    return STATE_LABELS[state] ?? (state.charAt(0) + state.slice(1).toLowerCase());
 }
 
 export const MESSAGE_STATUSES: string[] = ['RECEIVED', 'FILTERED', 'TRANSFORMED', 'SENT', 'QUEUED', 'ERROR', 'PENDING'];
@@ -114,19 +120,19 @@ export function messageStatusTag(status: string): 'accent' | 'red' | 'blue' | 'a
 
 export const STEP_TYPES: Record<string, { label: string }> = {
     'com.mirth.connect.plugins.javascriptstep.JavaScriptStep': { label: 'JavaScript' },
-    'com.mirth.connect.plugins.mapper.MapperStep': { label: 'Mapper' },
-    'com.mirth.connect.plugins.messagebuilder.MessageBuilderStep': { label: 'Message Builder' },
-    'com.mirth.connect.plugins.xsltstep.XsltStep': { label: 'XSLT Step' },
-    'com.mirth.connect.plugins.destinationsetfilter.DestinationSetFilterStep': { label: 'Destination Set Filter' },
-    'com.mirth.connect.plugins.scriptfilestep.ExternalScriptStep': { label: 'External Script' },
-    'com.mirth.connect.model.IteratorStep': { label: 'Iterator' }
+    'com.mirth.connect.plugins.mapper.MapperStep': { label: '映射器' },
+    'com.mirth.connect.plugins.messagebuilder.MessageBuilderStep': { label: '消息构建器' },
+    'com.mirth.connect.plugins.xsltstep.XsltStep': { label: 'XSLT 步骤' },
+    'com.mirth.connect.plugins.destinationsetfilter.DestinationSetFilterStep': { label: '目的地集过滤器' },
+    'com.mirth.connect.plugins.scriptfilestep.ExternalScriptStep': { label: '外部脚本' },
+    'com.mirth.connect.model.IteratorStep': { label: '迭代器' }
 };
 
 export const RULE_TYPES: Record<string, { label: string }> = {
     'com.mirth.connect.plugins.javascriptrule.JavaScriptRule': { label: 'JavaScript' },
-    'com.mirth.connect.plugins.rulebuilder.RuleBuilderRule': { label: 'Rule Builder' },
-    'com.mirth.connect.plugins.scriptfilerule.ExternalScriptRule': { label: 'External Script' },
-    'com.mirth.connect.model.IteratorRule': { label: 'Iterator' }
+    'com.mirth.connect.plugins.rulebuilder.RuleBuilderRule': { label: '规则构建器' },
+    'com.mirth.connect.plugins.scriptfilerule.ExternalScriptRule': { label: '外部脚本' },
+    'com.mirth.connect.model.IteratorRule': { label: '迭代器' }
 };
 
 export function elementTypeLabel(type: string): string {
@@ -248,6 +254,7 @@ export function newChannel(name: string, version: string): OieObject {
         '@version': version,
         id: uuid(),
         nextMetaDataId: 2,
+        // Persisted into engine data: keep the Swing default "New Channel"; UI strings are localized elsewhere.
         name: name || 'New Channel',
         description: '',
         revision: 0,
@@ -377,30 +384,30 @@ export function encodeChannelTemplates<T>(channel: T): T {
    (the polymorphic type the engine needs to construct the connector). */
 function connectorProblems(connector: unknown, label: unknown, problems: string[]): void {
     if (!connector || typeof connector !== 'object') {
-        problems.push(`${label} is missing`);
+        problems.push(`${label}缺失`);
         return;
     }
     const c = connector as OieObject;
-    if (!c.transportName) problems.push(`${label} type is not set`);
+    if (!c.transportName) problems.push(`${label}类型未设置`);
     const p = c.properties;
     if (!p || typeof p !== 'object' || !p['@class']) {
-        problems.push(`${label} has no connector settings (properties are missing)`);
+        problems.push(`${label}缺少连接器设置（属性缺失）`);
     }
 }
 
 export function validateChannel(channel: OieObject | null | undefined): string[] {
     const problems: string[] = [];
-    if (!channel || typeof channel !== 'object') return ['Channel is empty'];
-    if (!channel.name || !String(channel.name).trim()) problems.push('Channel name is required');
-    connectorProblems(channel.sourceConnector, 'Source connector', problems);
+    if (!channel || typeof channel !== 'object') return ['通道为空'];
+    if (!channel.name || !String(channel.name).trim()) problems.push('通道名称为必填项');
+    connectorProblems(channel.sourceConnector, '源连接器', problems);
     const dests = destinationsOf(channel);
-    if (!dests.length) problems.push('At least one destination connector is required');
+    if (!dests.length) problems.push('至少需要一个目的地连接器');
     // Swing never lets a channel reach this state (its disable/delete actions
     // refuse to drop the last enabled destination); catch it at save time too
     // so an imported or previously saved channel can't be persisted this way.
     else if (!dests.some(d => d && d.enabled !== false && (d.enabled as unknown) !== 'false')) {
-        problems.push('At least one destination must be enabled');
+        problems.push('至少需要启用一个目的地连接器');
     }
-    dests.forEach((d, i) => connectorProblems(d, d && (d.name || `Destination ${d.metaDataId ?? i + 1}`), problems));
+    dests.forEach((d, i) => connectorProblems(d, d && (d.name || `目的地 ${d.metaDataId ?? i + 1}`), problems));
     return problems;
 }

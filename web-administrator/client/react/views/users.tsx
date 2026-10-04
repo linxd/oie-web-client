@@ -20,14 +20,14 @@ import { isSsoSelf } from '../sso-session.js';
 
 
 const COLUMNS = [
-    { key: 'username', label: 'Username', render: (u: any) => u.username || '' },
-    { key: 'firstName', label: 'First Name', render: (u: any) => u.firstName || '' },
-    { key: 'lastName', label: 'Last Name', render: (u: any) => u.lastName || '' },
-    { key: 'organization', label: 'Organization', render: (u: any) => u.organization || '' },
-    { key: 'email', label: 'Email', render: (u: any) => u.email || '' },
-    { key: 'phoneNumber', label: 'Phone', render: (u: any) => u.phoneNumber || '' },
+    { key: 'username', label: '用户名', render: (u: any) => u.username || '' },
+    { key: 'firstName', label: '名字', render: (u: any) => u.firstName || '' },
+    { key: 'lastName', label: '姓氏', render: (u: any) => u.lastName || '' },
+    { key: 'organization', label: '机构', render: (u: any) => u.organization || '' },
+    { key: 'email', label: '电子邮箱', render: (u: any) => u.email || '' },
+    { key: 'phoneNumber', label: '电话', render: (u: any) => u.phoneNumber || '' },
     {
-        key: 'lastLogin', label: 'Last Login', className: 'mono',
+        key: 'lastLogin', label: '上次登录', className: 'mono',
         sortValue: (u: any) => {
             const v = u.lastLogin;
             return typeof v === 'object' ? Number(v?.time ?? v?.timestamp ?? 0) : Number(v) || 0;
@@ -64,17 +64,17 @@ export function UsersView() {
         let createdId: string | number | undefined;
         let createdUsername = '';
         const dialog = modal({
-            title: 'New User',
+            title: '新建用户',
             size: 'wide',
             body: h('div', notice, form.grid, pw.grid),
             buttons: [
-                { label: 'Cancel' },
+                { label: '取消' },
                 {
-                    label: 'Create', primary: true,
+                    label: '创建', primary: true,
                     onClick: async () => {
                         if (busy || (phase !== 'draft' && phase !== 'created')) return false;
                         const username = createdUsername || form.inputs.username.value.trim();
-                        if (!username) { toast('Username is required', 'warn'); return false; }
+                        if (!username) { toast('请填写用户名', 'warn'); return false; }
                         if (!pw.validate()) return false;
                         const password = (pw.password as HTMLInputElement).value;
                         const user: any = {};
@@ -83,14 +83,14 @@ export function UsersView() {
                         busy = true;
                         form.grid.inert = pw.grid.inert = true;
                         const submit = dialog.el.querySelector<HTMLButtonElement>('.modal-foot .btn-primary');
-                        if (submit) { submit.disabled = true; submit.textContent = 'Saving…'; }
+                        if (submit) { submit.disabled = true; submit.textContent = '保存中…'; }
                         try {
                             // Enforce the password policy BEFORE creating the user
                             // (Swing checks first) — otherwise a rejected password
                             // leaves a passwordless user behind and the requirement
                             // is effectively ignored.
                             const violations = passwordViolations(await api.users.checkPassword(password));
-                            if (violations.length) { toast(`Password rejected: ${violations.join('; ')}`, 'warn'); return false; }
+                            if (violations.length) { toast(`密码未通过校验：${violations.join('; ')}`, 'warn'); return false; }
 
                             if (phase === 'draft') {
                                 createdUsername = username;
@@ -103,13 +103,13 @@ export function UsersView() {
                             if (createdId === undefined) {
                                 const list = await api.users.list();
                                 const created = list.find(u => u.username === username);
-                                if (created?.id == null) throw new Error('The created account could not be found to set its password');
+                                if (created?.id == null) throw new Error('未能找到已创建的账户，无法为其设置密码');
                                 createdId = created.id;
                                 phase = 'created';
                             }
                             const rejected = passwordViolations(await api.users.updatePassword(createdId, password));
-                            if (rejected.length) throw new Error(`Password rejected: ${rejected.join('; ')}`);
-                            toast(`User "${username}" created`);
+                            if (rejected.length) throw new Error(`密码未通过校验：${rejected.join('; ')}`);
+                            toast(`已创建用户 "${username}"`);
                             return true;
                         } catch (e: any) {
                             toast(e.message, 'error');
@@ -121,15 +121,15 @@ export function UsersView() {
                             if (phase !== 'draft') {
                                 notice.hidden = false;
                                 notice.textContent = phase === 'created'
-                                    ? `Account "${createdUsername}" was created. Password setup is incomplete; retry below to finish.`
+                                    ? `账户 "${createdUsername}" 已创建，但密码设置未完成，请在下方重试以完成。`
                                     : phase === 'unverified'
-                                    ? `Account "${createdUsername}" was created, but its identity could not be verified. Close this dialog, refresh Users, and select the account before changing its password.`
-                                    : `Creation of "${createdUsername}" could not be confirmed. Close this dialog, refresh Users, and verify the account before creating it again or changing its password.`;
+                                    ? `账户 "${createdUsername}" 已创建，但未能核实其身份。请关闭此对话框，刷新用户列表并选中该账户后再修改密码。`
+                                    : `无法确认 "${createdUsername}" 是否创建成功。请关闭此对话框，刷新用户列表并核对该账户后，再重新创建或修改密码。`;
                                 refresh();
                             }
                             if (submit) {
                                 submit.disabled = phase === 'unknown' || phase === 'unverified';
-                                submit.textContent = phase === 'created' ? 'Retry Password Setup' : phase === 'unverified' ? 'Verify Account' : phase === 'unknown' ? 'Outcome Unknown' : 'Create';
+                                submit.textContent = phase === 'created' ? '重试密码设置' : phase === 'unverified' ? '核实账户' : phase === 'unknown' ? '结果未知' : '创建';
                             }
                         }
                     }
@@ -140,28 +140,28 @@ export function UsersView() {
 
     function editTask(selected?: any) {
         const user = selected || single();
-        if (!user) { toast('Select a user first', 'warn'); return; }
+        if (!user) { toast('请先选择用户', 'warn'); return; }
         openEditUserModal(user, { onSaved: refresh });
     }
 
     function passwordTask(selected: any) {
         const user = selected || single();
-        if (!user) { toast('Select a user first', 'warn'); return; }
+        if (!user) { toast('请先选择用户', 'warn'); return; }
         openChangePasswordModal(user);
     }
 
     async function deleteTask(selected?: any) {
         const user = selected || single();
-        if (!user) { toast('Select a user first', 'warn'); return; }
+        if (!user) { toast('请先选择用户', 'warn'); return; }
         const me = store.getState('user');
         if (me && String(me.id) === String(user.id)) {
-            toast('You cannot delete the user you are signed in as', 'warn');
+            toast('不能删除当前登录的用户', 'warn');
             return;
         }
-        if (!await confirmDialog('Delete user', `Permanently delete user "${user.username}"? This cannot be undone.`, { danger: true, okLabel: 'Delete' })) return;
+        if (!await confirmDialog('删除用户', `确定要永久删除用户 "${user.username}" 吗？此操作无法撤销。`, { danger: true, okLabel: '删除' })) return;
         try {
             await api.users.remove(user.id);
-            toast(`User "${user.username}" deleted`);
+            toast(`已删除用户 "${user.username}"`);
         } catch (e: any) {
             toast(e.message, 'error');
         }
@@ -177,23 +177,23 @@ export function UsersView() {
         // bug report.
         const ssoSelf = isSsoSelf(u, store.getState('user'));
         contextMenu(e.clientX, e.clientY, [
-            { label: 'Refresh', icon: 'refresh', task: 'doRefreshUser', group: 'user', onClick: () => refresh() },
-            { label: 'New User', icon: 'plus', task: 'doNewUser', group: 'user', onClick: () => newTask() },
+            { label: '刷新', icon: 'refresh', task: 'doRefreshUser', group: 'user', onClick: () => refresh() },
+            { label: '新建用户', icon: 'plus', task: 'doNewUser', group: 'user', onClick: () => newTask() },
             '-',
-            { label: 'Edit User', icon: 'edit', task: 'doEditUser', group: 'user', onClick: () => editTask(u) },
+            { label: '编辑用户', icon: 'edit', task: 'doEditUser', group: 'user', onClick: () => editTask(u) },
             {
-                label: ssoSelf ? 'Change Password — managed by SSO' : 'Change Password',
+                label: ssoSelf ? '修改密码——由 SSO 管理' : '修改密码',
                 icon: 'key', disabled: ssoSelf, onClick: () => passwordTask(u)
             },
             '-',
-            { label: 'Delete User', icon: 'trash', danger: true, task: 'doDeleteUser', group: 'user', onClick: () => deleteTask(u) }
+            { label: '删除用户', icon: 'trash', danger: true, task: 'doDeleteUser', group: 'user', onClick: () => deleteTask(u) }
         ]);
     };
 
     const options = useRef({
         selectable: 'single',
         rowKey: (u: any) => String(u.id),
-        emptyText: 'No users',
+        emptyText: '暂无用户',
         columnsMenu: true,
         columnsMenuKey: 'webadmin-cols-users',
         onActivate: (u: any) => editTask(u),
@@ -206,12 +206,12 @@ export function UsersView() {
     return (
         <div className="view">
             <ViewTasks>
-                <RailPane title="User Tasks" paneKey="tasks:User Tasks" group="user">
+                <RailPane title="用户任务" paneKey="tasks:User Tasks" group="user">
                     <div className="taskbar" data-pane-title="User Tasks">
-                        <TaskButton label="Refresh" icon="refresh" task="doRefreshUser" onClick={refresh} />
-                        <TaskButton label="New User" icon="plus" primary task="doNewUser" onClick={() => newTask()} />
-                        {hasSel && <TaskButton label="Edit User" icon="edit" task="doEditUser" onClick={() => editTask()} />}
-                        {hasSel && <TaskButton label="Delete User" icon="trash" danger task="doDeleteUser" onClick={() => deleteTask()} />}
+                        <TaskButton label="刷新" icon="refresh" task="doRefreshUser" onClick={refresh} />
+                        <TaskButton label="新建用户" icon="plus" primary task="doNewUser" onClick={() => newTask()} />
+                        {hasSel && <TaskButton label="编辑用户" icon="edit" task="doEditUser" onClick={() => editTask()} />}
+                        {hasSel && <TaskButton label="删除用户" icon="trash" danger task="doDeleteUser" onClick={() => deleteTask()} />}
                     </div>
                 </RailPane>
             </ViewTasks>

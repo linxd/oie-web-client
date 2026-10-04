@@ -80,7 +80,7 @@ legacy.name = 'Repair missing timestamp';
 await saveChannelModel(legacy, cancel);
 assert.match(writes.at(-1).url, /override=false/, 'a missing timestamp must not enable unconditional override');
 assert.ok(legacy.exportData.metadata.lastModified.time > 0);
-await assert.rejects(saveChannelModel({ id: 'uncaptured' }, allow), /original channel/);
+await assert.rejects(saveChannelModel({ id: 'uncaptured' }, allow), /原始通道/);
 
 server = null;
 const draft = { id: 'new', name: 'New', revision: 0 };
@@ -315,7 +315,7 @@ for (const failure of ['unavailable', 'session ended']) {
     readbackFailure = failure;
     const before = writes.length;
     if (failure === 'session ended') {
-        await assert.rejects(saveChannelModel(acceptedDraft, allow), /previous session/);
+        await assert.rejects(saveChannelModel(acceptedDraft, allow), /上一会话/);
     } else {
         assert.equal(await saveChannelModel(acceptedDraft, allow), true, 'an ordinary readback failure retains the accepted save');
     }
@@ -417,7 +417,7 @@ for (const [invalidateAt, expected] of [
     ['retry', ['write:false', 'read', 'confirm', 'write:true']]
 ]) {
     const attempt = conflictAttempt({ invalidateAt });
-    await assert.rejects(attempt.result, /previous session/);
+    await assert.rejects(attempt.result, /上一会话/);
     assert.deepEqual(attempt.events, expected, `session loss during ${invalidateAt} stops all subsequent stages`);
 }
 console.log('channel-save: shared conflict receipts, saver identity, cancellation, failure boundaries and session fencing passed');

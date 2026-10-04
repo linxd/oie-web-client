@@ -57,7 +57,7 @@ function OneToast({ entry }: any) {
 export function ToastHost() {
     const live = useSyncExternalStore(subscribe, snapshot, snapshot);
     return (
-        <Toast.Provider swipeDirection="right" label="Notification">
+        <Toast.Provider swipeDirection="right" label="通知">
             {live.map((entry: any) => <OneToast key={entry.id} entry={entry} />)}
             <Toast.Viewport className="toasts" />
         </Toast.Provider>

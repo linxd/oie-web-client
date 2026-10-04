@@ -15,16 +15,16 @@ export function* readTar(data, recursive = true) {
         const octal = (start, length) => {
             const value = text(header.subarray(start, start + length)).trim();
             if (!/^[0-7]*$/.test(value))
-                throw new Error('Invalid TAR numeric field');
+                throw new Error('TAR 数值字段无效');
             return value ? parseInt(value, 8) : 0;
         };
         const checksum = header.reduce((sum, byte, i) => sum + (i >= 148 && i < 156 ? 32 : byte), 0);
         if (checksum !== octal(148, 8))
-            throw new Error('Invalid TAR header checksum');
+            throw new Error('TAR 头部校验和无效');
         const size = octal(124, 12);
         const start = offset + 512;
         if (!Number.isSafeInteger(size) || start + size > data.length)
-            throw new Error('Truncated TAR archive');
+            throw new Error('TAR 归档已截断');
         const content = data.subarray(start, start + size);
         const type = header[156];
         const prefix = text(header.subarray(345, 500));
@@ -36,7 +36,7 @@ export function* readTar(data, recursive = true) {
                 const space = content.indexOf(32, pos);
                 const length = Number(text(content.subarray(pos, space)));
                 if (space < pos || !Number.isInteger(length) || length <= space - pos + 1 || pos + length > content.length) {
-                    throw new Error('Invalid TAR extended header');
+                    throw new Error('TAR 扩展头无效');
                 }
                 const field = decoder.decode(content.subarray(space + 1, pos + length - 1));
                 const equals = field.indexOf('=');
@@ -64,7 +64,7 @@ export function* readTar(data, recursive = true) {
         yield { name: path, data: content };
     }
     if (data.length % 512)
-        throw new Error('Truncated TAR archive');
+        throw new Error('TAR 归档已截断');
 }
 export async function* readMessageArchive(name, data, recursive, assertActive = () => { }) {
     assertActive();
@@ -112,8 +112,8 @@ function readFile(file, binary) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
-        reader.onerror = () => reject(reader.error || new Error(`Could not read ${file.name}`));
-        reader.onabort = () => reject(new Error(`Reading ${file.name} was cancelled`));
+        reader.onerror = () => reject(reader.error || new Error(`无法读取 ${file.name}`));
+        reader.onabort = () => reject(new Error(`${file.name} 的读取已取消`));
         if (binary)
             reader.readAsArrayBuffer(file);
         else

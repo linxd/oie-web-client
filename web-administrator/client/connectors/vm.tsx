@@ -41,9 +41,9 @@ const channelReader = {
     component() {
         return (
             <div className="cform-section">
-                <div className="cform-section-title">Channel Reader Settings</div>
+                <div className="cform-section-title">通道读取器设置</div>
                 <div className="hint py-0.5 px-0">
-                    Channel Reader listens for messages routed from other channels on this server. It has no connector-specific settings.
+                    通道读取器监听本服务器上其他通道路由过来的消息，没有连接器专属设置。
                 </div>
             </div>
         );
@@ -56,9 +56,9 @@ const channelReader = {
    isn't a known channel id. They are never standing picker options and never
    written to channelId — they describe the field's current state, shown as the
    combo's selected value only while that state holds (see syncCombo). */
-const NONE_LABEL = '<None>';
-const MAP_VARIABLE_LABEL = '<Map Variable>';
-const NOT_FOUND_LABEL = '<Channel Not Found>';
+const NONE_LABEL = '<无>';
+const MAP_VARIABLE_LABEL = '<映射变量>';
+const NOT_FOUND_LABEL = '<通道未找到>';
 
 /* Channel Id dual control, mirroring ChannelWriter's editable channelIdField
    (the source of truth) paired with the channelNames combo (a convenience
@@ -79,11 +79,11 @@ function channelControlNode(properties: any, platform: any, onChange: any) {
     let channelList: any[] = [];
 
     const field = textInput(properties.channelId === 'none' ? '' : (properties.channelId ?? ''), {
-        placeholder: '<None>', title: "The destination channel's unique global id.",
+        placeholder: '<无>', title: '目标通道的唯一全局 ID。',
         class: 'w-[225px]'
     });
     const combo = select([{ value: NONE_LABEL, label: NONE_LABEL }], NONE_LABEL, {
-        title: 'Select the channel to which messages accepted by this destination\'s filter should be written, or none to not write the message at all.',
+        title: '选择要把本目的地过滤器接收到的消息写入哪个通道，选择“无”表示完全不写入消息。',
         class: 'w-[225px]'
     });
 
@@ -147,7 +147,7 @@ function channelControlNode(properties: any, platform: any, onChange: any) {
     wrap.appendChild(field);
     wrap.appendChild(combo);
     const status = h('span', { role: 'status', class: 'text-text-dim' });
-    const refresh = h('button.btn', { type: 'button', onClick: () => { void load(); } }, 'Refresh channels') as HTMLButtonElement;
+    const refresh = h('button.btn', { type: 'button', onClick: () => { void load(); } }, '刷新通道') as HTMLButtonElement;
     wrap.appendChild(refresh);
     wrap.appendChild(status);
 
@@ -156,7 +156,7 @@ function channelControlNode(properties: any, platform: any, onChange: any) {
     async function load() {
         refresh.disabled = true;
         combo.disabled = true;
-        status.textContent = 'Loading channels…';
+        status.textContent = '正在加载通道…';
         try {
             const map = await platform.api.channels.idsAndNames();
             // mapEntries yields [channelId, channelName]; sort the picker by name.
@@ -171,7 +171,7 @@ function channelControlNode(properties: any, platform: any, onChange: any) {
             status.textContent = '';
             combo.disabled = false;
         } catch {
-            status.textContent = 'Could not load channels. Refresh to retry; the stored channel ID is unchanged.';
+            status.textContent = '无法加载通道。请刷新后重试，已保存的通道 ID 不受影响。';
         } finally {
             refresh.disabled = false;
         }
@@ -204,14 +204,14 @@ function mapVariablesTable(properties: any, onChange: any) {
     function paint() {
         clear(wrap);
         const table = h('div', { class: 'flex flex-col gap-1' });
-        table.appendChild(h('div', { className: 'cform-label', class: 'font-semibold text-[11px]' }, 'Map Variable'));
+        table.appendChild(h('div', { className: 'cform-label', class: 'font-semibold text-[11px]' }, '映射变量'));
         rows.forEach((value: any, i: number) => {
             const input = textInput(value, {
-                placeholder: 'Map Variable', class: 'flex-1',
+                placeholder: '映射变量', class: 'flex-1',
                 onInput: (e: any) => { rows[i] = e.target.value; commit(); }
             });
             const delBtn = h('button.icon-btn', {
-                type: 'button', title: 'Delete',
+                type: 'button', title: '删除',
                 onClick: () => { rows.splice(i, 1); commit(); paint(); }
             }, icon('x'));
             table.appendChild(h('div', { class: 'flex gap-1.5 mb-1 items-center' }, input, delBtn));
@@ -219,7 +219,7 @@ function mapVariablesTable(properties: any, onChange: any) {
         const newBtn = h('button.btn', {
             type: 'button',
             onClick: () => { rows.push(uniqueName()); commit(); paint(); }
-        }, 'New');
+        }, '新建');
         wrap.appendChild(table);
         wrap.appendChild(h('div', { class: 'mt-1.5' }, newBtn));
     }
@@ -242,18 +242,18 @@ const channelWriter = {
     component({ properties, platform, onChange }: any) {
         return (
             <ConnectorForm properties={properties} onChange={onChange} fields={[
-                { section: 'Channel Writer Settings' },
+                { section: '通道写入器设置' },
                 {
-                    type: 'custom', label: 'Channel Id', span: true,
-                    tooltip: "The destination channel's unique global id. Type a raw channel id or a ${mapVariable}, or pick a channel from the dropdown to fill it.",
+                    type: 'custom', label: '通道 ID', span: true,
+                    tooltip: '目标通道的唯一全局 ID。可输入原始通道 ID 或 ${mapVariable}，也可从下拉框中选择通道以自动填入。',
                     render: () => channelControlNode(properties, platform, onChange)
                 },
                 {
-                    type: 'custom', label: 'Message Metadata', span: true,
-                    tooltip: 'The following map variables will be included in the source map of the destination channel\'s message. Only use the map key itself, without the "${}" syntax.',
+                    type: 'custom', label: '消息元数据', span: true,
+                    tooltip: '以下映射变量将写入目标通道消息的源映射中。请只填写映射键名本身，不要带 "${}" 语法。',
                     render: () => mapVariablesTable(properties, onChange)
                 },
-                { key: 'channelTemplate', label: 'Template', type: 'code', minHeight: '340px' }
+                { key: 'channelTemplate', label: '模板', type: 'code', minHeight: '340px' }
             ]} />
         );
     },

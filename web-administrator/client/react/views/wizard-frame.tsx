@@ -53,7 +53,7 @@ export function useWizardModel({ routeId, storeKey, isValid, makeNew, fetch, nor
             store.setState(storeKey, ref.current);
             setReady(true);
         }).catch((e: any) => {
-            if (alive) { toast(e && e.message ? e.message : 'Could not load.', 'error'); router.navigate(backPath); }
+            if (alive) { toast(e && e.message ? e.message : '无法加载', 'error'); router.navigate(backPath); }
         });
         return () => { alive = false; };
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -78,22 +78,22 @@ function confirmLeave(entityLabel: any, isNew: any, canSave: any) {
         // would reject — OK-only notice instead (channel editor parity).
         if (canSave === false) {
             modal({
-                title: `Unsaved ${entityLabel}`,
-                body: h('div', `You don't have permission to save this ${entityLabel}. Your changes will be discarded.`),
-                buttons: [{ label: 'OK', primary: true, onClick: () => resolve('discard') }],
+                title: `未保存的${entityLabel}`,
+                body: h('div', `您没有保存此${entityLabel}的权限，更改将被丢弃`),
+                buttons: [{ label: '确定', primary: true, onClick: () => resolve('discard') }],
                 onClose: () => resolve('cancel')
             });
             return;
         }
         modal({
-            title: `Unsaved ${entityLabel}`,
+            title: `未保存的${entityLabel}`,
             body: h('div', isNew
-                ? `This ${entityLabel} hasn’t been created yet. Save it before leaving?`
-                : 'You have unsaved changes. Save before leaving?'),
+                ? `此${entityLabel}尚未创建，要在离开前保存吗？`
+                : '有未保存的更改，要在离开前保存吗？'),
             buttons: [
-                { label: 'Discard', danger: true, onClick: () => resolve('discard') },
-                { label: 'Cancel', onClick: () => resolve('cancel') },
-                { label: 'Save', primary: true, onClick: () => resolve('save') }
+                { label: '丢弃更改', danger: true, onClick: () => resolve('discard') },
+                { label: '取消', onClick: () => resolve('cancel') },
+                { label: '保存', primary: true, onClick: () => resolve('save') }
             ],
             onClose: () => resolve('cancel')
         });

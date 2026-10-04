@@ -96,7 +96,7 @@ export function register(platform: Platform) {
 
     platform.registerDashboardColumn({
         id: 'connection',
-        label: 'Connection',
+        label: '连接',
         order: 10,
         // Channel-level: show the source connector (metaDataId 0) state.
         cell(status: any) {
@@ -170,12 +170,12 @@ export function register(platform: Platform) {
                 <table className="dt">
                     <thead>
                         <tr>
-                            <th className="sortable" style={{ cursor: 'pointer' }} onClick={() => toggleSort('logId')}>Id<span className="sort-arrow">{arrow('logId')}</span></th>
-                            <th className="sortable" style={{ cursor: 'pointer' }} onClick={() => toggleSort('dateAdded')}>Timestamp<span className="sort-arrow">{arrow('dateAdded')}</span></th>
-                            <th className="sortable" style={{ cursor: 'pointer' }} onClick={() => toggleSort('channelName')}>Channel<span className="sort-arrow">{arrow('channelName')}</span></th>
-                            <th className="sortable" style={{ cursor: 'pointer' }} onClick={() => toggleSort('connectorType')}>Connector<span className="sort-arrow">{arrow('connectorType')}</span></th>
-                            <th className="sortable" style={{ cursor: 'pointer' }} onClick={() => toggleSort('eventState')}>Event<span className="sort-arrow">{arrow('eventState')}</span></th>
-                            <th className="sortable" style={{ cursor: 'pointer' }} onClick={() => toggleSort('information')}>Information<span className="sort-arrow">{arrow('information')}</span></th>
+                            <th className="sortable" style={{ cursor: 'pointer' }} onClick={() => toggleSort('logId')}>ID<span className="sort-arrow">{arrow('logId')}</span></th>
+                            <th className="sortable" style={{ cursor: 'pointer' }} onClick={() => toggleSort('dateAdded')}>时间戳<span className="sort-arrow">{arrow('dateAdded')}</span></th>
+                            <th className="sortable" style={{ cursor: 'pointer' }} onClick={() => toggleSort('channelName')}>通道<span className="sort-arrow">{arrow('channelName')}</span></th>
+                            <th className="sortable" style={{ cursor: 'pointer' }} onClick={() => toggleSort('connectorType')}>连接器<span className="sort-arrow">{arrow('connectorType')}</span></th>
+                            <th className="sortable" style={{ cursor: 'pointer' }} onClick={() => toggleSort('eventState')}>事件<span className="sort-arrow">{arrow('eventState')}</span></th>
+                            <th className="sortable" style={{ cursor: 'pointer' }} onClick={() => toggleSort('information')}>信息<span className="sort-arrow">{arrow('information')}</span></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -193,8 +193,8 @@ export function register(platform: Platform) {
                     {!items.length && (
                         <caption className="[caption-side:bottom] p-3.5 text-text-faint">
                             {error
-                                ? `Connection log unavailable: ${error}`
-                                : (lastError ? `Connection log unavailable: ${lastError}` : 'No connection events yet.')}
+                                ? `连接日志不可用：${error}`
+                                : (lastError ? `连接日志不可用：${lastError}` : '暂无连接事件')}
                         </caption>
                     )}
                 </table>
@@ -204,7 +204,7 @@ export function register(platform: Platform) {
 
     platform.registerDashboardTab({
         id: 'connection-log',
-        label: 'Connection Log',
+        label: '连接日志',
         order: 20,
         component: ConnectionLogTab
     });

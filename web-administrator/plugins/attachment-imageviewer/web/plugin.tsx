@@ -51,22 +51,22 @@ export function register(platform: Platform) {
         if (state.key !== key || state.status === 'loading') {
             return (
                 <div className="mt-[13px]">
-                    <div className="text-text-faint text-[10px] mb-1">Loading image…</div>
+                    <div className="text-text-faint text-[10px] mb-1">正在加载图片…</div>
                 </div>
             );
         }
         if (state.status === 'error') {
             return (
                 <div className="mt-[13px]">
-                    <div className="text-text-faint">{`Could not load image: ${state.message}`}</div>
-                    <button type="button" className="btn" onClick={() => retry()}>Retry</button>
+                    <div className="text-text-faint">{`无法加载图片：${state.message}`}</div>
+                    <button type="button" className="btn" onClick={() => retry()}>重试</button>
                 </div>
             );
         }
         return (
             <div className="mt-[13px]">
                 <img
-                    alt="Message attachment"
+                    alt="消息附件"
                     src={state.src}
                     className="max-w-full max-h-[540px] border border-[var(--bg3)] rounded-[4px]"
                 />

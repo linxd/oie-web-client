@@ -22,7 +22,7 @@ function unescape(value: string, key: boolean): string {
             // Commons Configuration's value reader discards incomplete Unicode
             // escapes, while the key reader rejects them.
             if (!key && hex.length < 4) break;
-            if (!/^[a-fA-F0-9]{4}$/.test(hex)) throw new Error(`Invalid Unicode escape: \\u${hex}`);
+            if (!/^[a-fA-F0-9]{4}$/.test(hex)) throw new Error(`无效的 Unicode 转义：\\u${hex}`);
             result += String.fromCharCode(parseInt(hex, 16));
             index += 4;
         } else if (key && /^[0-7]$/.test(next)) {
@@ -50,7 +50,7 @@ function canonicalComment(lines: string[], first: boolean): string {
 
 export class MissingConfigurationMapInclude extends Error {
     constructor(public path: string, public optional: boolean) {
-        super(`Select the included properties file "${path}".`);
+        super(`请选择所包含的 properties 文件 "${path}"`);
     }
 }
 
@@ -96,7 +96,7 @@ export function parseConfigurationMap(content: string, options: {
                 const delimiter = name.indexOf(':-');
                 const reference = delimiter < 0 ? name : name.slice(0, delimiter);
                 if (rows.has(reference)) {
-                    if (path.includes(reference)) throw new Error(`Cyclic property reference: ${[...path, reference].join(' → ')}`);
+                    if (path.includes(reference)) throw new Error(`属性引用循环：${[...path, reference].join(' → ')}`);
                     result += interpolate(rows.get(reference)!.value, [...path, reference]);
                 } else if (delimiter >= 0) result += name.slice(delimiter + 2);
                 else result += value.slice(start, end + 1);
@@ -107,7 +107,7 @@ export function parseConfigurationMap(content: string, options: {
     }
 
     function read(input: string, filename: string, path: string[]) {
-        if (path.includes(filename)) throw new Error(`Cyclic properties include: ${[...path, filename].join(' → ')}`);
+        if (path.includes(filename)) throw new Error(`properties 包含循环：${[...path, filename].join(' → ')}`);
         let comments: string[] = [], logical = '';
         for (const physical of input.split(/\r\n|\r|\n/)) {
             const line = trim(physical);
@@ -118,16 +118,16 @@ export function parseConfigurationMap(content: string, options: {
             // Java's default regex whitespace is ASCII. Escaped separators and
             // whitespace belong to the key, while unescaped ones delimit it.
             const parts = /^((?:[^ \t\r\n\f\v\\:=]|\\.)*)(?:[ \t\r\n\f\v]*(?:[ \t\r\n\f\v]+|[:=])[ \t\r\n\f\v]*)?(.*)$/.exec(logical);
-            if (!parts) throw new Error('Invalid configuration property');
+            if (!parts) throw new Error('配置属性无效');
             const key = unescape(trim(parts[1]), true);
             const value = unescape(trim(parts[2]), false);
             const optional = key.toLowerCase() === 'includeoptional';
             if (key.toLowerCase() === 'include' || optional) {
                 const target = includePath(filename, interpolate(value));
-                if ([...path, filename].includes(target)) throw new Error(`Cyclic properties include: ${[...path, filename, target].join(' → ')}`);
+                if ([...path, filename].includes(target)) throw new Error(`properties 包含循环：${[...path, filename, target].join(' → ')}`);
                 if (!options.includes?.has(target)) throw new MissingConfigurationMapInclude(target, optional);
                 const included = options.includes.get(target);
-                if (included == null && !optional) throw new Error(`Required included properties file "${target}" was not selected.`);
+                if (included == null && !optional) throw new Error(`未选择必需的包含文件 "${target}"`);
                 if (included != null) read(included, target, [...path, filename]);
             } else {
                 const comment = canonicalComment(comments, rows.size === 0 && path.length === 0);

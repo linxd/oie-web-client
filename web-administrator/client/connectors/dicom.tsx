@@ -18,10 +18,10 @@ import {
 } from './react-forms.js';
 
 const TLS_OPTIONS = [
-    { value: 'notls', label: 'No TLS' },
+    { value: 'notls', label: '无 TLS' },
     { value: '3des', label: '3DES' },
     { value: 'aes', label: 'AES' },
-    { value: 'without', label: 'Without' }
+    { value: 'without', label: '不加密' }
 ];
 
 // Swing tlsNoRadioActionPerformed greys (setEnabled(false)) the whole keystore /
@@ -32,21 +32,21 @@ const tlsDisabled = (p: any) => p.tls === 'notls';
 /* TLS / keystore fields shared by listener and sender (same Java fields). */
 function tlsFields() {
     return [
-        { section: 'TLS Settings' },
+        { section: 'TLS 设置' },
         { key: 'tls', label: 'TLS', type: 'select', options: TLS_OPTIONS, width: '120px', refresh: true },
-        { key: 'noClientAuth', label: 'Client Authentication TLS', type: 'radio', options: [
-            { value: false, label: 'Yes' },
-            { value: true, label: 'No' }
+        { key: 'noClientAuth', label: 'TLS 客户端认证', type: 'radio', options: [
+            { value: false, label: '是' },
+            { value: true, label: '否' }
         ], disabled: tlsDisabled },
-        { key: 'nossl2', label: 'Accept ssl v2 TLS handshake', type: 'radio', options: [
-            { value: false, label: 'Yes' },
-            { value: true, label: 'No' }
+        { key: 'nossl2', label: '接受 SSL v2 TLS 握手', type: 'radio', options: [
+            { value: false, label: '是' },
+            { value: true, label: '否' }
         ], disabled: tlsDisabled },
-        { key: 'keyStore', label: 'Keystore', type: 'text', width: '320px', disabled: tlsDisabled },
-        { key: 'keyStorePW', label: 'Keystore Password', type: 'password', width: '220px', disabled: tlsDisabled },
-        { key: 'trustStore', label: 'Trust Store', type: 'text', width: '320px', disabled: tlsDisabled },
-        { key: 'trustStorePW', label: 'Trust Store Password', type: 'password', width: '220px', disabled: tlsDisabled },
-        { key: 'keyPW', label: 'Key Password', type: 'password', width: '220px', disabled: tlsDisabled }
+        { key: 'keyStore', label: '密钥库', type: 'text', width: '320px', disabled: tlsDisabled },
+        { key: 'keyStorePW', label: '密钥库密码', type: 'password', width: '220px', disabled: tlsDisabled },
+        { key: 'trustStore', label: '信任库', type: 'text', width: '320px', disabled: tlsDisabled },
+        { key: 'trustStorePW', label: '信任库密码', type: 'password', width: '220px', disabled: tlsDisabled },
+        { key: 'keyPW', label: '密钥密码', type: 'password', width: '220px', disabled: tlsDisabled }
     ];
 }
 
@@ -102,40 +102,40 @@ const dicomListener = {
     component({ properties, onChange }: any) {
         return (
             <ConnectorForm properties={properties} onChange={onChange} fields={[
-                { section: 'Connection Settings' },
-                listenerAddressField('listenerConnectorProperties.host', 'Listener Address'),
-                { key: 'listenerConnectorProperties.port', label: 'Listener Port', type: 'number', width: '90px', append: () => portsInUseButton() },
-                { key: 'applicationEntity', label: 'Application Entity', type: 'text', width: '220px' },
-                { key: 'async', label: 'Max Async operations', type: 'number', width: '110px' },
-                { key: 'pdv1', label: 'Pack PDV', type: 'radio', options: YES_NO },
-                { key: 'reaper', label: 'DIMSE-RSP interval period (s)', type: 'number', width: '110px' },
-                { key: 'releaseTo', label: 'A-RELEASE-RP timeout (s)', type: 'number', width: '110px' },
-                { key: 'soCloseDelay', label: 'Socket Close Delay After A-ABORT (ms)', type: 'number', width: '110px' },
-                { key: 'requestTo', label: 'ASSOCIATE-RQ timeout (ms)', type: 'number', width: '110px' },
-                { key: 'idleTo', label: 'DIMSE-RQ timeout (ms)', type: 'number', width: '110px' },
-                { key: 'rspDelay', label: 'DIMSE-RSP delay (ms)', type: 'number', width: '110px' },
-                { key: 'sndpdulen', label: 'P-DATA-TF PDUs max length sent (KB)', type: 'number', width: '110px' },
-                { key: 'rcvpdulen', label: 'P-DATA-TF PDUs max length received (KB)', type: 'number', width: '110px' },
-                { key: 'sosndbuf', label: 'Send Socket Buffer Size (KB)', type: 'number', width: '110px' },
-                { key: 'sorcvbuf', label: 'Receive Socket Buffer Size (KB)', type: 'number', width: '110px' },
-                { key: 'bufSize', label: 'Transcoder Buffer Size (KB)', type: 'number', width: '110px' },
+                { section: '连接设置' },
+                listenerAddressField('listenerConnectorProperties.host', '监听器地址'),
+                { key: 'listenerConnectorProperties.port', label: '监听器端口', type: 'number', width: '90px', append: () => portsInUseButton() },
+                { key: 'applicationEntity', label: '应用实体', type: 'text', width: '220px' },
+                { key: 'async', label: '最大异步操作数', type: 'number', width: '110px' },
+                { key: 'pdv1', label: '打包 PDV', type: 'radio', options: YES_NO },
+                { key: 'reaper', label: 'DIMSE-RSP 间隔周期（秒）', type: 'number', width: '110px' },
+                { key: 'releaseTo', label: 'A-RELEASE-RP 超时（秒）', type: 'number', width: '110px' },
+                { key: 'soCloseDelay', label: 'A-ABORT 后套接字关闭延迟（毫秒）', type: 'number', width: '110px' },
+                { key: 'requestTo', label: 'ASSOCIATE-RQ 超时（毫秒）', type: 'number', width: '110px' },
+                { key: 'idleTo', label: 'DIMSE-RQ 超时（毫秒）', type: 'number', width: '110px' },
+                { key: 'rspDelay', label: 'DIMSE-RSP 延迟（毫秒）', type: 'number', width: '110px' },
+                { key: 'sndpdulen', label: 'P-DATA-TF PDU 最大发送长度（KB）', type: 'number', width: '110px' },
+                { key: 'rcvpdulen', label: 'P-DATA-TF PDU 最大接收长度（KB）', type: 'number', width: '110px' },
+                { key: 'sosndbuf', label: '发送套接字缓冲区大小（KB）', type: 'number', width: '110px' },
+                { key: 'sorcvbuf', label: '接收套接字缓冲区大小（KB）', type: 'number', width: '110px' },
+                { key: 'bufSize', label: '转码器缓冲区大小（KB）', type: 'number', width: '110px' },
                 {
-                    key: 'bigEndian', label: 'Accept Explict VR Big Endian', type: 'radio', options: YES_NO, refresh: true,
+                    key: 'bigEndian', label: '接受显式 VR 大端字节序', type: 'radio', options: YES_NO, refresh: true,
                     disabled: transferSyntaxLocked,
                     onSet: (p: any) => { if (asBool(p.bigEndian)) p.defts = false; }
                 },
                 {
-                    key: 'defts', label: 'Only Accept Default Transfer Syntax', type: 'radio', options: YES_NO, refresh: true,
+                    key: 'defts', label: '仅接受默认传输语法', type: 'radio', options: YES_NO, refresh: true,
                     disabled: deftsLocked,
                     onSet: (p: any) => { if (asBool(p.defts)) { p.bigEndian = false; p.nativeData = false; } }
                 },
                 {
-                    key: 'nativeData', label: 'Only Uncompressed Pixel Data', type: 'radio', options: YES_NO, refresh: true,
+                    key: 'nativeData', label: '仅未压缩像素数据', type: 'radio', options: YES_NO, refresh: true,
                     disabled: transferSyntaxLocked,
                     onSet: (p: any) => { if (asBool(p.nativeData)) p.defts = false; }
                 },
-                { key: 'tcpDelay', label: 'TCP Delay', type: 'radio', options: YES_NO },
-                { key: 'dest', label: 'Store Received Objects in Directory', type: 'text', width: '320px' },
+                { key: 'tcpDelay', label: 'TCP 延迟', type: 'radio', options: YES_NO },
+                { key: 'dest', label: '将接收对象存入目录', type: 'text', width: '320px' },
                 ...tlsFields()
             ]} />
         );
@@ -144,8 +144,8 @@ const dicomListener = {
     // ListenerSettingsPanel.checkProperties requires Listener Address + Listener Port.
     validate(properties: any) {
         return requireFields(properties, [
-            { key: 'listenerConnectorProperties.host', label: 'Listener Address' },
-            { key: 'listenerConnectorProperties.port', label: 'Listener Port' }
+            { key: 'listenerConnectorProperties.host', label: '监听器地址' },
+            { key: 'listenerConnectorProperties.port', label: '监听器端口' }
         ]);
     }
 };
@@ -198,42 +198,42 @@ const dicomSender = {
     component({ properties, onChange }: any) {
         return (
             <ConnectorForm properties={properties} onChange={onChange} fields={[
-                { section: 'Connection Settings' },
-                { key: 'host', label: 'Remote Host', type: 'text', width: '200px' },
-                { key: 'localHost', label: 'Local Host', type: 'text', width: '200px' },
-                { key: 'port', label: 'Remote Port', type: 'number', width: '90px' },
-                { key: 'localPort', label: 'Local Port', type: 'number', width: '90px', append: () => portsInUseButton() },
-                { key: 'applicationEntity', label: 'Remote Application Entity', type: 'text', width: '220px' },
-                { key: 'localApplicationEntity', label: 'Local Application Entity', type: 'text', width: '220px' },
-                { key: 'async', label: 'Max Async operations', type: 'number', width: '110px' },
-                { key: 'priority', label: 'Priority', type: 'radio', options: [
-                    { value: 'high', label: 'High' },
-                    { value: 'med', label: 'Medium' },
-                    { value: 'low', label: 'Low' }
+                { section: '连接设置' },
+                { key: 'host', label: '远程主机', type: 'text', width: '200px' },
+                { key: 'localHost', label: '本地主机', type: 'text', width: '200px' },
+                { key: 'port', label: '远程端口', type: 'number', width: '90px' },
+                { key: 'localPort', label: '本地端口', type: 'number', width: '90px', append: () => portsInUseButton() },
+                { key: 'applicationEntity', label: '远程应用实体', type: 'text', width: '220px' },
+                { key: 'localApplicationEntity', label: '本地应用实体', type: 'text', width: '220px' },
+                { key: 'async', label: '最大异步操作数', type: 'number', width: '110px' },
+                { key: 'priority', label: '优先级', type: 'radio', options: [
+                    { value: 'high', label: '高' },
+                    { value: 'med', label: '中' },
+                    { value: 'low', label: '低' }
                 ] },
-                { key: 'stgcmt', label: 'Request Storage Commitment', type: 'radio', options: YES_NO },
-                { key: 'username', label: 'User Name', type: 'text', width: '220px' },
-                { key: 'passcode', label: 'Pass Code', type: 'password', width: '220px' },
-                { section: 'Settings' },
-                { key: 'uidnegrsp', label: 'Request Positive User Identity Response', type: 'radio', options: YES_NO },
-                { key: 'pdv1', label: 'Pack PDV', type: 'radio', options: YES_NO },
-                { key: 'reaper', label: 'DIMSE-RSP interval period (s)', type: 'number', width: '110px' },
-                { key: 'sndpdulen', label: 'P-DATA-TF PDUs max length sent (KB)', type: 'number', width: '110px' },
-                { key: 'releaseTo', label: 'A-RELEASE-RP timeout (s)', type: 'number', width: '110px' },
-                { key: 'rcvpdulen', label: 'P-DATA-TF PDUs  max length received (KB)', type: 'number', width: '110px' },
-                { key: 'rspTo', label: 'DIMSE-RSP timeout (s)', type: 'number', width: '110px' },
-                { key: 'sosndbuf', label: 'Send Socket Buffer Size (KB)', type: 'number', width: '110px' },
-                { key: 'shutdownDelay', label: 'Shutdown delay (ms)', type: 'number', width: '110px' },
-                { key: 'sorcvbuf', label: 'Receive Socket Buffer Size (KB)', type: 'number', width: '110px' },
-                { key: 'soCloseDelay', label: 'Socket Close Delay After A-ABORT (ms)', type: 'number', width: '110px' },
-                { key: 'bufSize', label: 'Transcoder Buffer Size (KB)', type: 'number', width: '110px' },
-                { key: 'acceptTo', label: 'Timeout A-ASSOCIATE-AC (ms)', type: 'number', width: '110px' },
-                { key: 'connectTo', label: 'TCP Connection Timeout (ms)', type: 'number', width: '110px' },
-                { key: 'tcpDelay', label: 'TCP Delay', type: 'radio', options: YES_NO },
-                { key: 'ts1', label: 'Default Presentation Syntax', type: 'radio', options: YES_NO },
+                { key: 'stgcmt', label: '请求存储承诺', type: 'radio', options: YES_NO },
+                { key: 'username', label: '用户名', type: 'text', width: '220px' },
+                { key: 'passcode', label: '口令', type: 'password', width: '220px' },
+                { section: '设置' },
+                { key: 'uidnegrsp', label: '请求肯定用户身份响应', type: 'radio', options: YES_NO },
+                { key: 'pdv1', label: '打包 PDV', type: 'radio', options: YES_NO },
+                { key: 'reaper', label: 'DIMSE-RSP 间隔周期（秒）', type: 'number', width: '110px' },
+                { key: 'sndpdulen', label: 'P-DATA-TF PDU 最大发送长度（KB）', type: 'number', width: '110px' },
+                { key: 'releaseTo', label: 'A-RELEASE-RP 超时（秒）', type: 'number', width: '110px' },
+                { key: 'rcvpdulen', label: 'P-DATA-TF PDU 最大接收长度（KB）', type: 'number', width: '110px' },
+                { key: 'rspTo', label: 'DIMSE-RSP 超时（秒）', type: 'number', width: '110px' },
+                { key: 'sosndbuf', label: '发送套接字缓冲区大小（KB）', type: 'number', width: '110px' },
+                { key: 'shutdownDelay', label: '关闭延迟（毫秒）', type: 'number', width: '110px' },
+                { key: 'sorcvbuf', label: '接收套接字缓冲区大小（KB）', type: 'number', width: '110px' },
+                { key: 'soCloseDelay', label: 'A-ABORT 后套接字关闭延迟（毫秒）', type: 'number', width: '110px' },
+                { key: 'bufSize', label: '转码器缓冲区大小（KB）', type: 'number', width: '110px' },
+                { key: 'acceptTo', label: 'A-ASSOCIATE-AC 超时（毫秒）', type: 'number', width: '110px' },
+                { key: 'connectTo', label: 'TCP 连接超时（毫秒）', type: 'number', width: '110px' },
+                { key: 'tcpDelay', label: 'TCP 延迟', type: 'radio', options: YES_NO },
+                { key: 'ts1', label: '默认表示语法', type: 'radio', options: YES_NO },
                 ...tlsFields(),
-                { section: 'Template' },
-                { key: 'template', label: 'Template', type: 'code', minHeight: '260px' }
+                { section: '模板' },
+                { key: 'template', label: '模板', type: 'code', minHeight: '260px' }
             ]} />
         );
     },
@@ -241,9 +241,9 @@ const dicomSender = {
     // (host also enforces a minimum length, skipped here as a numeric/format check).
     validate(properties: any) {
         return requireFields(properties, [
-            { key: 'host', label: 'Remote Host' },
-            { key: 'port', label: 'Remote Port' },
-            { key: 'template', label: 'Template' }
+            { key: 'host', label: '远程主机' },
+            { key: 'port', label: '远程端口' },
+            { key: 'template', label: '模板' }
         ]);
     }
 };

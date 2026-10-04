@@ -22,26 +22,26 @@ function openScriptModal(value: any, onSave: any) {
     let draft = String(value ?? '');
     const editor = createCodeEditor({ value: draft, language: 'javascript', minHeight: '360px', onChange: (v: any) => { draft = v; } });
     modal({
-        title: 'Script',
+        title: '脚本',
         size: 'wide',
         body: editor.el,
         onClose: () => { editor.dispose && editor.dispose(); },
         buttons: [
-            { label: 'Open File…', onClick: async () => { const file = await pickFile('.js,.txt'); if (file) { draft = file.content; editor.setValue(file.content); } return false; } },
+            { label: '打开文件…', onClick: async () => { const file = await pickFile('.js,.txt'); if (file) { draft = file.content; editor.setValue(file.content); } return false; } },
             {
-                label: 'Validate Script',
+                label: '校验脚本',
                 // Engine-side Rhino compile check (these scripts execute on the
                 // engine, where E4X is legal — a local `new Function` parse
                 // can't accept it, and it would need 'unsafe-eval' in the CSP).
                 onClick: async () => {
                     const r = await validateScript(draft);
-                    if (r.ok === true) toast('Script is valid.');
-                    else toast(r.ok === false ? `Invalid script: ${r.message}` : r.message, r.ok === false ? 'error' : 'warn');
+                    if (r.ok === true) toast('脚本有效。');
+                    else toast(r.ok === false ? `脚本无效：${r.message}` : r.message, r.ok === false ? 'error' : 'warn');
                     return false;
                 }
             },
-            { label: 'Cancel' },
-            { label: 'OK', primary: true, onClick: () => onSave(draft === '' ? null : draft) }
+            { label: '取消' },
+            { label: '确定', primary: true, onClick: () => onSave(draft === '' ? null : draft) }
         ]
     });
 }
@@ -57,13 +57,13 @@ function groupSpecsFor(def: any, direction: any, connectorType: any) {
     const has = (key: any) => def.groups.some((g: any) => g.key === key);
     const specs: any[] = [];
     if (direction === 'outbound') {
-        if (has('deserializationProperties')) specs.push({ key: 'deserializationProperties', label: 'Deserialization' });
-        if (has('serializationProperties')) specs.push({ key: 'serializationProperties', label: 'Template Serialization' });
+        if (has('deserializationProperties')) specs.push({ key: 'deserializationProperties', label: '反序列化' });
+        if (has('serializationProperties')) specs.push({ key: 'serializationProperties', label: '模板序列化' });
     } else {
-        if (has('serializationProperties')) specs.push({ key: 'serializationProperties', label: 'Serialization' });
-        if (has('batchProperties') && connectorType === 'SOURCE') specs.push({ key: 'batchProperties', label: 'Batch' });
-        if (has('responseGenerationProperties') && connectorType === 'SOURCE') specs.push({ key: 'responseGenerationProperties', label: 'Response Generation' });
-        if (has('responseValidationProperties') && connectorType === 'RESPONSE') specs.push({ key: 'responseValidationProperties', label: 'Response Validation' });
+        if (has('serializationProperties')) specs.push({ key: 'serializationProperties', label: '序列化' });
+        if (has('batchProperties') && connectorType === 'SOURCE') specs.push({ key: 'batchProperties', label: '批处理' });
+        if (has('responseGenerationProperties') && connectorType === 'SOURCE') specs.push({ key: 'responseGenerationProperties', label: '响应生成' });
+        if (has('responseValidationProperties') && connectorType === 'RESPONSE') specs.push({ key: 'responseValidationProperties', label: '响应校验' });
     }
     return specs;
 }
@@ -118,7 +118,7 @@ function FieldControl({ groupObj, f, notify }: any) {
                 <Field label={f.label} hint={f.hint}>
                     <button type="button" className="btn btn-sm"
                         onClick={() => openScriptModal(groupObj[f.key], (v: any) => { groupObj[f.key] = v; notify(); })}>
-                        {value && String(value).trim() ? 'Edit' : 'Edit…'}
+                        {value && String(value).trim() ? '编辑' : '编辑…'}
                     </button>
                 </Field>
             );
@@ -137,9 +137,9 @@ const GROUP_LABEL_CLASS = 'font-semibold text-[11px] uppercase tracking-[0.04em]
 /* Unknown/plugin data types: raw JSON editor over the properties object. */
 function RawProperties({ typeName, props, onReplace }: any) {
     return (
-        <Field label="Properties (JSON)" hint={`No schema registered for "${typeName}" — edit the raw properties`}>
+        <Field label="属性（JSON）" hint={`"${typeName}" 未注册架构——请直接编辑原始属性`}>
             <textarea rows={14} spellCheck={false} defaultValue={JSON.stringify(props ?? {}, null, 2)}
-                onBlur={(e: any) => { try { onReplace(JSON.parse(e.target.value)); } catch (err: any) { toast(`Invalid JSON: ${err.message}`, 'error'); } }} />
+                onBlur={(e: any) => { try { onReplace(JSON.parse(e.target.value)); } catch (err: any) { toast(`JSON 无效：${err.message}`, 'error'); } }} />
         </Field>
     );
 }
@@ -163,7 +163,7 @@ export function DataTypePropertiesEditor({ typeName, props, version, direction =
     if (!def) return <RawProperties typeName={typeName} props={props} onReplace={onReplace || (() => {})} />;
 
     const specs = groupSpecsFor(def, direction, connectorType);
-    if (!specs.length) return <div className="text-text-faint py-2 px-0">This data type has no properties.</div>;
+    if (!specs.length) return <div className="text-text-faint py-2 px-0">此数据类型没有属性。</div>;
 
     const defaults = def.defaults(version);
     const byKey = new Map(def.groups.map((g: any) => [g.key, g]));

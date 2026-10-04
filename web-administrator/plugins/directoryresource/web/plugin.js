@@ -25,13 +25,13 @@ function register(platform2) {
       };
     }, [id, api]);
     if (state.phase === "loading") {
-      return /* @__PURE__ */ React.createElement("div", { className: "loading-block" }, /* @__PURE__ */ React.createElement("div", { className: "spinner" }), "Loading libraries\u2026");
+      return /* @__PURE__ */ React.createElement("div", { className: "loading-block" }, /* @__PURE__ */ React.createElement("div", { className: "spinner" }), "\u6B63\u5728\u52A0\u8F7D\u5E93\u2026");
     }
     if (state.phase === "error") {
-      return /* @__PURE__ */ React.createElement("div", { className: "text-text-faint" }, "Library list unavailable");
+      return /* @__PURE__ */ React.createElement("div", { className: "text-text-faint" }, "\u65E0\u6CD5\u83B7\u53D6\u5E93\u5217\u8868");
     }
     if (!state.libs.length) {
-      return /* @__PURE__ */ React.createElement("div", { className: "text-text-faint" }, "No libraries loaded");
+      return /* @__PURE__ */ React.createElement("div", { className: "text-text-faint" }, "\u672A\u52A0\u8F7D\u4EFB\u4F55\u5E93");
     }
     return /* @__PURE__ */ React.createElement("ul", { className: "m-0 pl-[16px] max-h-[162px] overflow-auto font-mono text-[11px]" }, state.libs.map((l, i) => /* @__PURE__ */ React.createElement("li", { key: `${i}-${l}` }, l)));
   }
@@ -41,7 +41,7 @@ function register(platform2) {
     const [directory, setDirectory] = React.useState(obj.directory || "");
     const [recursion, setRecursion] = React.useState(obj.directoryRecursion !== false);
     const [description, setDescription] = React.useState(obj.description || "");
-    return /* @__PURE__ */ React.createElement("div", { className: "form-grid" }, /* @__PURE__ */ React.createElement("div", { className: "field" }, /* @__PURE__ */ React.createElement("label", null, "Name"), /* @__PURE__ */ React.createElement(
+    return /* @__PURE__ */ React.createElement("div", { className: "form-grid" }, /* @__PURE__ */ React.createElement("div", { className: "field" }, /* @__PURE__ */ React.createElement("label", null, "\u540D\u79F0"), /* @__PURE__ */ React.createElement(
       "input",
       {
         type: "text",
@@ -59,7 +59,7 @@ function register(platform2) {
           if (refreshTable) refreshTable();
         }
       }
-    ), locked ? /* @__PURE__ */ React.createElement("div", { className: "hint" }, "The Default Resource cannot be renamed") : null), /* @__PURE__ */ React.createElement("div", { className: "field" }, /* @__PURE__ */ React.createElement("label", null, "Directory"), /* @__PURE__ */ React.createElement(
+    ), locked ? /* @__PURE__ */ React.createElement("div", { className: "hint" }, "\u7F3A\u7701\u8D44\u6E90\u4E0D\u80FD\u91CD\u547D\u540D") : null), /* @__PURE__ */ React.createElement("div", { className: "field" }, /* @__PURE__ */ React.createElement("label", null, "\u76EE\u5F55"), /* @__PURE__ */ React.createElement(
       "input",
       {
         type: "text",
@@ -74,7 +74,7 @@ function register(platform2) {
           setDirectory(e.target.value);
         }
       }
-    ), locked ? /* @__PURE__ */ React.createElement("div", { className: "hint" }, "The Default Resource directory cannot be changed") : null), /* @__PURE__ */ React.createElement("div", { className: "field" }, /* @__PURE__ */ React.createElement("label", null, "Subdirectories"), /* @__PURE__ */ React.createElement("label", { className: "check" }, /* @__PURE__ */ React.createElement(
+    ), locked ? /* @__PURE__ */ React.createElement("div", { className: "hint" }, "\u7F3A\u7701\u8D44\u6E90\u7684\u76EE\u5F55\u4E0D\u80FD\u66F4\u6539") : null), /* @__PURE__ */ React.createElement("div", { className: "field" }, /* @__PURE__ */ React.createElement("label", null, "\u5B50\u76EE\u5F55"), /* @__PURE__ */ React.createElement("label", { className: "check" }, /* @__PURE__ */ React.createElement(
       "input",
       {
         type: "checkbox",
@@ -84,7 +84,7 @@ function register(platform2) {
           setRecursion(e.target.checked);
         }
       }
-    ), "Include All Subdirectories")), /* @__PURE__ */ React.createElement("div", { className: "field span-2" }, /* @__PURE__ */ React.createElement("label", null, "Description"), /* @__PURE__ */ React.createElement(
+    ), "\u5305\u542B\u6240\u6709\u5B50\u76EE\u5F55")), /* @__PURE__ */ React.createElement("div", { className: "field span-2" }, /* @__PURE__ */ React.createElement("label", null, "\u63CF\u8FF0"), /* @__PURE__ */ React.createElement(
       "textarea",
       {
         value: description,
@@ -97,13 +97,13 @@ function register(platform2) {
           setDescription(e.target.value);
         }
       }
-    )), /* @__PURE__ */ React.createElement("div", { className: "field span-2" }, /* @__PURE__ */ React.createElement("label", null, "Loaded Libraries"), /* @__PURE__ */ React.createElement(LoadedLibraries, { entry, api: platform3.api })));
+    )), /* @__PURE__ */ React.createElement("div", { className: "field span-2" }, /* @__PURE__ */ React.createElement("label", null, "\u5DF2\u52A0\u8F7D\u7684\u5E93"), /* @__PURE__ */ React.createElement(LoadedLibraries, { entry, api: platform3.api })));
   }
   platform2.registerResourceType("Directory", {
     type: "Directory",
-    label: "Directory",
+    label: "\u76EE\u5F55",
     propertiesClass: DIRECTORY_RESOURCE_CLASS,
-    detailHeader: "Directory Settings",
+    detailHeader: "\u76EE\u5F55\u8BBE\u7F6E",
     /* New directory resource. ctx: { version, containerIsArray } — version
        mirrors an existing entry so the engine doesn't migrate from scratch;
        the @class is only needed for the array-shaped container. */

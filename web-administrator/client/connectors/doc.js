@@ -20,7 +20,7 @@ const isRtf = (p) => String(p.documentType ?? 'pdf').toLowerCase() === 'rtf';
    text/plain body to /connectors/doc/_testWrite — NOT the JSON properties — with
    channelId/channelName query params (DocumentConnectorServletInterface). */
 function docTestWriteButton(properties, channel) {
-    const btn = taskButton('Test Write', 'folder', async () => {
+    const btn = taskButton('测试写入', 'folder', async () => {
         btn.disabled = true;
         try {
             const result = await post('/connectors/doc/_testWrite', properties.host ?? '', {
@@ -28,7 +28,7 @@ function docTestWriteButton(properties, channel) {
                 contentType: 'text/plain'
             });
             const type = result && typeof result === 'object' ? String(result.type ?? '') : '';
-            const message = (result && typeof result === 'object' && result.message) || type || 'No response received';
+            const message = (result && typeof result === 'object' && result.message) || type || '未收到响应';
             if (type === 'SUCCESS')
                 successToast(message);
             else
@@ -133,7 +133,7 @@ function pageSizeRow(p, { onChange }) {
     const current = matchingPreset(p);
     const presetOptions = PAGE_SIZES.map((ps) => ({ value: ps.name, label: ps.name }));
     if (current === 'CUSTOM')
-        presetOptions.push({ value: 'CUSTOM', label: 'Custom' });
+        presetOptions.push({ value: 'CUSTOM', label: '自定义' });
     const presetField = select(presetOptions, current, {
         onChange: (e) => {
             const ps = PAGE_SIZES.find((x) => x.name === e.target.value);
@@ -168,21 +168,21 @@ const documentWriter = {
     },
     component({ properties, channel, onChange }) {
         return (React.createElement(ConnectorForm, { properties: properties, onChange: onChange, fields: [
-                { key: 'output', label: 'Output', type: 'radio', refresh: true, options: [
-                        { value: 'FILE', label: 'File' },
-                        { value: 'ATTACHMENT', label: 'Attachment' },
-                        { value: 'BOTH', label: 'Both' }
+                { key: 'output', label: '输出', type: 'radio', refresh: true, options: [
+                        { value: 'FILE', label: '文件' },
+                        { value: 'ATTACHMENT', label: '附件' },
+                        { value: 'BOTH', label: '两者' }
                     ] },
                 {
-                    key: 'host', label: 'Directory', type: 'text', width: '200px',
+                    key: 'host', label: '目录', type: 'text', width: '200px',
                     disabled: (p) => !writesFile(p),
                     append: () => docTestWriteButton(properties, channel)
                 },
-                { key: 'outputPattern', label: 'File Name', type: 'text', width: '200px', disabled: (p) => !writesFile(p) },
+                { key: 'outputPattern', label: '文件名', type: 'text', width: '200px', disabled: (p) => !writesFile(p) },
                 {
                     // Switching to RTF disables the Encrypted radio and forces Encrypted=No
                     // (documentTypeRTFRadioActionPerformed -> encryptedNoActionPerformed).
-                    key: 'documentType', label: 'Document Type', type: 'radio', refresh: true,
+                    key: 'documentType', label: '文档类型', type: 'radio', refresh: true,
                     onSet: (p) => { if (isRtf(p))
                         p.encrypt = false; },
                     options: [
@@ -190,12 +190,12 @@ const documentWriter = {
                         { value: 'rtf', label: 'RTF' }
                     ]
                 },
-                { key: 'encrypt', label: 'Encrypted', type: 'radio', options: YES_NO, refresh: true, disabled: isRtf },
+                { key: 'encrypt', label: '已加密', type: 'radio', options: YES_NO, refresh: true, disabled: isRtf },
                 // Password is greyed when Encrypted=No, including under RTF (which calls
                 // encryptedNoActionPerformed and disables the Encrypted radio).
-                { key: 'password', label: 'Password', type: 'password', width: '124px', disabled: (p) => isRtf(p) || !asBool(p.encrypt) },
-                { label: 'Page Size', type: 'custom', render: pageSizeRow },
-                { key: 'template', label: 'HTML Template', type: 'code', language: 'html', minHeight: '260px' }
+                { key: 'password', label: '密码', type: 'password', width: '124px', disabled: (p) => isRtf(p) || !asBool(p.encrypt) },
+                { label: '页面尺寸', type: 'custom', render: pageSizeRow },
+                { key: 'template', label: 'HTML 模板', type: 'code', language: 'html', minHeight: '260px' }
             ] }));
     },
     // Swing DocumentWriter.checkProperties: Directory/File Name required unless Output =
@@ -203,12 +203,12 @@ const documentWriter = {
     // Encrypted = Yes; Page Width/Height must not be blank (numeric/range check skipped).
     validate(properties) {
         return requireFields(properties, [
-            { key: 'host', label: 'Directory', when: writesFile },
-            { key: 'outputPattern', label: 'File Name', when: writesFile },
-            { key: 'template', label: 'HTML Template' },
-            { key: 'password', label: 'Password', when: (p) => asBool(p.encrypt) },
-            { key: 'pageWidth', label: 'Page Width' },
-            { key: 'pageHeight', label: 'Page Height' }
+            { key: 'host', label: '目录', when: writesFile },
+            { key: 'outputPattern', label: '文件名', when: writesFile },
+            { key: 'template', label: 'HTML 模板' },
+            { key: 'password', label: '密码', when: (p) => asBool(p.encrypt) },
+            { key: 'pageWidth', label: '页面宽度' },
+            { key: 'pageHeight', label: '页面高度' }
         ]);
     }
 };

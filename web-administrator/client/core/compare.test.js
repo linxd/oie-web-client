@@ -19,7 +19,7 @@ const ref = (over = {}) => ({
 
 /* ---- stage tables ---- */
 
-ok(stageLabel('PROCESSED_RAW') === 'Processed Raw', 'stageLabel maps to the Swing tab label');
+ok(stageLabel('PROCESSED_RAW') === '处理后原始', 'stageLabel returns the localized caption (YYT build)');
 ok(stageKey('PROCESSED_RAW') === 'processedRaw', 'stageKey maps to the ConnectorMessage field');
 
 /* ---- stored stages come from the message, not the channel config ---- */
@@ -54,7 +54,7 @@ ok(built.dataTypes.RAW === 'HL7V2' && built.dataTypes.ENCODED === 'XML', 'per-st
 ok(!JSON.stringify(built).includes('MSH|'), 'a reference carries no content');
 
 const unnamed = refFromConnectorMessage({ id: 'c1' }, 1, { metaDataId: 2, encoded: { content: 'x' } }, 'ENCODED');
-ok(unnamed.connectorName === 'Connector 2', 'an unnamed destination falls back to its id');
+ok(unnamed.connectorName === '连接器 2', 'an unnamed destination falls back to its id');
 ok(unnamed.channelName === undefined, 'no channel name is captured when none was given');
 
 /* ---- identical-tuple comparison ---- */
@@ -73,8 +73,8 @@ ok(sameMessage(ref(), ref({ messageId: 41208 })) === false, 'a different message
 ok(sameMessage(ref(), ref({ channelId: 'c2' })) === false, 'message 41207 of another channel is NOT the same message');
 ok(sameMessage(ref(), null) === false, 'nothing is the same message as no ref');
 
-ok(describeRef(ref()) === 'Orders In · Msg 41207 · Source · Raw', 'describeRef leads with the channel, and renders the reference only');
-ok(describeRef(ref({ channelName: undefined })) === 'c1 · Msg 41207 · Source · Raw', 'describeRef falls back to the channel id');
+ok(describeRef(ref()) === 'Orders In · 消息 41207 · Source · 原始', 'describeRef leads with the channel, and renders the reference only');
+ok(describeRef(ref({ channelName: undefined })) === 'c1 · 消息 41207 · Source · 原始', 'describeRef falls back to the channel id');
 ok(describeRef(null) === '', 'describeRef of nothing is empty');
 
 /* ---- the state machine ---- */

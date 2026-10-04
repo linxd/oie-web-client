@@ -86,15 +86,15 @@ function normalizeEvents(rows: any) {
 }
 
 function levelTag(level: any) {
-    if (level === 'ERROR') return h('span.tag.red', icon('warning', 11), 'ERROR');
-    if (level === 'WARNING') return h('span.tag.amber', icon('warning', 11), 'WARNING');
+    if (level === 'ERROR') return h('span.tag.red', icon('warning', 11), '错误');
+    if (level === 'WARNING') return h('span.tag.amber', icon('warning', 11), '警告');
     return h('span.tag.blue', icon('info', 11), level || '');
 }
 function outcomeTag(outcome: any) {
     if (outcome === 'SUCCESS') {
-        return h('span.tag', { class: 'text-ok border-[color-mix(in_srgb,var(--ok)_40%,transparent)] bg-[color-mix(in_srgb,var(--ok)_10%,transparent)]' }, icon('check', 11), 'SUCCESS');
+        return h('span.tag', { class: 'text-ok border-[color-mix(in_srgb,var(--ok)_40%,transparent)] bg-[color-mix(in_srgb,var(--ok)_10%,transparent)]' }, icon('check', 11), '成功');
     }
-    if (outcome === 'FAILURE') return h('span.tag.red', icon('x', 11), 'FAILURE');
+    if (outcome === 'FAILURE') return h('span.tag.red', icon('x', 11), '失败');
     return h('span.tag', outcome || '');
 }
 
@@ -117,12 +117,12 @@ function toCount(value: any) {
 }
 
 function shortError(e: any) {
-    let msg = String((e && e.message) || e || 'Unknown error');
+    let msg = String((e && e.message) || e || '未知错误');
     if (msg.includes('<')) msg = msg.replace(/<[^>]*>/g, ' ');
     msg = msg.replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
         .replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
     if (msg.length > 180) msg = msg.slice(0, 180) + '…';
-    if (!msg) msg = 'Unknown error';
+    if (!msg) msg = '未知错误';
     return (e && e.status) ? `${msg} (HTTP ${e.status})` : msg;
 }
 
@@ -135,7 +135,7 @@ function Field({ label, children }: any) {
 /* ---- detail pane ---- */
 
 function EventDetail({ event, username }: any) {
-    if (!event) return <div className="text-text-faint flex-none py-[8px] px-3.5">Select an event to view its details.</div>;
+    if (!event) return <div className="text-text-faint flex-none py-[8px] px-3.5">选择一个事件以查看详情</div>;
     const kv = (label: any, value: any) => (
         <span className="flex items-center gap-[4px]">
             <span className="text-text-faint text-[9.5px] font-[640] tracking-[0.1em] uppercase">{label}</span>
@@ -149,15 +149,15 @@ function EventDetail({ event, username }: any) {
         <>
             <div className="flex flex-wrap items-center gap-[16px] py-2 px-3.5 border-b border-line flex-none">
                 {kv('Id', displayValue(event.id))}
-                {kv('Level', displayValue(event.level))}
-                {kv('Outcome', displayValue(event.outcome))}
-                {kv('User', username(event.userId))}
+                {kv('级别', displayValue(event.level))}
+                {kv('结果', displayValue(event.outcome))}
+                {kv('用户', username(event.userId))}
                 {kv('IP', displayValue(event.ipAddress))}
             </div>
             <div className="flex-1 min-h-0 overflow-auto">
             {attributes.length
                 ? <table className="dt">
-                    <thead><tr><th className="w-[1%]">Name</th><th>Value</th></tr></thead>
+                    <thead><tr><th className="w-[1%]">名称</th><th>值</th></tr></thead>
                     <tbody>{attributes.map(([k, v], i) => (
                         <tr key={i}>
                             <td className="whitespace-nowrap align-top font-semibold">{k}</td>
@@ -165,7 +165,7 @@ function EventDetail({ event, username }: any) {
                         </tr>
                     ))}</tbody>
                 </table>
-                : <div className="text-text-faint py-3 px-3.5">This event has no attributes.</div>}
+                : <div className="text-text-faint py-3 px-3.5">此事件没有属性</div>}
             </div>
         </>
     );
@@ -216,7 +216,7 @@ export function EventsView() {
 
     function username(uid: any) {
         if (uid === null || uid === undefined || uid === '') return '';
-        if (String(uid) === '0') return 'System';   // engine's own (no logged-in user)
+        if (String(uid) === '0') return '系统';   // engine's own (no logged-in user)
         return usernamesRef.current[String(uid)] ?? String(uid);
     }
 
@@ -258,7 +258,7 @@ export function EventsView() {
             total = toCount(count);
         } catch (e: any) {
             if (gen !== searchGenRef.current) return;
-            toast(`Event search failed: ${shortError(e)}`, 'error');
+            toast(`事件搜索失败：${shortError(e)}`, 'error');
         }
         if (gen !== searchGenRef.current) return;   // superseded by a newer search
         setEvents(rows);
@@ -272,13 +272,13 @@ export function EventsView() {
     const search = () => runSearch(buildParams(), 0, Number(pageSize) || 20);
 
     async function exportAllEvents() {
-        if (!await confirmDialog('Export All Events',
-            'Export all events to a file in the exports directory on the server?', { okLabel: 'Export' })) return;
+        if (!await confirmDialog('导出全部事件',
+            '将所有事件导出为服务器 exports 目录下的文件？', { okLabel: '导出' })) return;
         try {
             const path = await api.post('/events/_export', null, { raw: true });
-            toast(`Events exported on the server to: ${String(path || '').trim()}`);
+            toast(`事件已在服务器导出至：${String(path || '').trim()}`);
         } catch (e: any) {
-            toast(`Export failed: ${shortError(e)}`, 'error');
+            toast(`导出失败：${shortError(e)}`, 'error');
         }
     }
 
@@ -286,30 +286,30 @@ export function EventsView() {
     searchRef.current = search;
 
     const COLUMNS = useRef([
-        { key: 'level', label: 'Level', width: '120px', render: (e: any) => levelTag(e.level) },
-        { key: 'eventTime', label: 'Date & Time', width: '160px', className: 'mono', sortValue: (e: any) => fmtDate(e.eventTime), render: (e: any) => fmtDate(e.eventTime) },
-        { key: 'name', label: 'Name' },
-        { key: 'serverId', label: 'Server ID', width: '150px', className: 'mono text-text-faint', render: (e: any) => displayValue(e.serverId) },
-        { key: 'userId', label: 'User', width: '110px', sortValue: (e: any) => username(e.userId), render: (e: any) => username(e.userId) },
-        { key: 'outcome', label: 'Outcome', width: '110px', render: (e: any) => outcomeTag(e.outcome) },
-        { key: 'ipAddress', label: 'IP Address', className: 'mono', width: '130px' },
-        { key: 'channelMsgId', label: 'Channel ID - Message ID', className: 'mono', defaultHidden: true, sortValue: eventChannelIdWithMessageId, render: eventChannelIdWithMessageId },
-        { key: 'channelName', label: 'Channel Name', defaultHidden: true, sortValue: eventChannelName, render: eventChannelName },
-        { key: 'patientId', label: 'Patient ID', defaultHidden: true, sortValue: (e: any) => eventAttr(e, 'patientId'), render: (e: any) => eventAttr(e, 'patientId') }
+        { key: 'level', label: '级别', width: '120px', render: (e: any) => levelTag(e.level) },
+        { key: 'eventTime', label: '日期时间', width: '160px', className: 'mono', sortValue: (e: any) => fmtDate(e.eventTime), render: (e: any) => fmtDate(e.eventTime) },
+        { key: 'name', label: '名称' },
+        { key: 'serverId', label: '服务器 ID', width: '150px', className: 'mono text-text-faint', render: (e: any) => displayValue(e.serverId) },
+        { key: 'userId', label: '用户', width: '110px', sortValue: (e: any) => username(e.userId), render: (e: any) => username(e.userId) },
+        { key: 'outcome', label: '结果', width: '110px', render: (e: any) => outcomeTag(e.outcome) },
+        { key: 'ipAddress', label: 'IP 地址', className: 'mono', width: '130px' },
+        { key: 'channelMsgId', label: '通道 ID - 消息 ID', className: 'mono', defaultHidden: true, sortValue: eventChannelIdWithMessageId, render: eventChannelIdWithMessageId },
+        { key: 'channelName', label: '通道名称', defaultHidden: true, sortValue: eventChannelName, render: eventChannelName },
+        { key: 'patientId', label: '患者 ID', defaultHidden: true, sortValue: (e: any) => eventAttr(e, 'patientId'), render: (e: any) => eventAttr(e, 'patientId') }
     ]).current;
 
     const options = useRef({
         selectable: 'single',
         rowKey: (e: any) => String(e.id),
-        emptyText: 'No events found',
+        emptyText: '未找到事件',
         // Resizable + reorderable + show/hide columns (persisted), like the dashboard.
         columnsKey: 'events',
         onSelect: (rows: any) => setSelected(rows.length ? rows[0] : null),
         onContextMenu: (row: any, ev: any) => {
             setSelected(row);
             contextMenu(ev.clientX, ev.clientY, [
-                { label: 'Refresh', icon: 'refresh', task: 'doRefreshEvents', group: 'event', onClick: () => searchRef.current() },
-                { label: 'Export All Events', icon: 'export', task: 'doExportAllEvents', group: 'event', onClick: () => exportAllEvents() }
+                { label: '刷新', icon: 'refresh', task: 'doRefreshEvents', group: 'event', onClick: () => searchRef.current() },
+                { label: '导出全部事件', icon: 'export', task: 'doExportAllEvents', group: 'event', onClick: () => exportAllEvents() }
             ]);
         }
     }).current;
@@ -354,41 +354,41 @@ export function EventsView() {
     const criteria = (
         <>
                     <div className="form-row">
-                        <Field label="Start Time"><DateTimeField value={start} onChange={setStart} label="Start time" /></Field>
-                        <Field label="End Time"><DateTimeField value={end} onChange={setEnd} label="End time" /></Field>
-                        <Field label="Name"><input type="text" placeholder="Event name contains…" className="w-[171px]" value={name} onChange={(e: any) => setName(e.target.value)} onKeyDown={enterSearch} /></Field>
-                        <Field label="Level">
+                        <Field label="开始时间"><DateTimeField value={start} onChange={setStart} label="开始时间" /></Field>
+                        <Field label="结束时间"><DateTimeField value={end} onChange={setEnd} label="结束时间" /></Field>
+                        <Field label="名称"><input type="text" placeholder="事件名称包含…" className="w-[171px]" value={name} onChange={(e: any) => setName(e.target.value)} onKeyDown={enterSearch} /></Field>
+                        <Field label="级别">
                             <div className="flex items-center gap-2">
                                 {LEVELS.map((l: any) => (
                                     <label key={l} className="check">
                                         <input type="checkbox" checked={(levels as any)[l]} onChange={(e: any) => setLevels((p: any) => ({ ...p, [l]: e.target.checked }))} />
-                                        {l.charAt(0) + l.slice(1).toLowerCase()}
+                                        {l === 'INFORMATION' ? '信息' : l === 'WARNING' ? '警告' : l === 'ERROR' ? '错误' : l}
                                     </label>
                                 ))}
                             </div>
                         </Field>
-                        <Field label="Outcome">
+                        <Field label="结果">
                             <select value={outcome} onChange={(e: any) => setOutcome(e.target.value)}>
-                                <option value="">Any</option>
-                                {OUTCOMES.map((o: any) => <option key={o} value={o}>{o}</option>)}
+                                <option value="">任意</option>
+                                {OUTCOMES.map((o: any) => <option key={o} value={o}>{o === 'SUCCESS' ? '成功' : o === 'FAILURE' ? '失败' : o}</option>)}
                             </select>
                         </Field>
-                        <Field label="Page Size">
+                        <Field label="每页条数">
                             <select value={pageSize} onChange={(e: any) => setPageSize(Number(e.target.value))}>
                                 {[20, 50, 100].map((n: any) => <option key={n} value={n}>{n}</option>)}
                             </select>
                         </Field>
-                        <button className={'btn filter-adv-toggle' + (advancedOpen ? ' btn-primary' : '')} title="Show advanced search criteria"
-                            onClick={() => setAdvancedOpen((o: any) => !o)}><Icon name="filter" />Advanced</button>
-                        <TaskButton label="Search" icon="search" primary onClick={() => { search(); setFiltersOpen(false); }} />
+                        <button className={'btn filter-adv-toggle' + (advancedOpen ? ' btn-primary' : '')} title="显示高级搜索条件"
+                            onClick={() => setAdvancedOpen((o: any) => !o)}><Icon name="filter" />高级</button>
+                        <TaskButton label="搜索" icon="search" primary onClick={() => { search(); setFiltersOpen(false); }} />
                     </div>
                     {/* Always rendered; hidden inline behind the Advanced toggle when wide,
                         but always shown inside the Filters popover (no menu-in-a-menu). */}
                     <div className={'form-row mt-2 filter-advanced' + (advancedOpen ? '' : ' adv-hidden')}>
-                        <Field label="User Id"><input type="number" min="0" className="w-[81px]" value={userId} onChange={(e: any) => setUserId(e.target.value)} onKeyDown={enterSearch} /></Field>
-                        <Field label="IP Address"><input type="text" className="w-[117px]" value={ip} onChange={(e: any) => setIp(e.target.value)} onKeyDown={enterSearch} /></Field>
-                        <Field label="Server Id"><input type="text" className="w-[207px]" value={serverId} onChange={(e: any) => setServerId(e.target.value)} onKeyDown={enterSearch} /></Field>
-                        <Field label="Attribute Search"><input type="text" placeholder="Attribute values contain…" className="w-[171px]" value={attrSearch} onChange={(e: any) => setAttrSearch(e.target.value)} onKeyDown={enterSearch} /></Field>
+                        <Field label="用户 ID"><input type="number" min="0" className="w-[81px]" value={userId} onChange={(e: any) => setUserId(e.target.value)} onKeyDown={enterSearch} /></Field>
+                        <Field label="IP 地址"><input type="text" className="w-[117px]" value={ip} onChange={(e: any) => setIp(e.target.value)} onKeyDown={enterSearch} /></Field>
+                        <Field label="服务器 ID"><input type="text" className="w-[207px]" value={serverId} onChange={(e: any) => setServerId(e.target.value)} onKeyDown={enterSearch} /></Field>
+                        <Field label="属性搜索"><input type="text" placeholder="属性值包含…" className="w-[171px]" value={attrSearch} onChange={(e: any) => setAttrSearch(e.target.value)} onKeyDown={enterSearch} /></Field>
                     </div>
         </>
     );
@@ -396,10 +396,10 @@ export function EventsView() {
     return (
         <div className="view">
             <ViewTasks>
-                <RailPane title="Event Tasks" paneKey="tasks:Event Tasks" group="event">
+                <RailPane title="事件任务" paneKey="tasks:Event Tasks" group="event">
                     <div className="taskbar" data-pane-title="Event Tasks">
-                        <TaskButton label="Search" icon="refresh" onClick={() => search()} />
-                        <TaskButton label="Export All Events" icon="export" task="doExportAllEvents" onClick={exportAllEvents} />
+                        <TaskButton label="搜索" icon="refresh" onClick={() => search()} />
+                        <TaskButton label="导出全部事件" icon="export" task="doExportAllEvents" onClick={exportAllEvents} />
                     </div>
                 </RailPane>
             </ViewTasks>
@@ -411,7 +411,7 @@ export function EventsView() {
                         <Popover.Root open={filtersOpen} onOpenChange={setFiltersOpen}>
                             <Popover.Trigger asChild>
                                 <button className="btn filter-toggle" type="button">
-                                    <Icon name="filter" /><span>Filters</span><Icon name="chevD" size={14} />
+                                    <Icon name="filter" /><span>筛选</span><Icon name="chevD" size={14} />
                                 </button>
                             </Popover.Trigger>
                             <Popover.Portal>
@@ -430,10 +430,10 @@ export function EventsView() {
                 </div>
                 <div className="filterbar panel overflow-visible mx-[13px] mb-3">
                     <button className="btn" disabled={page.offset <= 0}
-                        onClick={() => runSearch(page.params ?? {}, Math.max(0, page.offset - page.limit), page.limit)}>Prev</button>
+                        onClick={() => runSearch(page.params ?? {}, Math.max(0, page.offset - page.limit), page.limit)}>上一页</button>
                     <button className="btn" disabled={page.offset + page.limit >= page.total}
-                        onClick={() => runSearch(page.params ?? {}, page.offset + page.limit, page.limit)}>Next</button>
-                    <span className="counts">{`${fmtNumber(from)}–${fmtNumber(to)} of ${fmtNumber(page.total)}`}</span>
+                        onClick={() => runSearch(page.params ?? {}, page.offset + page.limit, page.limit)}>下一页</button>
+                    <span className="counts">{`${fmtNumber(from)}–${fmtNumber(to)} 共 ${fmtNumber(page.total)}`}</span>
                 </div>
                 <div className="split-handle mx-[13px] my-1" data-orient="v" data-resize="next" />
                 <div ref={detailPaneRef} className="flex-none h-[36px] overflow-hidden flex flex-col panel mx-[13px] mb-3">

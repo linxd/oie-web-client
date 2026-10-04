@@ -32,75 +32,75 @@ const bool = (key: any, label: any, def: any, hint?: any) => ({ key, label, type
 const opt = (key: any, label: any, options: any, def: any, hint?: any) => ({ key, label, type: 'select', options, default: def, hint });
 const code = (key: any, label: any, def: any, hint?: any) => ({ key, label, type: 'code', default: def, hint });
 
-const BATCH_SCRIPT_HINT = 'JavaScript that splits the batch and returns the next message. ' +
-    "Has access to 'reader' (a Java BufferedReader); return null/empty to signal end of input. " +
-    'Only used when Process Batch is enabled in the connector.';
+const BATCH_SCRIPT_HINT = '拆分批处理并返回下一条消息的 JavaScript，' +
+    "可访问 'reader'（Java BufferedReader），返回 null/空 表示输入结束；" +
+    '仅在连接器中启用批处理时使用';
 
 const DEF: any = {
     name: 'HL7V2', label: 'HL7 v2.x', order: 10,
     propertiesClass: `${PKG}.HL7v2DataTypeProperties`,
     groups: [
         {
-            key: 'serializationProperties', label: 'Serialization',
+            key: 'serializationProperties', label: '序列化',
             class: `${PKG}.HL7v2SerializationProperties`,
             fields: [
-                bool('handleRepetitions', 'Parse Field Repetitions', true, 'Parse field repetitions (Non-Strict Parser only).'),
-                bool('handleSubcomponents', 'Parse Subcomponents', true, 'Parse subcomponents (Non-Strict Parser only).'),
-                bool('useStrictParser', 'Use Strict Parser', false, 'Parse messages based upon strict HL7 specifications.'),
-                bool('useStrictValidation', 'Validate in Strict Parser', false, 'Validate messages using HL7 specifications (Strict Parser only).'),
-                bool('stripNamespaces', 'Strip Namespaces', false, 'Strip namespace definitions from the transformed XML message (Strict Parser only).'),
-                text('segmentDelimiter', 'Segment Delimiter', '\\r', 'Input delimiter character(s) expected after each segment.'),
-                bool('convertLineBreaks', 'Convert Line Breaks', true, 'Convert all line break styles (CRLF, CR, LF) in the raw message to the segment delimiter.')
+                bool('handleRepetitions', '解析字段重复', true, '解析字段重复项（仅非严格解析器）'),
+                bool('handleSubcomponents', '解析子组件', true, '解析子组件（仅非严格解析器）'),
+                bool('useStrictParser', '使用严格解析器', false, '按 HL7 严格规范解析消息'),
+                bool('useStrictValidation', '严格解析器中校验', false, '按 HL7 规范校验消息（仅严格解析器）'),
+                bool('stripNamespaces', '去除命名空间', false, '从转换后的 XML 消息中去除命名空间定义（仅严格解析器）'),
+                text('segmentDelimiter', '段分隔符', '\\r', '每段之后期望的输入分隔字符'),
+                bool('convertLineBreaks', '转换换行符', true, '将原始消息中的所有换行风格（CRLF、CR、LF）转换为段分隔符')
             ]
         },
         {
-            key: 'deserializationProperties', label: 'Deserialization',
+            key: 'deserializationProperties', label: '反序列化',
             class: `${PKG}.HL7v2DeserializationProperties`,
             fields: [
-                bool('useStrictParser', 'Use Strict Parser', false, 'Parse messages based upon strict HL7 specifications.'),
-                bool('useStrictValidation', 'Validate in Strict Parser', false, 'Validate messages using HL7 specifications (Strict Parser only).'),
-                text('segmentDelimiter', 'Segment Delimiter', '\\r', 'Delimiter character(s) used after each segment.')
+                bool('useStrictParser', '使用严格解析器', false, '按 HL7 严格规范解析消息'),
+                bool('useStrictValidation', '严格解析器中校验', false, '按 HL7 规范校验消息（仅严格解析器）'),
+                text('segmentDelimiter', '段分隔符', '\\r', '每段之后使用的分隔字符')
             ]
         },
         {
-            key: 'batchProperties', label: 'Batch',
+            key: 'batchProperties', label: '批处理',
             class: `${PKG}.HL7v2BatchProperties`,
             fields: [
-                opt('splitType', 'Split Batch By', [
-                    { value: 'MSH_Segment', label: 'MSH Segment' },
+                opt('splitType', '批处理拆分方式', [
+                    { value: 'MSH_Segment', label: 'MSH 段' },
                     { value: 'JavaScript', label: 'JavaScript' }
-                ], 'MSH_Segment', 'MSH Segment: each MSH segment starts a new message. JavaScript: use a script to split messages.'),
+                ], 'MSH_Segment', 'MSH 段：每个 MSH 段起始一条新消息；JavaScript：使用脚本拆分消息'),
                 code('batchScript', 'JavaScript', null, BATCH_SCRIPT_HINT)
             ]
         },
         {
-            key: 'responseGenerationProperties', label: 'Response Generation',
+            key: 'responseGenerationProperties', label: '响应生成',
             class: `${PKG}.HL7v2ResponseGenerationProperties`,
             fields: [
-                text('segmentDelimiter', 'Segment Delimiter', '\\r', 'Delimiter character(s) used after each segment of the generated ACK.'),
-                text('successfulACKCode', 'Successful ACK Code', 'AA'),
-                text('successfulACKMessage', 'Successful ACK Message', null),
-                text('errorACKCode', 'Error ACK Code', 'AE'),
-                text('errorACKMessage', 'Error ACK Message', 'An Error Occurred Processing Message.'),
-                text('rejectedACKCode', 'Rejected ACK Code', 'AR'),
-                text('rejectedACKMessage', 'Rejected ACK Message', 'Message Rejected.'),
-                bool('msh15ACKAccept', 'MSH-15 ACK Accept', false, 'Check the MSH-15 field of an incoming message to control the acknowledgment conditions.'),
-                text('dateFormat', 'Date Format', 'yyyyMMddHHmmss.SSS', 'Date format used for the timestamp in the generated ACK.')
+                text('segmentDelimiter', '段分隔符', '\\r', '生成的 ACK 中每段之后使用的分隔字符'),
+                text('successfulACKCode', '成功 ACK 代码', 'AA'),
+                text('successfulACKMessage', '成功 ACK 消息', null),
+                text('errorACKCode', '错误 ACK 代码', 'AE'),
+                text('errorACKMessage', '错误 ACK 消息', 'An Error Occurred Processing Message.'),
+                text('rejectedACKCode', '拒绝 ACK 代码', 'AR'),
+                text('rejectedACKMessage', '拒绝 ACK 消息', 'Message Rejected.'),
+                bool('msh15ACKAccept', 'MSH-15 ACK 接受', false, '检查传入消息的 MSH-15 字段以控制确认条件'),
+                text('dateFormat', '日期格式', 'yyyyMMddHHmmss.SSS', '生成的 ACK 中时间戳使用的日期格式')
             ]
         },
         {
-            key: 'responseValidationProperties', label: 'Response Validation',
+            key: 'responseValidationProperties', label: '响应校验',
             class: `${PKG}.HL7v2ResponseValidationProperties`,
             fields: [
-                text('successfulACKCode', 'Successful ACK Codes', 'AA,CA', 'ACK code(s) expected when the message is accepted (comma separated). Message status is set to SENT.'),
-                text('errorACKCode', 'Error ACK Codes', 'AE,CE', 'ACK code(s) expected when an error occurs downstream (comma separated). Message status is set to ERROR.'),
-                text('rejectedACKCode', 'Rejected ACK Codes', 'AR,CR', 'ACK code(s) expected when the message is rejected (comma separated). Message status is set to ERROR.'),
-                bool('validateMessageControlId', 'Validate Message Control Id', true, 'Validate the Message Control Id (MSA-2) returned from the response.'),
-                opt('originalMessageControlId', 'Original Message Control Id', [
-                    { value: 'Destination_Encoded', label: 'Destination Encoded' },
-                    { value: 'Map_Variable', label: 'Map Variable' }
-                ], 'Destination_Encoded', 'Source of the original Message Control Id used to validate the response.'),
-                text('originalIdMapVariable', 'Original Id Map Variable', null, 'Required when Original Message Control Id is Map Variable; the Id is read from the connector or channel map.')
+                text('successfulACKCode', '成功 ACK 代码', 'AA,CA', '消息被接受时期望的 ACK 代码（逗号分隔），消息状态置为 SENT'),
+                text('errorACKCode', '错误 ACK 代码', 'AE,CE', '下游发生错误时期望的 ACK 代码（逗号分隔），消息状态置为 ERROR'),
+                text('rejectedACKCode', '拒绝 ACK 代码', 'AR,CR', '消息被拒绝时期望的 ACK 代码（逗号分隔），消息状态置为 ERROR'),
+                bool('validateMessageControlId', '校验消息控制 ID', true, '校验响应返回的消息控制 ID（MSA-2）'),
+                opt('originalMessageControlId', '原消息控制 ID', [
+                    { value: 'Destination_Encoded', label: '目的地编码值' },
+                    { value: 'Map_Variable', label: '映射变量' }
+                ], 'Destination_Encoded', '校验响应时用于获取原消息控制 ID 的来源'),
+                text('originalIdMapVariable', '原 ID 映射变量', null, '当原消息控制 ID 选择映射变量时必填，ID 从连接器或通道映射中读取')
             ]
         }
     ]

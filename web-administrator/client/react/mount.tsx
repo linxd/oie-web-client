@@ -46,7 +46,7 @@ export function reactView(Component: any) {
         flushSync(() => root.render(
             <QueryClientProvider client={queryClient}>
                 <TasksHostContext.Provider value={reactTasksHostEl}>
-                    <ErrorBoundary label="This view failed to render">
+                    <ErrorBoundary label="该视图渲染失败">
                         <Component params={params} query={query} />
                     </ErrorBoundary>
                 </TasksHostContext.Provider>
@@ -66,7 +66,7 @@ export function reactView(Component: any) {
 // `label` names the island in the fallback and in the console line — pass the
 // panel/tab it hosts when the caller knows it, since these roots are usually
 // plugin code and the report is what identifies whose.
-export function mountReact(hostEl: any, element: any, { label = 'This panel failed to render' }: any = {}) {
+export function mountReact(hostEl: any, element: any, { label = '该面板渲染失败' }: any = {}) {
     const root = createRoot(hostEl);
     flushSync(() => root.render(
         <QueryClientProvider client={queryClient}>
@@ -95,12 +95,12 @@ export function ViewTasks({ children }: any) {
     if (!host) return null;
     if (collapsed) {
         return createPortal(
-            <CollapsedSideStrip label="Tasks" icon="chevR" onExpand={() => setCollapsed(false)} />,
+            <CollapsedSideStrip label="任务" icon="chevR" onExpand={() => setCollapsed(false)} />,
             host);
     }
     const hideBtn = (
         <button type="button" className="icon-btn tasks-collapse-btn"
-            title="Hide the task pane" aria-label="Hide the task pane" aria-expanded="true"
+            title="隐藏任务面板" aria-label="隐藏任务面板" aria-expanded="true"
             onClick={() => setCollapsed(true)}>
             <Icon name="chevL" size={12} />
         </button>

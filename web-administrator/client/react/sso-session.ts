@@ -80,4 +80,4 @@ export function isSsoSelf(user: any, me: any): boolean {
 }
 
 /** Shown wherever a password control is greyed out instead of removed. */
-export const SSO_MANAGED_NOTE = 'Your password is managed by your identity provider.';
+export const SSO_MANAGED_NOTE = '您的密码由身份提供商管理';

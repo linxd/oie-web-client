@@ -33,14 +33,14 @@ export function codeTemplateFromXml(el: Element, version: string): any {
 
 function saveError(result: any): string {
     if (String(result?.librariesSuccess) !== 'true') {
-        return result?.librariesCause?.detailMessage || 'The library set could not be saved';
+        return result?.librariesCause?.detailMessage || '库集合保存失败';
     }
     let failure = '';
     const scan = (value: any) => {
         if (!value || failure) return;
         if (Array.isArray(value)) return value.forEach(scan);
         if (typeof value !== 'object') return;
-        if (String(value.success) === 'false') failure = value.cause?.detailMessage || 'A code template could not be saved';
+        if (String(value.success) === 'false') failure = value.cause?.detailMessage || '代码模板保存失败';
         else Object.values(value).forEach(scan);
     };
     scan(result.codeTemplateResults);
@@ -52,9 +52,9 @@ export async function bulkUpdateWithConflict(
 ): Promise<boolean> {
     let result = await api.codeTemplates.bulkUpdate(libraries, templates, removedLibraryIds, removedTemplateIds, false);
     if (String(result?.overrideNeeded) === 'true') {
-        const overwrite = await confirmDialog('Code Templates Modified',
-            'Code templates or libraries changed while the import was being prepared. Overwrite those changes?',
-            { danger: true, okLabel: 'Overwrite' });
+        const overwrite = await confirmDialog('代码模板已修改',
+            '导入准备期间代码模板或库已发生变化。要覆盖这些更改吗？',
+            { danger: true, okLabel: '覆盖' });
         if (!overwrite) return false;
         result = await api.codeTemplates.bulkUpdate(libraries, templates, removedLibraryIds, removedTemplateIds, true);
     }

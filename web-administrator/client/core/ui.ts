@@ -248,8 +248,8 @@ function domCornerToast(message: string, type: ToastType, timeout: number): UiHa
 export function toast(message: any, type: ToastType = 'info', timeout = 4200): UiHandle {
     if (type === 'error' || type === 'warn') {
         return detailModal({
-            title: type === 'error' ? 'Error' : 'Warning',
-            badge: { text: type === 'error' ? 'Error' : 'Warning', tone: type === 'error' ? 'err' : 'warn' },
+            title: type === 'error' ? '错误' : '警告',
+            badge: { text: type === 'error' ? '错误' : '警告', tone: type === 'error' ? 'err' : 'warn' },
             sections: [{ text: String(message) }]
         });
     }
@@ -293,7 +293,7 @@ function domModal({ title, body, buttons = [], size = '', onClose, label }: Moda
     const titleId = 'modal-title-' + (++modalSeq);
     let closed = false;
     let pending = false;
-    const pendingStatus = h('div', { role: 'status', hidden: true }, 'Working…');
+    const pendingStatus = h('div', { role: 'status', hidden: true }, '正在处理…');
 
     const close = () => {
         if (closed) return;                       // idempotent: overlay click + button can race
@@ -315,7 +315,7 @@ function domModal({ title, body, buttons = [], size = '', onClose, label }: Moda
         ...(label ? { 'aria-label': label } : { 'aria-labelledby': titleId })
     },
         h('div.modal-header', h('span', { id: titleId }, title),
-            h('button.icon-btn', { onClick: requestClose, title: 'Close', 'aria-label': 'Close' }, icon('x'))),
+            h('button.icon-btn', { onClick: requestClose, title: '关闭', 'aria-label': '关闭' }, icon('x'))),
         h('div.modal-body', body),
         pendingStatus,
         buttons.length ? h('div.modal-foot', buttons.map(btn =>
@@ -401,14 +401,14 @@ function syncAppHidden(): void {
     else app.removeAttribute('aria-hidden');
 }
 
-export function confirmDialog(title: string, message: unknown, { danger = false, okLabel = 'OK' }: { danger?: boolean; okLabel?: string } = {}): Promise<boolean> {
+export function confirmDialog(title: string, message: unknown, { danger = false, okLabel = '确定' }: { danger?: boolean; okLabel?: string } = {}): Promise<boolean> {
     return new Promise<boolean>(resolve => {
         modal({
             title,
             body: h('div', String(message)),
             onClose: () => resolve(false),
             buttons: [
-                { label: 'Cancel', onClick: () => { resolve(false); } },
+                { label: '取消', onClick: () => { resolve(false); } },
                 { label: okLabel, primary: !danger, danger, onClick: () => { resolve(true); } }
             ]
         });
@@ -423,8 +423,8 @@ export function promptDialog(title: string, label: string, initial = ''): Promis
             body: h('div.field', h('label', label), input),
             onClose: () => resolve(null),
             buttons: [
-                { label: 'Cancel', onClick: () => { resolve(null); } },
-                { label: 'OK', primary: true, onClick: () => { resolve(input.value); } }
+                { label: '取消', onClick: () => { resolve(null); } },
+                { label: '确定', primary: true, onClick: () => { resolve(input.value); } }
             ]
         });
         input.addEventListener('keydown', (e: KeyboardEvent) => {
@@ -443,11 +443,11 @@ async function copyToClipboard(text: unknown): Promise<void> {
     try {
         if (navigator.clipboard && navigator.clipboard.writeText) {
             await navigator.clipboard.writeText(String(text));
-            toast('Copied to clipboard');
+            toast('已复制到剪贴板');
             return;
         }
     } catch { /* fall through to the unavailable notice */ }
-    toast('Clipboard unavailable', 'warn');
+    toast('无法访问剪贴板', 'warn');
 }
 
 const DETAIL_TONE: Record<string, string> = { err: 'var(--err)', warn: 'var(--warn)', ok: 'var(--ok)', info: 'var(--accent)' };
@@ -494,8 +494,8 @@ export function detailModal({ title, badge, meta, sections = [], copy }: DetailM
                 h('pre', { class: preClass }, String(s.text ?? ''))
             ])),
         buttons: [
-            { label: 'Copy', onClick: () => { copyToClipboard(copyText); return false; } },
-            { label: 'Close', primary: true }
+            { label: '复制', onClick: () => { copyToClipboard(copyText); return false; } },
+            { label: '关闭', primary: true }
         ]
     });
 }
@@ -506,9 +506,9 @@ export function detailModal({ title, badge, meta, sections = [], copy }: DetailM
 export function errorModal(title: string, error: any, meta?: unknown): ModalHandle {
     return detailModal({
         title,
-        badge: { text: 'Error', tone: 'err' },
+        badge: { text: '错误', tone: 'err' },
         meta,
-        sections: [{ label: 'Message', text: (error && error.message) || String(error) }]
+        sections: [{ label: '消息', text: (error && error.message) || String(error) }]
     });
 }
 
@@ -674,7 +674,7 @@ export function closeContextMenu({ restore = true }: { restore?: boolean } = {})
 
 /* ---- tabs ----------------------------------------------------------------------------------- */
 
-export function tabs(defs: TabDef[], { onChange, active = 0, label = 'Tabs' }: { onChange?: (index: number, def: TabDef) => void; active?: number; label?: string } = {}): TabsHandle {
+export function tabs(defs: TabDef[], { onChange, active = 0, label = '标签页' }: { onChange?: (index: number, def: TabDef) => void; active?: number; label?: string } = {}): TabsHandle {
     // role=tablist + roving tabindex, matching react/ui.jsx useTabList: one tab
     // stop for the strip, arrows move and select (the APG default for tabs).
     const bar = h('div.tabs', { role: 'tablist', 'aria-label': label });
@@ -793,7 +793,7 @@ export class DataTable<T = any> {
                 this.render();
             }
         }));
-        items.push('-', { label: 'Restore Default', onClick: () => { this.hidden = new Set(this.defaultHidden); this.saveHidden(); this.render(); } });
+        items.push('-', { label: '恢复默认', onClick: () => { this.hidden = new Set(this.defaultHidden); this.saveHidden(); this.render(); } });
         contextMenu(e.clientX, e.clientY, items);
     }
 
@@ -832,7 +832,7 @@ export class DataTable<T = any> {
         if (!this.rows.length) {
             this.el.appendChild(h('div.dt-empty',
                 h('div.empty-icon', icon('search', 30)),
-                h('div', options.emptyText || 'Nothing to display')));
+                h('div', options.emptyText || '暂无数据')));
             return;
         }
 
@@ -1038,7 +1038,7 @@ export async function saveFile(suggestedName: string, type: string, getContent: 
         try {
             handle = await (window as any).showSaveFilePicker({
                 suggestedName,
-                types: ext ? [{ description: 'File', accept: { [type || 'application/octet-stream']: [ext] } }] : undefined
+                types: ext ? [{ description: '文件', accept: { [type || 'application/octet-stream']: [ext] } }] : undefined
             });
         } catch (e) {
             if (e && (e as { name?: string }).name === 'AbortError') return;   // user cancelled the dialog
@@ -1084,7 +1084,7 @@ export function pickFile(accept?: string, { binary = false }: { binary?: boolean
                 name: file.name,
                 content: binary ? (String(reader.result).split(',')[1] || '') : (reader.result as string)
             });
-            reader.onerror = () => reject(reader.error || new Error('The selected file could not be read.'));
+            reader.onerror = () => reject(reader.error || new Error('无法读取所选文件。'));
             reader.onabort = () => resolve(null);
             try { if (binary) reader.readAsDataURL(file); else reader.readAsText(file); }
             catch (error) { reject(error); }
@@ -1094,6 +1094,6 @@ export function pickFile(accept?: string, { binary = false }: { binary?: boolean
     });
 }
 
-export function loading(text = 'Loading…'): HTMLElement {
+export function loading(text = '加载中…'): HTMLElement {
     return h('div.loading-block', h('div.spinner'), text);
 }

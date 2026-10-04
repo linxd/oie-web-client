@@ -37,11 +37,11 @@ import { libraryImportCallbacks } from './code-template-import-dialogs.js';
 
 
 const CT_COLUMNS = [
-    { key: 'name', label: 'Name' },
-    { key: 'id', label: 'Id' },
-    { key: 'description', label: 'Description' },
-    { key: 'revision', label: 'Revision', align: 'right' },
-    { key: 'lastModified', label: 'Last Modified' }
+    { key: 'name', label: '名称' },
+    { key: 'id', label: 'ID' },
+    { key: 'description', label: '描述' },
+    { key: 'revision', label: '修订版本', align: 'right' },
+    { key: 'lastModified', label: '上次修改' }
 ];
 const CT_COL_WIDTHS = { name: 300, id: 280, description: 260, revision: 80, lastModified: 150 };
 
@@ -49,37 +49,47 @@ const PROPERTIES_CLASS = 'com.mirth.connect.model.codetemplates.BasicCodeTemplat
 
 /* CodeTemplateProperties.CodeTemplateType (XStream serializes enum names) */
 const TEMPLATE_TYPES = [
-    { value: 'FUNCTION', label: 'Function' },
-    { value: 'DRAG_AND_DROP_CODE', label: 'Drag-and-Drop Code Block' },
-    { value: 'COMPILED_CODE', label: 'Compiled Code Block' }
+    { value: 'FUNCTION', label: '函数' },
+    { value: 'DRAG_AND_DROP_CODE', label: '拖放代码块' },
+    { value: 'COMPILED_CODE', label: '已编译代码块' }
 ];
 
-/* ContextType enum, grouped the way the Swing context tree presents it */
+/* ContextType enum, grouped the way the Swing context tree presents it.
+   The group `label` values are identifiers compared by CONNECTOR_CONTEXTS
+   below, so only their display captions are localized. */
 const CONTEXT_GROUPS = [
     { label: 'Global Scripts', types: [
-        ['GLOBAL_DEPLOY', 'Deploy Script'],
-        ['GLOBAL_UNDEPLOY', 'Undeploy Script'],
-        ['GLOBAL_PREPROCESSOR', 'Preprocessor Script'],
-        ['GLOBAL_POSTPROCESSOR', 'Postprocessor Script']
+        ['GLOBAL_DEPLOY', '部署脚本'],
+        ['GLOBAL_UNDEPLOY', '取消部署脚本'],
+        ['GLOBAL_PREPROCESSOR', '预处理器脚本'],
+        ['GLOBAL_POSTPROCESSOR', '后处理器脚本']
     ] },
     { label: 'Channel Scripts', types: [
-        ['CHANNEL_DEPLOY', 'Deploy Script'],
-        ['CHANNEL_UNDEPLOY', 'Undeploy Script'],
-        ['CHANNEL_PREPROCESSOR', 'Preprocessor Script'],
-        ['CHANNEL_POSTPROCESSOR', 'Postprocessor Script'],
-        ['CHANNEL_ATTACHMENT', 'Attachment Script'],
-        ['CHANNEL_BATCH', 'Batch Script']
+        ['CHANNEL_DEPLOY', '部署脚本'],
+        ['CHANNEL_UNDEPLOY', '取消部署脚本'],
+        ['CHANNEL_PREPROCESSOR', '预处理器脚本'],
+        ['CHANNEL_POSTPROCESSOR', '后处理器脚本'],
+        ['CHANNEL_ATTACHMENT', '附件脚本'],
+        ['CHANNEL_BATCH', '批处理脚本']
     ] },
     { label: 'Source Connector', types: [
-        ['SOURCE_RECEIVER', 'Receiver Script(s)'],
-        ['SOURCE_FILTER_TRANSFORMER', 'Filter / Transformer Script']
+        ['SOURCE_RECEIVER', '接收器脚本'],
+        ['SOURCE_FILTER_TRANSFORMER', '过滤器 / 转换器脚本']
     ] },
     { label: 'Destination Connector', types: [
-        ['DESTINATION_FILTER_TRANSFORMER', 'Filter / Transformer Script'],
-        ['DESTINATION_DISPATCHER', 'Dispatcher Script'],
-        ['DESTINATION_RESPONSE_TRANSFORMER', 'Response Transformer Script']
+        ['DESTINATION_FILTER_TRANSFORMER', '过滤器 / 转换器脚本'],
+        ['DESTINATION_DISPATCHER', '分发器脚本'],
+        ['DESTINATION_RESPONSE_TRANSFORMER', '响应转换器脚本']
     ] }
 ];
+
+/* Display-only captions for the context group identifiers above. */
+const CONTEXT_GROUP_LABEL: Record<string, string> = {
+    'Global Scripts': '全局脚本',
+    'Channel Scripts': '通道脚本',
+    'Source Connector': '源连接器',
+    'Destination Connector': '目的地连接器'
+};
 
 const ALL_CONTEXTS = CONTEXT_GROUPS.flatMap(g => g.types.map(t => t[0]));
 
@@ -136,14 +146,14 @@ function templateDescription(template: any) {
 
 function bulkSaveError(result: any): string {
     if (String(result?.librariesSuccess) !== 'true') {
-        return result?.librariesCause?.detailMessage || 'The library set could not be saved';
+        return result?.librariesCause?.detailMessage || '无法保存该库集合';
     }
     let failure = '';
     const scan = (value: any) => {
         if (!value || failure) return;
         if (Array.isArray(value)) return value.forEach(scan);
         if (typeof value !== 'object') return;
-        if (String(value.success) === 'false') failure = value.cause?.detailMessage || 'A code template could not be saved';
+        if (String(value.success) === 'false') failure = value.cause?.detailMessage || '无法保存某个代码模板';
         else Object.values(value).forEach(scan);
     };
     scan(result.codeTemplateResults);
@@ -233,7 +243,7 @@ export function CodeTemplatesView() {
             markClean();
             setSelected((prev: any) => (prev && resolve(prev, next) ? prev : null));
         } catch (e: any) {
-            toast(`Load failed: ${e.message}`, 'error');
+            toast(`加载失败：${e.message}`, 'error');
         }
     }
 
@@ -253,8 +263,8 @@ export function CodeTemplatesView() {
             render: (n: any) => {
                 switch (c.key) {
                     case 'name': return n.kind === 'library'
-                        ? <TreeLabel icon="folder" label={n.lib.name || '(unnamed library)'} />
-                        : <TreeLabel icon="file" label={n.tpl.name || '(unnamed template)'} />;
+                        ? <TreeLabel icon="folder" label={n.lib.name || '（未命名库）'} />
+                        : <TreeLabel icon="file" label={n.tpl.name || '（未命名代码模板）'} />;
                     case 'id': return n.kind === 'library' ? (n.lib.id || '') : (n.tpl.id || '');
                     case 'description': return n.kind === 'library' ? (n.lib.description || '') : templateDescription(n.tpl);
                     case 'revision': return String((n.kind === 'library' ? n.lib.revision : n.tpl.revision) ?? '');
@@ -284,14 +294,14 @@ export function CodeTemplatesView() {
         e.preventDefault();
         const found = resolve(selected);
         contextMenu(e.clientX, e.clientY, [
-            { label: 'Refresh', icon: 'refresh', task: 'doRefreshCodeTemplates', group: 'codeTemplate', onClick: () => load() },
+            { label: '刷新', icon: 'refresh', task: 'doRefreshCodeTemplates', group: 'codeTemplate', onClick: () => load() },
             '-',
-            { label: 'New Code Template', icon: 'plus', task: 'doNewCodeTemplate', group: 'codeTemplate', onClick: () => newTemplate(found && found.entry) },
-            { label: 'New Library', icon: 'folder', task: 'doNewLibrary', group: 'codeTemplate', onClick: () => newLibrary() },
+            { label: '新建代码模板', icon: 'plus', task: 'doNewCodeTemplate', group: 'codeTemplate', onClick: () => newTemplate(found && found.entry) },
+            { label: '新建库', icon: 'folder', task: 'doNewLibrary', group: 'codeTemplate', onClick: () => newLibrary() },
             '-',
-            { label: 'Import Code Templates', icon: 'import', task: 'doImportCodeTemplates', group: 'codeTemplate', onClick: () => importCodeTemplates(found && found.entry) },
-            { label: 'Import Libraries', icon: 'import', task: 'doImportLibraries', group: 'codeTemplate', onClick: () => importLibraries() },
-            { label: 'Export All Libraries', icon: 'export', task: 'doExportAllLibraries', group: 'codeTemplate', onClick: () => exportLibraries() }
+            { label: '导入代码模板', icon: 'import', task: 'doImportCodeTemplates', group: 'codeTemplate', onClick: () => importCodeTemplates(found && found.entry) },
+            { label: '导入库', icon: 'import', task: 'doImportLibraries', group: 'codeTemplate', onClick: () => importLibraries() },
+            { label: '导出全部库', icon: 'export', task: 'doExportAllLibraries', group: 'codeTemplate', onClick: () => exportLibraries() }
         ]);
     }
 
@@ -315,22 +325,22 @@ export function CodeTemplatesView() {
                 onClick: () => a.onInvoke((resolved as any).template, actionCtx)
             }));
         contextMenu(e.clientX, e.clientY, [
-            { label: 'Refresh', icon: 'refresh', task: 'doRefreshCodeTemplates', group: 'codeTemplate', onClick: () => load() },
+            { label: '刷新', icon: 'refresh', task: 'doRefreshCodeTemplates', group: 'codeTemplate', onClick: () => load() },
             '-',
-            { label: 'New Code Template', icon: 'plus', task: 'doNewCodeTemplate', group: 'codeTemplate', onClick: () => newTemplate((resolved as any).entry) },
-            { label: 'New Library', icon: 'folder', task: 'doNewLibrary', group: 'codeTemplate', onClick: () => newLibrary() },
+            { label: '新建代码模板', icon: 'plus', task: 'doNewCodeTemplate', group: 'codeTemplate', onClick: () => newTemplate((resolved as any).entry) },
+            { label: '新建库', icon: 'folder', task: 'doNewLibrary', group: 'codeTemplate', onClick: () => newLibrary() },
             '-',
-            { label: 'Import Code Templates', icon: 'import', task: 'doImportCodeTemplates', group: 'codeTemplate', onClick: () => importCodeTemplates((resolved as any).entry) },
-            { label: 'Import Libraries', icon: 'import', task: 'doImportLibraries', group: 'codeTemplate', onClick: () => importLibraries() },
-            { label: 'Export Code Template', icon: 'export', hidden: !isTpl, task: 'doExportCodeTemplate', group: 'codeTemplate', onClick: () => exportTemplate(resolved) },
-            { label: 'Export Library', icon: 'export', hidden: !isLib, task: 'doExportLibrary', group: 'codeTemplate', onClick: () => exportLibrary(resolved) },
-            { label: 'Export All Libraries', icon: 'export', task: 'doExportAllLibraries', group: 'codeTemplate', onClick: () => exportLibraries() },
+            { label: '导入代码模板', icon: 'import', task: 'doImportCodeTemplates', group: 'codeTemplate', onClick: () => importCodeTemplates((resolved as any).entry) },
+            { label: '导入库', icon: 'import', task: 'doImportLibraries', group: 'codeTemplate', onClick: () => importLibraries() },
+            { label: '导出代码模板', icon: 'export', hidden: !isTpl, task: 'doExportCodeTemplate', group: 'codeTemplate', onClick: () => exportTemplate(resolved) },
+            { label: '导出库', icon: 'export', hidden: !isLib, task: 'doExportLibrary', group: 'codeTemplate', onClick: () => exportLibrary(resolved) },
+            { label: '导出全部库', icon: 'export', task: 'doExportAllLibraries', group: 'codeTemplate', onClick: () => exportLibraries() },
             '-',
-            { label: 'Validate Script', icon: 'check', hidden: !isTpl, task: 'doValidateCodeTemplate', group: 'codeTemplate', onClick: () => validateScriptTask(resolved) },
+            { label: '校验脚本', icon: 'check', hidden: !isTpl, task: 'doValidateCodeTemplate', group: 'codeTemplate', onClick: () => validateScriptTask(resolved) },
             ...(pluginItems.length ? ['-', ...pluginItems] : []),
-            { label: 'Delete', icon: 'trash', danger: true, task: isTpl ? 'doDeleteCodeTemplate' : 'doDeleteLibrary', group: 'codeTemplate', onClick: () => deleteSelected(sel) },
+            { label: '删除', icon: 'trash', danger: true, task: isTpl ? 'doDeleteCodeTemplate' : 'doDeleteLibrary', group: 'codeTemplate', onClick: () => deleteSelected(sel) },
             '-',
-            { label: 'Save All', icon: 'save', task: 'doSaveCodeTemplates', group: 'codeTemplate', onClick: () => saveAll() }
+            { label: '全部保存', icon: 'save', task: 'doSaveCodeTemplates', group: 'codeTemplate', onClick: () => saveAll() }
         ]);
     }
 
@@ -367,7 +377,7 @@ export function CodeTemplatesView() {
         // list (pushing onto it would silently never reach saveAll).
         const entry = entryArg && entriesNowRef.current.find(en => en.library.id === entryArg.library.id);
         if (!entry) {
-            toast('Select a library first', 'warn');
+            toast('请先选择一个库', 'warn');
             return;
         }
         const v = store.getState('serverVersion') || '4.5.2';
@@ -393,28 +403,28 @@ export function CodeTemplatesView() {
        no-ops, letting a later Save All resurrect the engine-deleted templates. */
     async function deleteSelected(sel: any) {
         let found = resolve(sel, entriesNowRef.current);
-        if (!sel || !found) { toast('Select a library or code template first', 'warn'); return; }
+        if (!sel || !found) { toast('请先选择库或代码模板', 'warn'); return; }
 
         if (sel.kind === 'library') {
             const count = found.entry.templates.length;
             const message = count
-                ? `Delete library "${found.entry.library.name}" and its ${count} code template(s)? Save All commits the removal.`
-                : `Delete library "${found.entry.library.name}"? Save All commits the removal.`;
-            if (!await confirmDialog('Delete Library', message, { danger: true, okLabel: 'Delete' })) return;
+                ? `确定要删除库“${found.entry.library.name}”及其 ${count} 个代码模板吗？全部保存后才会提交删除`
+                : `确定要删除库“${found.entry.library.name}”吗？全部保存后才会提交删除`;
+            if (!await confirmDialog('删除库', message, { danger: true, okLabel: '删除' })) return;
             found = resolve(sel, entriesNowRef.current);
-            if (!found) { toast('The library no longer exists (the list was reloaded)', 'warn'); return; }
+            if (!found) { toast('该库已不存在（列表已重新加载）', 'warn'); return; }
             const entry = found.entry;
             setEntries(prev => prev.filter(en => en !== entry));
         } else {
-            if (!await confirmDialog('Delete Code Template', `Delete code template "${found.template.name}"?`, { danger: true, okLabel: 'Delete' })) return;
+            if (!await confirmDialog('删除代码模板', `确定要删除代码模板“${found.template.name}”吗？`, { danger: true, okLabel: '删除' })) return;
             found = resolve(sel, entriesNowRef.current);
-            if (!found) { toast('The code template no longer exists (the list was reloaded)', 'warn'); return; }
+            if (!found) { toast('该代码模板已不存在（列表已重新加载）', 'warn'); return; }
             found.entry.templates = found.entry.templates.filter((t: any) => t !== found!.template!);
         }
         invalidateCompletions();   // deleted templates no longer autocomplete
         setSelected(null);
         markDirty();
-        toast('Deleted — use Save All to commit library changes');
+        toast('已删除 — 使用全部保存提交库更改');
     }
 
     function saveAll() { return withEditorSave(() => saveAllUnlocked()); }
@@ -427,12 +437,12 @@ export function CodeTemplatesView() {
         // as a conflict on every save). A "false" response means someone else saved since
         // this view loaded — prompt once, then retry everything with override=true.
         const conflict = async (): Promise<any> => {
-            const overwrite = await confirmDialog('Code Templates Modified',
-                'One or more code templates or libraries have been modified since you opened them. Are you sure you want to overwrite them with your changes?',
-                { danger: true, okLabel: 'Overwrite' });
+            const overwrite = await confirmDialog('代码模板已被修改',
+                '您打开的一个或多个代码模板或库已被他人修改，确定要用您的更改覆盖它们吗？',
+                { danger: true, okLabel: '覆盖' });
             assertSession();
             if (overwrite) return saveAllUnlocked(true, assertSession);
-            toast('Save cancelled — Refresh to load the latest code templates', 'warn');
+            toast('已取消保存 — 请刷新以加载最新的代码模板', 'warn');
         };
         try {
             const v = store.getState('serverVersion') || '4.5.2';
@@ -510,17 +520,17 @@ export function CodeTemplatesView() {
                     persistedTemplatesRef.current = persistedTemplates;
                     invalidateCompletions();
                     setEntries(prev => prev.slice());
-                    toast(`Save partially failed: ${failure}`, 'error');
+                    toast(`保存部分失败：${failure}`, 'error');
                     return;
                 }
                 throw new Error(failure);
             }
             invalidateCompletions();   // script editors refetch the new scope on next focus
-            toast('Code templates saved');
+            toast('代码模板已保存');
             await load();
         } catch (e: any) {
             try { assertSession(); } catch { return; }
-            toast(`Save failed: ${e.message}`, 'error');
+            toast(`保存失败：${e.message}`, 'error');
         }
     }
 
@@ -535,7 +545,7 @@ export function CodeTemplatesView() {
             assertSession();
         } catch (e: any) {
             try { assertSession(); } catch { return; }
-            toast(`Export failed: ${e.message}`, 'error');
+            toast(`导出失败：${e.message}`, 'error');
         }
     }
 
@@ -543,20 +553,20 @@ export function CodeTemplatesView() {
         let assertSession: () => void;
         try { assertSession = captureEngineSession(); } catch { return; }
         if (!found || !found.entry || found.template) {
-            toast('Select a library first', 'warn');
+            toast('请先选择一个库', 'warn');
             return;
         }
         const { library } = found.entry;
         try {
             await saveFile(`${library.name || library.id}.xml`, 'application/xml', async () => {
                 const xml = await api.getXml(`/codeTemplateLibraries/${encodeURIComponent(library.id)}`, { includeCodeTemplates: true });
-                if (!xml || !String(xml).trim()) throw new Error('Library not found on the server — save it first');
+                if (!xml || !String(xml).trim()) throw new Error('服务端未找到该库 — 请先保存');
                 return xml;
             }, assertSession);
             assertSession();
         } catch (e: any) {
             try { assertSession(); } catch { return; }
-            toast(`Export failed: ${e.message}`, 'error');
+            toast(`导出失败：${e.message}`, 'error');
         }
     }
 
@@ -564,19 +574,19 @@ export function CodeTemplatesView() {
         let assertSession: () => void;
         try { assertSession = captureEngineSession(); } catch { return; }
         if (!found || !found.template) {
-            toast('Select a code template first', 'warn');
+            toast('请先选择一个代码模板', 'warn');
             return;
         }
         try {
             await saveFile(`${found.template.name || found.template.id}.xml`, 'application/xml', async () => {
                 const xml = await api.getXml(`/codeTemplates/${found.template.id}`);
-                if (!xml || !String(xml).trim()) throw new Error('Template not found on the server — save it first');
+                if (!xml || !String(xml).trim()) throw new Error('服务端未找到该代码模板 — 请先保存');
                 return xml;
             }, assertSession);
             assertSession();
         } catch (e: any) {
             try { assertSession(); } catch { return; }
-            toast(`Export failed: ${e.message}`, 'error');
+            toast(`导出失败：${e.message}`, 'error');
         }
     }
 
@@ -584,7 +594,7 @@ export function CodeTemplatesView() {
        replaces that collection, so always obtain a fresh, complete baseline,
        send no removals, and never force a stale import over concurrent edits. */
     function importLibraries() {
-        return withEditorSave(importLibrariesUnlocked, 'Importing libraries…');
+        return withEditorSave(importLibrariesUnlocked, '正在导入库…');
     }
 
     async function importLibrariesUnlocked() {
@@ -594,11 +604,11 @@ export function CodeTemplatesView() {
         try {
             if (dirtyRef.current) {
                 if (!platform.checkTask('codeTemplate', 'doSaveCodeTemplates')) {
-                    toast('You do not have permission to save these changes. Refresh to discard them before importing libraries.', 'warn');
+                    toast('您没有保存这些更改的权限，请先刷新丢弃更改后再导入库', 'warn');
                     return;
                 }
-                const save = await confirmDialog('Unsaved Changes',
-                    'Save your code template changes before importing libraries?', { okLabel: 'Save and Import' });
+                const save = await confirmDialog('未保存的更改',
+                    '要在导入库之前保存您的代码模板更改吗？', { okLabel: '保存并导入' });
                 assertSession();
                 if (!save) return;
                 await saveAllUnlocked();
@@ -614,9 +624,9 @@ export function CodeTemplatesView() {
                 libraryImportRef.current = { xml, libraries: parseLibraryImport(xml, v), ids: new Map() };
             }
             const pending = libraryImportRef.current;
-            const confirmed = await confirmDialog('Import Libraries',
-                `Import libraries from "${file.name}"? Existing libraries and templates will be kept. Any conflicts will be reviewed before saving.`,
-                { okLabel: 'Import' });
+            const confirmed = await confirmDialog('导入库',
+                `要从“${file.name}”导入库吗？现有库和模板将保留，冲突会在保存前逐一确认`,
+                { okLabel: '导入' });
             assertSession();
             if (!confirmed) return;
             const current = await api.codeTemplates.libraries(true);
@@ -630,13 +640,13 @@ export function CodeTemplatesView() {
             assertSession();
             if (String(result?.overrideNeeded) === 'true') {
                 writeAttempted = false; // the engine checks conflicts before writing
-                throw new Error('Libraries or code templates changed during import. Import again to merge with the latest server versions.');
+                throw new Error('导入期间库或代码模板已被更改，请重新导入以与服务端最新版本合并');
             }
             const failure = bulkSaveError(result);
             if (failure) throw new Error(failure);
             libraryImportRef.current = null;
             invalidateCompletions();   // script editors refetch the new scope on next focus
-            toast(`Imported ${file.name}`);
+            toast(`已导入 ${file.name}`);
             setSelected(null);
             await load();
         } catch (e: any) {
@@ -649,12 +659,12 @@ export function CodeTemplatesView() {
                 await load();
                 try { assertSession(); } catch { return; }
             }
-            toast(`Import failed: ${e.message}`, 'error');
+            toast(`导入失败：${e.message}`, 'error');
         }
     }
 
     function importCodeTemplates(entryArg: any) {
-        return withEditorSave(() => importCodeTemplatesUnlocked(entryArg), 'Importing code templates…');
+        return withEditorSave(() => importCodeTemplatesUnlocked(entryArg), '正在导入代码模板…');
     }
 
     async function importCodeTemplatesUnlocked(entryArg: any) {
@@ -664,15 +674,15 @@ export function CodeTemplatesView() {
         try {
             const target = entriesNowRef.current.find(en => en.library.id === entryArg?.library.id)
                 || (entriesNowRef.current.length === 1 ? entriesNowRef.current[0] : null);
-            if (!target) { toast('Select a library to import into first', 'warn'); return; }
+            if (!target) { toast('请先选择要导入到哪个库', 'warn'); return; }
             const targetId = target.library.id;
             if (dirtyRef.current) {
                 if (!platform.checkTask('codeTemplate', 'doSaveCodeTemplates')) {
-                    toast('You do not have permission to save these changes. Refresh to discard them before importing code templates.', 'warn');
+                    toast('您没有保存这些更改的权限，请先刷新丢弃更改后再导入代码模板', 'warn');
                     return;
                 }
-                const save = await confirmDialog('Unsaved Changes',
-                    'Save your code template changes before importing code templates?', { okLabel: 'Save and Import' });
+                const save = await confirmDialog('未保存的更改',
+                    '要在导入代码模板之前保存您的代码模板更改吗？', { okLabel: '保存并导入' });
                 assertSession();
                 if (!save) return;
                 await saveAllUnlocked(false, assertSession);
@@ -699,13 +709,13 @@ export function CodeTemplatesView() {
             assertSession();
             if (String(result?.overrideNeeded) === 'true') {
                 writeAttempted = false;
-                throw new Error('Libraries or code templates changed during import. Import again to merge with the latest server versions.');
+                throw new Error('导入期间库或代码模板已被更改，请重新导入以与服务端最新版本合并');
             }
             const failure = bulkSaveError(result);
             if (failure) throw new Error(failure);
             templateImportRef.current = null;
             invalidateCompletions();
-            toast(`Imported ${payload.templates.length} code template(s) into "${target.library.name || 'library'}"`);
+            toast(`已将 ${payload.templates.length} 个代码模板导入“${target.library.name || '未命名库'}”`);
             await load();
         } catch (e: any) {
             try { assertSession(); } catch { return; }
@@ -714,24 +724,24 @@ export function CodeTemplatesView() {
                 await load();
                 try { assertSession(); } catch { return; }
             }
-            toast(`Import failed: ${e.message}`, 'error');
+            toast(`导入失败：${e.message}`, 'error');
         }
     }
 
     /* Validate Script (Swing) — real Rhino compile check of the selected
        template's code via the engine bridge. */
     async function validateScriptTask(found: any) {
-        if (!found || !found.template) { toast('Select a code template first', 'warn'); return; }
+        if (!found || !found.template) { toast('请先选择一个代码模板', 'warn'); return; }
         const code = found.template.properties && found.template.properties.code;
-        if (typeof code !== 'string' || !code.trim()) { toast('Template has no code to validate', 'warn'); return; }
+        if (typeof code !== 'string' || !code.trim()) { toast('该代码模板没有可校验的代码', 'warn'); return; }
         const result = await validateScript(code);
         if (result.ok === null) { toast(result.message, 'warn'); return; }
-        if (result.ok === false) { toast(`Validation error — ${result.message}`, 'error'); return; }
-        toast('Code template validated successfully');
+        if (result.ok === false) { toast(`校验错误 — ${result.message}`, 'error'); return; }
+        toast('代码模板校验通过');
     }
 
     async function refreshTask() {
-        if (dirtyRef.current && !await confirmDialog('Refresh', 'Discard unsaved changes and refresh?', { okLabel: 'Refresh' })) return;
+        if (dirtyRef.current && !await confirmDialog('刷新', '要丢弃未保存的更改并刷新吗？', { okLabel: '刷新' })) return;
         load();
     }
 
@@ -758,12 +768,12 @@ export function CodeTemplatesView() {
             if (!dirtyRef.current) return;
             // No save permission -> say the edits can't be kept (channel editor parity).
             const ok = platform.checkTask('codeTemplate', 'doSaveCodeTemplates')
-                ? await confirmDialog('Unsaved Changes',
-                    'You have unsaved code template changes. Leave without saving?',
-                    { danger: true, okLabel: 'Leave' })
-                : await confirmDialog('Unsaved Changes',
-                    "You don't have permission to save code template changes. Leaving will discard them.",
-                    { okLabel: 'OK' });
+                ? await confirmDialog('未保存的更改',
+                    '代码模板有未保存的更改，要直接离开吗？',
+                    { danger: true, okLabel: '离开' })
+                : await confirmDialog('未保存的更改',
+                    '您没有保存代码模板更改的权限，离开后更改将被丢弃。',
+                    { okLabel: '确定' });
             return ok ? undefined : false;
         });
         // Tab-close guard: same dirty state, synchronous (see core/unsaved.js).
@@ -817,24 +827,24 @@ export function CodeTemplatesView() {
         ? (n: any) => (n.kind === 'library' ? (n.lib.name || '').toLowerCase().includes(term) : templateMatches(n.tpl, term))
         : undefined;
     const totalTemplates = entries.reduce((sum: any, en: any) => sum + en.templates.length, 0);
-    const countsText = `${entries.length} Librar${entries.length === 1 ? 'y' : 'ies'}, ${totalTemplates} Code Template${totalTemplates === 1 ? '' : 's'}`;
+    const countsText = `${entries.length} 个库，${totalTemplates} 个代码模板`;
 
     return (
         <div className="view">
             <ViewTasks>
-                <RailPane title="Code Template Tasks" paneKey="tasks:Code Template Tasks" group="codeTemplate">
+                <RailPane title="代码模板任务" paneKey="tasks:Code Template Tasks" group="codeTemplate">
                     <div className="taskbar" data-pane-title="Code Template Tasks">
-                        <TaskButton label="Refresh" icon="refresh" task="doRefreshCodeTemplates" onClick={refreshTask} />
-                        {dirty && <TaskButton label="Save Changes" icon="save" primary task="doSaveCodeTemplates" onClick={() => saveAll()} />}
-                        {found && <TaskButton label="New Code Template" icon="plus" task="doNewCodeTemplate" onClick={() => newTemplate(found.entry)} />}
-                        <TaskButton label="New Library" icon="folder" task="doNewLibrary" onClick={newLibrary} />
-                        <TaskButton label="Import Code Templates" icon="import" task="doImportCodeTemplates" onClick={() => importCodeTemplates(found && found.entry)} />
-                        <TaskButton label="Import Libraries" icon="import" task="doImportLibraries" onClick={importLibraries} />
-                        {isTemplate && <TaskButton label="Export Code Template" icon="export" task="doExportCodeTemplate" onClick={() => exportTemplate(found)} />}
-                        {isLibrary && <TaskButton label="Export Library" icon="export" task="doExportLibrary" onClick={() => exportLibrary(found)} />}
-                        {isTemplate && <TaskButton label="Delete Code Template" icon="trash" danger task="doDeleteCodeTemplate" onClick={() => deleteSelected(selected)} />}
-                        {isLibrary && <TaskButton label="Delete Library" icon="trash" danger task="doDeleteLibrary" onClick={() => deleteSelected(selected)} />}
-                        {isTemplate && <TaskButton label="Validate Script" icon="check" task="doValidateCodeTemplate" onClick={() => validateScriptTask(found)} />}
+                        <TaskButton label="刷新" icon="refresh" task="doRefreshCodeTemplates" onClick={refreshTask} />
+                        {dirty && <TaskButton label="保存更改" icon="save" primary task="doSaveCodeTemplates" onClick={() => saveAll()} />}
+                        {found && <TaskButton label="新建代码模板" icon="plus" task="doNewCodeTemplate" onClick={() => newTemplate(found.entry)} />}
+                        <TaskButton label="新建库" icon="folder" task="doNewLibrary" onClick={newLibrary} />
+                        <TaskButton label="导入代码模板" icon="import" task="doImportCodeTemplates" onClick={() => importCodeTemplates(found && found.entry)} />
+                        <TaskButton label="导入库" icon="import" task="doImportLibraries" onClick={importLibraries} />
+                        {isTemplate && <TaskButton label="导出代码模板" icon="export" task="doExportCodeTemplate" onClick={() => exportTemplate(found)} />}
+                        {isLibrary && <TaskButton label="导出库" icon="export" task="doExportLibrary" onClick={() => exportLibrary(found)} />}
+                        {isTemplate && <TaskButton label="删除代码模板" icon="trash" danger task="doDeleteCodeTemplate" onClick={() => deleteSelected(selected)} />}
+                        {isLibrary && <TaskButton label="删除库" icon="trash" danger task="doDeleteLibrary" onClick={() => deleteSelected(selected)} />}
+                        {isTemplate && <TaskButton label="校验脚本" icon="check" task="doValidateCodeTemplate" onClick={() => validateScriptTask(found)} />}
                         {isTemplate && platform.codeTemplateActions()
                             .filter((a: any) => (a.isEnabled ? a.isEnabled({ platform, template: found!.template, library: found!.entry.library }) : true))
                             .map((a: any) => <TaskButton key={a.id || a.label} label={a.label} icon={a.icon} task={a.task}
@@ -870,13 +880,13 @@ export function CodeTemplatesView() {
                                 columnWidths={CT_COL_WIDTHS}
                                 defaultHidden={['id']}
                                 pinnedKeys={['name']}
-                                emptyText="No code template libraries" />
+                                emptyText="未找到代码模板库" />
                         </div>
                         <div className="filterbar flex-none panel overflow-visible mx-[13px] my-2">
                             <span className="counts">{countsText}</span>
                             <span className="ml-auto inline-flex items-center gap-1.5">
-                                <label>Filter:</label>
-                                <input type="text" placeholder="Filter…" className="max-w-[234px]" value={filterText}
+                                <label>筛选：</label>
+                                <input type="text" placeholder="筛选…" className="max-w-[234px]" value={filterText}
                                     onChange={(e: any) => setFilterText(e.target.value)} />
                             </span>
                         </div>
@@ -895,7 +905,7 @@ export function CodeTemplatesView() {
                                     onToggleMax={() => setEditorMax((m: any) => !m)} />
                             </div>
                         </div>
-                    </> : <div className="split-b flex-none text-text-faint py-[8px] px-3.5">Select a library or code template to edit it.</div>}
+                    </> : <div className="split-b flex-none text-text-faint py-[8px] px-3.5">请选择要编辑的库或代码模板</div>}
                 </div>
             </div>
         </div>
@@ -959,9 +969,9 @@ function LibraryEditor({ entry, markDirty, focusName, onFocusConsumed }: any) {
         if ((counts as any)[type] === undefined) (counts as any)[type] = 0;
         (counts as any)[type]++;
     }
-    const summaryText = `${counts.FUNCTION} Function${counts.FUNCTION === 1 ? '' : 's'}, `
-        + `${counts.DRAG_AND_DROP_CODE} Drag-and-Drop Code Block${counts.DRAG_AND_DROP_CODE === 1 ? '' : 's'}, `
-        + `${counts.COMPILED_CODE} Compiled Code Block${counts.COMPILED_CODE === 1 ? '' : 's'}`;
+    const summaryText = `${counts.FUNCTION} 个函数，`
+        + `${counts.DRAG_AND_DROP_CODE} 个拖放代码块，`
+        + `${counts.COMPILED_CODE} 个已编译代码块`;
 
     const enabled = new Set(idSetOf(library.enabledChannelIds));
     function setChannel(id: any, on: any) {
@@ -986,7 +996,7 @@ function LibraryEditor({ entry, markDirty, focusName, onFocusConsumed }: any) {
         <div className="flex flex-col flex-1 min-h-0">
             <div className="form-grid mb-3">
                 <div className="field">
-                    <label>Name</label>
+                    <label>名称</label>
                     <input ref={nameRef} type="text" value={library.name || ''}
                         onChange={(e: any) => { library.name = e.target.value; markDirty(); }} />
                 </div>
@@ -994,34 +1004,34 @@ function LibraryEditor({ entry, markDirty, focusName, onFocusConsumed }: any) {
                     <label className="check">
                         <input type="checkbox" checked={!!library.includeNewChannels}
                             onChange={(e: any) => { library.includeNewChannels = e.target.checked; markDirty(); }} />
-                        Include New Channels
+                        包含新通道
                     </label>
                 </div>
             </div>
             <div className="flex flex-1 min-h-0">
                 <div className="flex flex-col flex-1 min-h-0 mr-3.5">
                     <div className="mb-2.5 text-[11px] text-text-dim">
-                        <span className="font-[650]">Summary: </span>{summaryText}
+                        <span className="font-[650]">概览：</span>{summaryText}
                     </div>
-                    <label className="text-[10px] font-[650] tracking-[0.08em] uppercase text-text-dim mb-1.5">Description</label>
+                    <label className="text-[10px] font-[650] tracking-[0.08em] uppercase text-text-dim mb-1.5">描述</label>
                     <textarea className="flex-1 min-h-[108px] resize-none" value={library.description || ''}
                         onChange={(e: any) => { library.description = e.target.value; markDirty(); }} />
                 </div>
                 <div className="w-[270px] flex-none flex flex-col min-h-0 border-l border-line pl-3.5">
                     <div className="flex items-baseline justify-between mb-2">
-                        <label className="text-[10px] font-[650] tracking-[0.08em] uppercase text-text-dim">Channels</label>
+                        <label className="text-[10px] font-[650] tracking-[0.08em] uppercase text-text-dim">通道</label>
                         <span className="text-[10px]">
-                            <a href="#" className="text-accent" onClick={(e: any) => { e.preventDefault(); setAllChannels(true); }}>Select All</a>
+                            <a href="#" className="text-accent" onClick={(e: any) => { e.preventDefault(); setAllChannels(true); }}>全选</a>
                             <span className="text-text-faint my-0 mx-1.5">|</span>
-                            <a href="#" className="text-accent" onClick={(e: any) => { e.preventDefault(); setAllChannels(false); }}>Deselect All</a>
+                            <a href="#" className="text-accent" onClick={(e: any) => { e.preventDefault(); setAllChannels(false); }}>全不选</a>
                         </span>
                     </div>
-                    <input type="text" placeholder="Filter…" className="w-full mb-1.5" value={chFilter}
+                    <input type="text" placeholder="筛选…" className="w-full mb-1.5" value={chFilter}
                         onChange={(e: any) => setChFilter(e.target.value)} />
                     <div className="overflow-auto flex-1">
-                        {chError ? <div className="text-text-faint">{`Channels unavailable: ${chError}`}</div>
-                            : channels === null ? <div className="loading-block"><div className="spinner" />Loading channels…</div>
-                                : visible.length === 0 ? <div className="text-text-faint">{channels.length ? 'No matches' : 'No channels'}</div>
+                        {chError ? <div className="text-text-faint">{`通道不可用：${chError}`}</div>
+                            : channels === null ? <div className="loading-block"><div className="spinner" />正在加载通道…</div>
+                                : visible.length === 0 ? <div className="text-text-faint">{channels.length ? '无匹配项' : '暂无通道'}</div>
                                     : visible.map((row: any) => (
                                         <div key={row.id}>
                                             <label className="check">
@@ -1051,22 +1061,22 @@ function TemplateEditor({ entry, template, entries, markDirty, focusName, onFocu
             <div data-editor-overtake style={{ flex: 'none' }}>
                 <div className="form-grid mb-3">
                     <div className="field">
-                        <label>Name</label>
+                        <label>名称</label>
                         <input ref={nameRef} type="text" value={template.name || ''}
                             onChange={(e: any) => { template.name = e.target.value; markDirty(); }} />
                     </div>
                     <div className="field">
-                        <label>Library</label>
+                        <label>库</label>
                         {/* Swing lets you move a template between libraries here. */}
                         <select value={entry.library.id}
                             onChange={(e: any) => onMoveTemplate(entry, template, e.target.value)}>
                             {entries.map((en: any) => (
-                                <option key={en.library.id} value={en.library.id}>{en.library.name || '(unnamed library)'}</option>
+                                <option key={en.library.id} value={en.library.id}>{en.library.name || '（未命名库）'}</option>
                             ))}
                         </select>
                     </div>
                     <div className="field">
-                        <label>Type</label>
+                        <label>类型</label>
                         <select value={template.properties.type || 'FUNCTION'}
                             onChange={(e: any) => { template.properties.type = e.target.value; markDirty(); }}>
                             {TEMPLATE_TYPES.map((t: any) => <option key={t.value} value={t.value}>{t.label}</option>)}
@@ -1077,9 +1087,9 @@ function TemplateEditor({ entry, template, entries, markDirty, focusName, onFocu
             <div className="flex flex-1 min-h-0">
                 <div className="flex flex-col flex-1 min-h-0 mr-3.5">
                     <div className="flex items-center mb-1.5">
-                        <label className="text-[10px] font-[650] tracking-[0.08em] uppercase text-text-dim">Code</label>
+                        <label className="text-[10px] font-[650] tracking-[0.08em] uppercase text-text-dim">代码</label>
                         <button type="button" className="icon-btn ml-auto"
-                            title={maximized ? 'Restore editor (Esc)' : 'Maximize editor'}
+                            title={maximized ? '还原编辑器（Esc）' : '最大化编辑器'}
                             onClick={onToggleMax}>
                             <Icon name={maximized ? 'minimize' : 'maximize'} size={15} />
                         </button>
@@ -1131,11 +1141,11 @@ function ContextPanel({ template, markDirty }: any) {
     return (
         <div className="w-[234px] flex-none flex flex-col min-h-0 border-l border-line pl-3.5">
             <div className="flex items-baseline justify-between mb-2">
-                <label className="text-[10px] font-[650] tracking-[0.08em] uppercase text-text-dim">Context</label>
+                <label className="text-[10px] font-[650] tracking-[0.08em] uppercase text-text-dim">上下文</label>
                 <span className="text-[10px]">
-                    <a href="#" className="text-accent" onClick={(e: any) => { e.preventDefault(); setAll(true); }}>Select All</a>
+                    <a href="#" className="text-accent" onClick={(e: any) => { e.preventDefault(); setAll(true); }}>全选</a>
                     <span className="text-text-faint my-0 mx-1.5">|</span>
-                    <a href="#" className="text-accent" onClick={(e: any) => { e.preventDefault(); setAll(false); }}>Deselect All</a>
+                    <a href="#" className="text-accent" onClick={(e: any) => { e.preventDefault(); setAll(false); }}>全不选</a>
                 </span>
             </div>
             <div className="overflow-auto flex-1">
@@ -1144,7 +1154,7 @@ function ContextPanel({ template, markDirty }: any) {
                     return (
                         <div key={group.label} className="mb-1.5">
                             <div>
-                                <GroupCheck label={group.label}
+                                <GroupCheck label={CONTEXT_GROUP_LABEL[group.label] ?? group.label}
                                     checked={on === group.types.length && on > 0}
                                     indeterminate={on > 0 && on < group.types.length}
                                     onChange={(e: any) => toggleGroup(group, e.target.checked)} />

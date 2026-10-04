@@ -13,13 +13,13 @@ globalThis.fetch = async (_url, init) => {
 };
 assert.equal(await (await engineFetch('/api/test', { cache: 'force-cache' })).text(), 'ok');
 document.cookie = 'oie-engine=k%3Asecond; oie-login=two';
-await assert.rejects(engineFetch('/api/test', { method: 'PUT', body: 'secret' }), /session changed/);
+await assert.rejects(engineFetch('/api/test', { method: 'PUT', body: 'secret' }), /会话已变更/);
 assert.equal(calls, 1, 'stale mutation must not reach fetch');
 assert.equal(changes, 1);
 
 // Even a same-engine re-login must fence the old tab's work.
 document.cookie = 'oie-engine=k%3Afirst; oie-login=two';
-await assert.rejects(engineFetch('/api/test'), /session changed/);
+await assert.rejects(engineFetch('/api/test'), /会话已变更/);
 assert.equal(calls, 1);
 
 // Header-time and body-time races both discard the previous session's data.
@@ -29,7 +29,7 @@ globalThis.fetch = () => new Promise(resolve => { complete = resolve; });
 const pending = engineFetch('/api/test');
 document.cookie = 'oie-engine=k%3Asecond; oie-login=three';
 complete(new Response('old data'));
-await assert.rejects(pending, /session changed/);
+await assert.rejects(pending, /会话已变更/);
 
 adoptEngineContext();
 globalThis.fetch = async () => new Response('old body');
@@ -37,17 +37,17 @@ const response = await engineFetch('/api/test');
 document.cookie = 'oie-engine=k%3Asecond; oie-login=four';
 adoptEngineContext();
 await response.text();
-assert.throws(() => assertEngineResponse(response), /previous session/);
+assert.throws(() => assertEngineResponse(response), /上一会话/);
 // Local idle lock fences headers AND bodies without waiting for remote cookies.
 globalThis.fetch = () => new Promise(resolve => { complete = resolve; });
 const pendingIdle = engineFetch('/api/test');
 discardEngineResponses();
 complete(new Response('late private data'));
-await assert.rejects(pendingIdle, /previous session/);
+await assert.rejects(pendingIdle, /上一会话/);
 globalThis.fetch = async () => new Response('new response');
 const beforeLock = await engineFetch('/api/test');
 discardEngineResponses();
-assert.throws(() => assertEngineResponse(beforeLock), /previous session/);
+assert.throws(() => assertEngineResponse(beforeLock), /上一会话/);
 assert.equal(await (await engineFetch('/api/test')).text(), 'new response');
 
 // A logical operation cannot start fresh requests after an earlier stage was
@@ -55,15 +55,15 @@ assert.equal(await (await engineFetch('/api/test')).text(), 'new response');
 const interruptedOperation = captureEngineSession();
 interruptedOperation();
 discardEngineResponses();
-assert.throws(interruptedOperation, /previous session/);
+assert.throws(interruptedOperation, /上一会话/);
 const replacementOperation = captureEngineSession();
 replacementOperation();
-assert.throws(interruptedOperation, /previous session/);
+assert.throws(interruptedOperation, /上一会话/);
 
 document.cookie = 'oie-engine=k%3Asecond; oie-login=five';
-assert.throws(replacementOperation, /session changed/);
-assert.throws(captureEngineSession, /session changed/);
+assert.throws(replacementOperation, /会话已变更/);
+assert.throws(captureEngineSession, /会话已变更/);
 adoptEngineContext();
-assert.throws(replacementOperation, /previous session/);
+assert.throws(replacementOperation, /上一会话/);
 captureEngineSession()();
 console.log('engine-fetch: session changes block requests and stale responses');

@@ -2,7 +2,7 @@
 import { platform } from "@oie/web-shell";
 import { toDisplayString } from "@oie/web-api";
 var React = platform.React;
-var GLOBAL_MAP_LABEL = "<Global Map>";
+var GLOBAL_MAP_LABEL = "<\u5168\u5C40\u6620\u5C04>";
 function register(platform2) {
   const { h, modal } = platform2.ui;
   const api = platform2.api;
@@ -36,7 +36,7 @@ function register(platform2) {
   }
   function showValue(row) {
     modal({
-      title: "Global Map Value",
+      title: "\u5168\u5C40\u6620\u5C04\u503C",
       size: "wide",
       body: h(
         "div",
@@ -44,7 +44,7 @@ function register(platform2) {
         h(
           "div",
           { class: "flex gap-[13px] flex-wrap text-[11px]" },
-          h("span.mono.text-text-faint", `Server ${row.serverId}`),
+          h("span.mono.text-text-faint", `\u670D\u52A1\u5668 ${row.serverId}`),
           h("span.mono", row.channel),
           h("span.mono", { class: "font-[650]" }, row.key)
         ),
@@ -52,7 +52,7 @@ function register(platform2) {
           class: "m-0 whitespace-pre-wrap [word-break:break-word] max-h-[60vh] overflow-x-hidden overflow-y-auto bg-bg0 text-text border border-[var(--bg3)] p-2 rounded-[4px]"
         }, row.value)
       ),
-      buttons: [{ label: "Close", primary: true }]
+      buttons: [{ label: "\u5173\u95ED", primary: true }]
     });
   }
   async function fetchRows() {
@@ -117,9 +117,9 @@ function register(platform2) {
     const arrow = (key) => sort.key === key ? sort.dir > 0 ? " \u25B2" : " \u25BC" : "";
     let body;
     if (error) {
-      body = /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("td", { colSpan: 4, className: "text-text-faint p-3" }, `Global maps unavailable: ${error}`));
+      body = /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("td", { colSpan: 4, className: "text-text-faint p-3" }, `\u65E0\u6CD5\u83B7\u53D6\u5168\u5C40\u6620\u5C04\uFF1A${error}`));
     } else if (!filtered.length) {
-      body = /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("td", { colSpan: 4, className: "text-text-faint p-3" }, "No global map variables are set."));
+      body = /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("td", { colSpan: 4, className: "text-text-faint p-3" }, "\u672A\u8BBE\u7F6E\u4EFB\u4F55\u5168\u5C40\u6620\u5C04\u53D8\u91CF"));
     } else {
       body = sorted.map((r, i) => {
         const value = r.value.replace(/\s+/g, " ").trim();
@@ -128,7 +128,7 @@ function register(platform2) {
           {
             key: `${r.serverId}|${r.channelId}|${r.key}|${i}`,
             className: "cursor-pointer",
-            title: "Double-click for the full value",
+            title: "\u53CC\u51FB\u67E5\u770B\u5B8C\u6574\u503C",
             onDoubleClick: () => showValue(r)
           },
           /* @__PURE__ */ React.createElement("td", { className: "mono text-text-faint" }, r.serverId),
@@ -138,11 +138,11 @@ function register(platform2) {
         );
       });
     }
-    return /* @__PURE__ */ React.createElement("div", { className: "dt-wrap min-h-0" }, /* @__PURE__ */ React.createElement("table", { className: "dt global-maps" }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("th", { className: "sortable", style: { cursor: "pointer" }, onClick: () => toggleSort("serverId") }, "Server Id", /* @__PURE__ */ React.createElement("span", { className: "sort-arrow" }, arrow("serverId"))), /* @__PURE__ */ React.createElement("th", { className: "sortable", style: { cursor: "pointer" }, onClick: () => toggleSort("channel") }, "Channel", /* @__PURE__ */ React.createElement("span", { className: "sort-arrow" }, arrow("channel"))), /* @__PURE__ */ React.createElement("th", { className: "sortable", style: { cursor: "pointer" }, onClick: () => toggleSort("key") }, "Key", /* @__PURE__ */ React.createElement("span", { className: "sort-arrow" }, arrow("key"))), /* @__PURE__ */ React.createElement("th", { className: "sortable", style: { cursor: "pointer" }, onClick: () => toggleSort("value") }, "Value", /* @__PURE__ */ React.createElement("span", { className: "sort-arrow" }, arrow("value"))))), /* @__PURE__ */ React.createElement("tbody", null, body)));
+    return /* @__PURE__ */ React.createElement("div", { className: "dt-wrap min-h-0" }, /* @__PURE__ */ React.createElement("table", { className: "dt global-maps" }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("th", { className: "sortable", style: { cursor: "pointer" }, onClick: () => toggleSort("serverId") }, "\u670D\u52A1\u5668 ID", /* @__PURE__ */ React.createElement("span", { className: "sort-arrow" }, arrow("serverId"))), /* @__PURE__ */ React.createElement("th", { className: "sortable", style: { cursor: "pointer" }, onClick: () => toggleSort("channel") }, "\u901A\u9053", /* @__PURE__ */ React.createElement("span", { className: "sort-arrow" }, arrow("channel"))), /* @__PURE__ */ React.createElement("th", { className: "sortable", style: { cursor: "pointer" }, onClick: () => toggleSort("key") }, "\u952E", /* @__PURE__ */ React.createElement("span", { className: "sort-arrow" }, arrow("key"))), /* @__PURE__ */ React.createElement("th", { className: "sortable", style: { cursor: "pointer" }, onClick: () => toggleSort("value") }, "\u503C", /* @__PURE__ */ React.createElement("span", { className: "sort-arrow" }, arrow("value"))))), /* @__PURE__ */ React.createElement("tbody", null, body)));
   }
   platform2.registerDashboardTab({
     id: "global-maps",
-    label: "Global Maps",
+    label: "\u5168\u5C40\u6620\u5C04",
     order: 30,
     component: GlobalMapsTab
   });

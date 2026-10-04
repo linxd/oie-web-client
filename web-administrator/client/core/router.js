@@ -185,10 +185,10 @@ function loadErrorNode(path) {
     const empty = document.createElement('div');
     empty.className = 'dt-empty';
     const msg = document.createElement('div');
-    msg.textContent = 'This view failed to load.';
+    msg.textContent = '此视图加载失败。';
     const retry = document.createElement('button');
     retry.className = 'btn btn-primary';
-    retry.textContent = 'Retry';
+    retry.textContent = '重试';
     retry.addEventListener('click', () => navigate(path));
     empty.append(msg, retry);
     body.appendChild(empty);

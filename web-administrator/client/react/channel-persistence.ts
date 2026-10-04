@@ -15,13 +15,13 @@ export function channelSessionActive(): () => boolean {
     };
 }
 
-export const confirmLibraryOverwrite = () => confirmDialog('Code Template Libraries Modified',
-    'One or more code templates or libraries have been modified since you last refreshed. Do you want to overwrite the changes?',
-    { danger: true, okLabel: 'Overwrite' });
+export const confirmLibraryOverwrite = () => confirmDialog('代码模板库已修改',
+    '自上次刷新以来，一个或多个代码模板或库已被修改。要覆盖这些更改吗？',
+    { danger: true, okLabel: '覆盖' });
 
-export const confirmChannelOverwrite = () => confirmDialog('Channel Modified',
-    'This channel has been modified since you first opened it, or its edit timestamp could not be verified. Overwrite the saved channel with your changes?',
-    { danger: true, okLabel: 'Overwrite' });
+export const confirmChannelOverwrite = () => confirmDialog('通道已修改',
+    '自您首次打开以来该通道已被修改，或其编辑时间戳无法校验。要用您的更改覆盖已保存的通道吗？',
+    { danger: true, okLabel: '覆盖' });
 
 export async function persistChannelModel(channel: any): Promise<boolean> {
     const assertSession = captureEngineSession();
@@ -29,9 +29,9 @@ export async function persistChannelModel(channel: any): Promise<boolean> {
     const saved = await saveChannelModel(channel, {
         userId: store.getState('user')?.id,
         skipUnchanged: true,
-        confirmCreationRetry: () => confirmDialog('Creation Outcome Unknown',
-            'The previous create request did not return a result and the channel is not visible yet. The engine may still be processing it. Retry creation with the same channel ID?',
-            { danger: true, okLabel: 'Retry Creation' }),
+        confirmCreationRetry: () => confirmDialog('创建结果未知',
+            '上次的创建请求没有返回结果，且尚看不到该通道，引擎可能仍在处理。要用同一通道 ID 重试创建吗？',
+            { danger: true, okLabel: '重试创建' }),
         confirmConflict: confirmChannelOverwrite
     });
     assertSession();

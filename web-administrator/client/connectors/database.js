@@ -83,15 +83,15 @@ function insertUrlTemplateButton(properties, platform, onChange) {
             const d = drivers.find((x) => x && String(x.className) === String(properties.driver));
             const template = d && d.template ? String(d.template) : '';
             if (!template) {
-                toast('The selected driver has no URL template.', 'warn');
+                toast('所选驱动没有 URL 模板。', 'warn');
                 return;
             }
-            if (properties.url && !(await confirmDialog('Insert URL Template', 'Replace your current connection URL with the template URL?', { okLabel: 'Replace' })))
+            if (properties.url && !(await confirmDialog('插入 URL 模板', '确定要用模板 URL 替换当前连接 URL 吗？', { okLabel: '替换' })))
                 return;
             properties.url = template;
             onChange();
         }
-    }, 'Insert URL Template');
+    }, '插入 URL 模板');
 }
 /* The Driver <select> DOM node, populated asynchronously from the cached drivers
    list (falling back to a free-text input on error). Mirrors the imperative
@@ -99,7 +99,7 @@ function insertUrlTemplateButton(properties, platform, onChange) {
 function driverControlNode(properties, platform, onChange) {
     const wrap = h('div', { class: 'flex items-center gap-1.5' });
     const wrench = h('button.icon-btn', {
-        type: 'button', title: 'View and manage the list of database JDBC drivers',
+        type: 'button', title: '查看并管理数据库 JDBC 驱动列表',
         class: 'ml-1.5',
         onClick: () => openDriversModal(() => { driversPromise = null; refresh(); })
     }, icon('settings'));
@@ -156,7 +156,7 @@ async function openDriversModal(onSaved) {
         }));
     }
     catch (e) {
-        toast(`Could not load drivers: ${e.message}`, 'error');
+        toast(`无法加载驱动：${e.message}`, 'error');
         return;
     }
     const tbody = h('tbody');
@@ -166,26 +166,26 @@ async function openDriversModal(onSaved) {
             inp.addEventListener('input', () => { d[key] = inp.value; });
             return h('td', { class: 'py-0.5 px-1' }, inp);
         };
-        return h('tr', cell('name', 'Name', '120px'), cell('className', 'com.example.Driver', '200px'), cell('template', 'jdbc:db://host:port/name', '220px'), cell('selectLimit', 'SELECT * FROM ? LIMIT 1', '180px'), cell('alt', 'legacy.Driver, ...', '160px'), h('td', { class: 'py-0.5 px-1' }, h('button.icon-btn', { type: 'button', title: 'Remove', onClick: () => { model.splice(model.indexOf(d), 1); renderRows(); } }, icon('x'))));
+        return h('tr', cell('name', '名称', '120px'), cell('className', 'com.example.Driver', '200px'), cell('template', 'jdbc:db://host:port/name', '220px'), cell('selectLimit', 'SELECT * FROM ? LIMIT 1', '180px'), cell('alt', 'legacy.Driver, ...', '160px'), h('td', { class: 'py-0.5 px-1' }, h('button.icon-btn', { type: 'button', title: '移除', onClick: () => { model.splice(model.indexOf(d), 1); renderRows(); } }, icon('x'))));
     }
     function renderRows() {
         clear(tbody);
         if (!model.length)
-            tbody.appendChild(h('tr', h('td', { colSpan: 6, class: 'text-text-faint p-3' }, 'No drivers — click Add.')));
+            tbody.appendChild(h('tr', h('td', { colSpan: 6, class: 'text-text-faint p-3' }, '暂无驱动，请点击添加')));
         else
             model.forEach((d) => tbody.appendChild(rowEl(d)));
     }
     renderRows();
-    const table = h('table.dt', h('thead', h('tr', h('th', 'Name'), h('th', 'Driver Class'), h('th', 'JDBC URL Template'), h('th', 'Select with Limit Query'), h('th', 'Legacy Driver Classes'), h('th', ''))), tbody);
-    const addBtn = h('button.btn', { type: 'button', onClick: () => { model.push({ name: '', className: '', template: '', selectLimit: '', alt: '' }); renderRows(); } }, icon('plus'), 'Add');
+    const table = h('table.dt', h('thead', h('tr', h('th', '名称'), h('th', '驱动类'), h('th', 'JDBC URL 模板'), h('th', '带 Limit 的查询语句'), h('th', '旧版驱动类'), h('th', ''))), tbody);
+    const addBtn = h('button.btn', { type: 'button', onClick: () => { model.push({ name: '', className: '', template: '', selectLimit: '', alt: '' }); renderRows(); } }, icon('plus'), '添加');
     modal({
-        title: 'Database Drivers',
+        title: '数据库驱动',
         size: 'xwide',
         body: h('div', { class: 'flex flex-col gap-2.5' }, h('div', addBtn), h('div', { class: 'max-h-[55vh] overflow-auto' }, table)),
         buttons: [
-            { label: 'Close' },
+            { label: '关闭' },
             {
-                label: 'Save', primary: true,
+                label: '保存', primary: true,
                 onClick: async () => {
                     const payload = model
                         .filter((d) => d.name.trim() || d.className.trim())
@@ -202,11 +202,11 @@ async function openDriversModal(onSaved) {
                     });
                     try {
                         await api.server.setDatabaseDrivers(payload);
-                        toast('Database drivers saved');
+                        toast('数据库驱动已保存');
                         onSaved && onSaved();
                     }
                     catch (e) {
-                        toast(`Save failed: ${e.message}`, 'error');
+                        toast(`保存失败：${e.message}`, 'error');
                         return false;
                     }
                 }
@@ -243,17 +243,17 @@ const databaseReader = {
         return (React.createElement("div", null,
             React.createElement(PollSection, { properties: properties, onChange: onChange }),
             React.createElement(ConnectorForm, { properties: properties, onChange: onChange, fields: [
-                    { section: 'Connection Settings' },
-                    { type: 'custom', label: 'Driver', render: () => driverControlNode(properties, platform, onChange) },
+                    { section: '连接设置' },
+                    { type: 'custom', label: '驱动', render: () => driverControlNode(properties, platform, onChange) },
                     { key: 'url', label: 'URL', type: 'text', width: '420px', append: (p, ctx) => insertUrlTemplateButton(p, platform, ctx.onChange) },
-                    { key: 'username', label: 'Username', type: 'text', width: '220px' },
-                    { key: 'password', label: 'Password', type: 'password', width: '220px' },
-                    { section: 'Database Reader Settings' },
+                    { key: 'username', label: '用户名', type: 'text', width: '220px' },
+                    { key: 'password', label: '密码', type: 'password', width: '220px' },
+                    { section: '数据库读取器设置' },
                     {
                         // Swing useScriptYes/NoActionPerformed: toggling re-seeds the editors —
                         // Yes fills the Select + Post-Process editors with the connection
                         // boilerplate (and switches them to JavaScript); No clears them back to SQL.
-                        key: 'useScript', label: 'Use JavaScript', type: 'radio', options: YES_NO, refresh: true,
+                        key: 'useScript', label: '使用 JavaScript', type: 'radio', options: YES_NO, refresh: true,
                         onSet: (p, v) => {
                             if (asBool(v)) {
                                 p.select = generateConnectionString(p);
@@ -266,36 +266,36 @@ const databaseReader = {
                         }
                     },
                     // Swing useScriptYes/No: Keep Connection Open is disabled in JavaScript mode.
-                    { key: 'keepConnectionOpen', label: 'Keep Connection Open', type: 'radio', options: YES_NO, disabled: (p) => asBool(p.useScript) },
+                    { key: 'keepConnectionOpen', label: '保持连接打开', type: 'radio', options: YES_NO, disabled: (p) => asBool(p.useScript) },
                     // Swing aggregateResultsActionPerformed(true): forces Cache Results=Yes and disables it.
                     {
-                        key: 'aggregateResults', label: 'Aggregate Results', type: 'radio', options: YES_NO, refresh: true,
+                        key: 'aggregateResults', label: '聚合结果', type: 'radio', options: YES_NO, refresh: true,
                         onSet: (p) => { if (asBool(p.aggregateResults))
                             p.cacheResults = true; }
                     },
                     // Swing: Cache Results enabled only when Use JavaScript=No AND Aggregate Results=No.
-                    { key: 'cacheResults', label: 'Cache Results', type: 'radio', options: YES_NO, refresh: true, disabled: (p) => asBool(p.useScript) || asBool(p.aggregateResults) },
+                    { key: 'cacheResults', label: '缓存结果', type: 'radio', options: YES_NO, refresh: true, disabled: (p) => asBool(p.useScript) || asBool(p.aggregateResults) },
                     // Swing: Fetch Size enabled only when Use JavaScript=No AND Cache Results=No (aggregate forces cache=Yes).
-                    { key: 'fetchSize', label: 'Fetch Size', type: 'number', width: '110px', disabled: (p) => asBool(p.useScript) || asBool(p.cacheResults) || asBool(p.aggregateResults) },
-                    { key: 'retryCount', label: '# of Retries on Error', type: 'number', width: '110px' },
-                    { key: 'retryInterval', label: 'Retry Interval (ms)', type: 'number', width: '120px' },
-                    { key: 'encoding', label: 'Encoding', type: 'select', options: CHARSETS, width: '160px' },
-                    { section: 'Query' },
+                    { key: 'fetchSize', label: '获取行数', type: 'number', width: '110px', disabled: (p) => asBool(p.useScript) || asBool(p.cacheResults) || asBool(p.aggregateResults) },
+                    { key: 'retryCount', label: '错误时重试次数', type: 'number', width: '110px' },
+                    { key: 'retryInterval', label: '重试间隔（毫秒）', type: 'number', width: '120px' },
+                    { key: 'encoding', label: '编码', type: 'select', options: CHARSETS, width: '160px' },
+                    { section: '查询' },
                     {
                         // Swing flips selectSQLLabel 'SQL:'<->'JavaScript:' + the editor syntax on Use JavaScript.
                         key: 'select', label: (p) => asBool(p.useScript) ? 'JavaScript' : 'SQL', type: 'code', minHeight: '260px',
                         language: (p) => asBool(p.useScript) ? 'javascript' : 'sql',
-                        tooltip: 'SQL select statement, or a JavaScript script when "Use JavaScript" is Yes'
+                        tooltip: 'SQL 查询语句；当「使用 JavaScript」为「是」时填 JavaScript 脚本'
                     },
                     {
                         // Swing option labels (UPDATE_NEVER=1, UPDATE_EACH=3, UPDATE_ONCE=2);
                         // runPostProcessSQLLabel flips 'SQL'<->'Script' on Use JavaScript.
-                        key: 'updateMode', label: (p) => asBool(p.useScript) ? 'Run Post-Process Script' : 'Run Post-Process SQL', type: 'radio', refresh: true,
+                        key: 'updateMode', label: (p) => asBool(p.useScript) ? '执行后处理脚本' : '执行后处理 SQL', type: 'radio', refresh: true,
                         // Swing aggregateResultsActionPerformed relabels the per-message
                         // options to per-row when Aggregate Results = Yes.
                         options: (p) => asBool(p.aggregateResults)
-                            ? [{ value: 1, label: 'Never' }, { value: 3, label: 'For each row' }, { value: 2, label: 'Once for all rows' }]
-                            : [{ value: 1, label: 'Never' }, { value: 3, label: 'After each message' }, { value: 2, label: 'Once after all messages' }]
+                            ? [{ value: 1, label: '从不' }, { value: 3, label: '每行一次' }, { value: 2, label: '全部行一次' }]
+                            : [{ value: 1, label: '从不' }, { value: 3, label: '每条消息后' }, { value: 2, label: '全部消息后一次' }]
                     },
                     {
                         // Swing updateNeverActionPerformed keeps this editor VISIBLE but disabled at Never.
@@ -313,8 +313,8 @@ const databaseReader = {
         return requireFields(properties, [
             { key: 'url', label: 'URL', when: (p) => !asBool(p.useScript) },
             { key: 'select', label: 'SQL' },
-            { key: 'update', label: 'Post-Process SQL', when: (p) => Number(p.updateMode) !== 1 },
-            { key: 'driver', label: 'Driver' }
+            { key: 'update', label: '后处理 SQL', when: (p) => Number(p.updateMode) !== 1 },
+            { key: 'driver', label: '驱动' }
         ]);
     }
 };
@@ -336,17 +336,17 @@ const databaseWriter = {
     },
     component({ properties, platform, onChange }) {
         return (React.createElement(ConnectorForm, { properties: properties, onChange: onChange, fields: [
-                { section: 'Connection Settings' },
-                { type: 'custom', label: 'Driver', render: () => driverControlNode(properties, platform, onChange) },
+                { section: '连接设置' },
+                { type: 'custom', label: '驱动', render: () => driverControlNode(properties, platform, onChange) },
                 { key: 'url', label: 'URL', type: 'text', width: '420px', append: (p, ctx) => insertUrlTemplateButton(p, platform, ctx.onChange) },
-                { key: 'username', label: 'Username', type: 'text', width: '220px' },
-                { key: 'password', label: 'Password', type: 'password', width: '220px' },
-                { section: 'Query' },
+                { key: 'username', label: '用户名', type: 'text', width: '220px' },
+                { key: 'password', label: '密码', type: 'password', width: '220px' },
+                { section: '查询' },
                 {
                     // Swing useJavaScriptYes/NoActionPerformed: toggling re-seeds the editor —
                     // Yes fills it with the connection boilerplate (and switches to JavaScript);
                     // No clears it back to SQL.
-                    key: 'useScript', label: 'Use JavaScript', type: 'radio', options: YES_NO, refresh: true,
+                    key: 'useScript', label: '使用 JavaScript', type: 'radio', options: YES_NO, refresh: true,
                     onSet: (p, v) => { p.query = asBool(v) ? generateWriterConnectionString(p) : ''; }
                 },
                 {
@@ -362,7 +362,7 @@ const databaseWriter = {
         return requireFields(properties, [
             { key: 'url', label: 'URL', when: (p) => !asBool(p.useScript) },
             { key: 'query', label: 'SQL' },
-            { key: 'driver', label: 'Driver' }
+            { key: 'driver', label: '驱动' }
         ]);
     }
 };

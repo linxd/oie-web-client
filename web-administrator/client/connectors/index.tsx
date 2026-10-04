@@ -42,11 +42,11 @@ function GenericPanel({ properties, onChange }: any) {
         try {
             parsed = JSON.parse(editorRef.current.getValue());
         } catch (e: any) {
-            toast('Invalid JSON: ' + e.message, 'error');
+            toast('JSON 无效：' + e.message, 'error');
             return;
         }
         if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-            toast('Properties must be a JSON object', 'error');
+            toast('属性必须是一个 JSON 对象', 'error');
             return;
         }
         for (const key of Object.keys(properties)) {
@@ -54,16 +54,16 @@ function GenericPanel({ properties, onChange }: any) {
         }
         Object.assign(properties, parsed);
         onChange();
-        toast('Properties applied');
+        toast('属性已应用');
     };
     return (
         <div>
             <div className="hint mb-1.5">
-                No dedicated editor for this connector type — edit the raw properties JSON. "@class" and "@version" must be preserved.
+                此连接器类型没有专用编辑器 —— 请直接编辑原始属性 JSON。必须保留 "@class" 与 "@version"。
             </div>
             <div ref={hostRef} />
             <div className="mt-2">
-                <button className="btn btn-primary" onClick={apply}>Apply</button>
+                <button className="btn btn-primary" onClick={apply}>应用</button>
             </div>
         </div>
     );
@@ -85,7 +85,7 @@ export function register(platform: any) {
     // Basic TCP transmission mode (no framing) — the built-in TransmissionMode;
     // MLLP framing ships as the mllpmode plugin.
     platform.registerTransmissionMode('Basic', {
-        label: 'Basic TCP', order: 20,
+        label: '基本 TCP', order: 20,
         apply(tm: any) {
             tm['@class'] = 'com.mirth.connect.model.transmission.framemode.FrameModeProperties';
             tm.pluginPointName = 'Basic';

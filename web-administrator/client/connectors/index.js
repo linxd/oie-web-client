@@ -46,11 +46,11 @@ function GenericPanel({ properties, onChange }) {
             parsed = JSON.parse(editorRef.current.getValue());
         }
         catch (e) {
-            toast('Invalid JSON: ' + e.message, 'error');
+            toast('JSON 无效：' + e.message, 'error');
             return;
         }
         if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-            toast('Properties must be a JSON object', 'error');
+            toast('属性必须是一个 JSON 对象', 'error');
             return;
         }
         for (const key of Object.keys(properties)) {
@@ -59,13 +59,13 @@ function GenericPanel({ properties, onChange }) {
         }
         Object.assign(properties, parsed);
         onChange();
-        toast('Properties applied');
+        toast('属性已应用');
     };
     return (React.createElement("div", null,
-        React.createElement("div", { className: "hint mb-1.5" }, "No dedicated editor for this connector type \u2014 edit the raw properties JSON. \"@class\" and \"@version\" must be preserved."),
+        React.createElement("div", { className: "hint mb-1.5" }, "\u6B64\u8FDE\u63A5\u5668\u7C7B\u578B\u6CA1\u6709\u4E13\u7528\u7F16\u8F91\u5668 \u2014\u2014 \u8BF7\u76F4\u63A5\u7F16\u8F91\u539F\u59CB\u5C5E\u6027 JSON\u3002\u5FC5\u987B\u4FDD\u7559 \"@class\" \u4E0E \"@version\"\u3002"),
         React.createElement("div", { ref: hostRef }),
         React.createElement("div", { className: "mt-2" },
-            React.createElement("button", { className: "btn btn-primary", onClick: apply }, "Apply"))));
+            React.createElement("button", { className: "btn btn-primary", onClick: apply }, "\u5E94\u7528"))));
 }
 function genericPanel() {
     return {
@@ -81,7 +81,7 @@ export function register(platform) {
     // Basic TCP transmission mode (no framing) — the built-in TransmissionMode;
     // MLLP framing ships as the mllpmode plugin.
     platform.registerTransmissionMode('Basic', {
-        label: 'Basic TCP', order: 20,
+        label: '基本 TCP', order: 20,
         apply(tm) {
             tm['@class'] = 'com.mirth.connect.model.transmission.framemode.FrameModeProperties';
             tm.pluginPointName = 'Basic';

@@ -263,7 +263,7 @@ async function handle(response: Response, { raw = false, noAuthHandler = false }
             const text = await response.text().catch(() => '');
             assertEngineResponse(response);
             // parseBody is total (its parses are internally guarded), so no try/catch.
-            let message = 'Unauthorized';
+            let message = '未授权';
             const parsed = parseBody(text);
             if (parsed && typeof parsed === 'object') message = parsed.message || parsed.error || message;
             throw new ApiError(401, message, text);
@@ -274,7 +274,7 @@ async function handle(response: Response, { raw = false, noAuthHandler = false }
             sessionExpiredFired = true;
             listeners.sessionExpired.forEach(fn => fn());
         }
-        throw new ApiError(401, 'Session expired');
+        throw new ApiError(401, '会话已过期');
     }
     const text = await response.text();
     assertEngineResponse(response);

@@ -31,6 +31,10 @@ import {
 
 const STEPS = ['Basics', 'Trigger', 'Channels', 'Actions', 'Review'];
 
+/* Display-only captions for the stepper (STEPS above are compared in code and
+   stay engine-facing identifiers). */
+const STEP_LABELS = ['基本信息', '触发条件', '通道', '操作', '确认'];
+
 // Normalize the action group list to an array with at least one group.
 function normalizeActionGroups(a: any) {
     const ag = a.actionGroups = a.actionGroups || {};
@@ -53,7 +57,7 @@ function AlertWizardView({ params }: any) {
         normalize: normalizeActionGroups,
         backPath: '/alerts'
     });
-    if (!ready || !model) return <div className="view"><div className="view-body"><div className="dt-empty">Loading alert…</div></div></div>;
+    if (!ready || !model) return <div className="view"><div className="view-body"><div className="dt-empty">正在加载警报…</div></div></div>;
     return <AlertWizardInner key={model.id || 'new'} alert={model} isNew={isNew} />;
 }
 
@@ -98,7 +102,7 @@ function AlertWizardInner({ alert, isNew }: any) {
                 .map(result => String(result.reason?.message || result.reason));
             const message = failures.join('; ');
             setDataError(message || null);
-            if (message) toast(`Failed to load alert choices: ${message}`, 'error');
+            if (message) toast(`加载警报选项失败：${message}`, 'error');
         });
         return () => { alive = false; };
     }, []);
@@ -106,7 +110,7 @@ function AlertWizardInner({ alert, isNew }: any) {
     // Keep the model in the store + prompt-on-leave (shared with the channel wizard).
     useLeaveGuard({
         model: alert, isNew, storeKey: 'editingAlert', storeNewKey: 'editingAlertNew',
-        entityLabel: 'alert', dirtyKey: 'editingAlertDirty', dirtyRef, savedRef, switchingRef, save: () => saveAlert(false),
+        entityLabel: '警报', dirtyKey: 'editingAlertDirty', dirtyRef, savedRef, switchingRef, save: () => saveAlert(false),
         canSave: () => platform.checkTask('alertEdit', 'doSaveAlerts')
     });
     const canSave = platform.checkTask('alertEdit', 'doSaveAlerts');
@@ -151,7 +155,7 @@ function AlertWizardInner({ alert, isNew }: any) {
     /* ---- validation ---- */
     // Alert filters use java.util.regex.Pattern in the engine. Browser RegExp
     // rejects valid Java syntax (e.g. inline flags); match the classic/Swing path.
-    function nameError() { return String(alert.name || '').trim() ? null : 'An alert name is required.'; }
+    function nameError() { return String(alert.name || '').trim() ? null : '请填写警报名称'; }
     function stepProblems(i: any) {
         if (STEPS[i] === 'Basics') return nameError() ? [nameError()] : [];
         return [];
@@ -166,9 +170,9 @@ function AlertWizardInner({ alert, isNew }: any) {
     // Non-blocking heads-ups (an inert alert is still a valid draft, like the classic editor).
     function warnings() {
         const out: any[] = [];
-        if (!enabledChannels.size && !ac.newChannelSource && !ac.newChannelDestination) out.push('No channels selected — this alert will never fire.');
-        if (!actionList().length) out.push('No actions — this alert won’t notify anyone.');
-        else if (actionList().some((a: any) => !String(a.recipient || '').trim())) out.push('An action has no recipient.');
+        if (!enabledChannels.size && !ac.newChannelSource && !ac.newChannelDestination) out.push('未选择通道，该警报不会触发');
+        if (!actionList().length) out.push('未配置操作，该警报不会通知任何人');
+        else if (actionList().some((a: any) => !String(a.recipient || '').trim())) out.push('有操作未填写接收者');
         return out;
     }
 
@@ -199,7 +203,7 @@ function AlertWizardInner({ alert, isNew }: any) {
             dirtyRef.current = false;
             return true;
         } catch (e: any) {
-            toast(e && e.message ? e.message : 'Could not save the alert.', 'error');
+            toast(e && e.message ? e.message : '无法保存该警报', 'error');
             return false;
         }
     }
@@ -209,7 +213,7 @@ function AlertWizardInner({ alert, isNew }: any) {
         const ok = await saveAlert(enable);
         if (!ok) { setSaving(false); return; }
         store.setState('navGuard', null);
-        toast(`Alert “${alert.name}” ${isNew ? 'created' : 'saved'}${enable ? ' and enabled' : ''}.`, 'info');
+        toast(`警报“${alert.name}”${isNew ? '已创建' : '已保存'}${enable ? '并已启用' : ''}`, 'info');
         router.navigate('/alerts');
     }
     function switchToClassic() {
@@ -222,17 +226,17 @@ function AlertWizardInner({ alert, isNew }: any) {
     async function exportAlert() {
         let assertSession: () => void;
         try { assertSession = captureEngineSession(); } catch { return; }
-        if (isNew) { toast('Save the alert first, then export it', 'warn'); return; }
+        if (isNew) { toast('请先保存警报，再执行导出', 'warn'); return; }
         try {
             await saveFile(`${alert.name || alert.id}.xml`, 'application/xml', async () => {
                 const xml = await api.getXml(`/alerts/${alert.id}`);
-                if (!xml || !String(xml).trim()) throw new Error('Alert not found on the server — save it first');
+                if (!xml || !String(xml).trim()) throw new Error('服务器上未找到该警报，请先保存');
                 return xml;
             }, assertSession);
             assertSession();
         } catch (e: any) {
             try { assertSession(); } catch { return; }
-            toast(`Export failed: ${e.message}`, 'error');
+            toast(`导出失败：${e.message}`, 'error');
         }
     }
 
@@ -246,23 +250,23 @@ function AlertWizardInner({ alert, isNew }: any) {
             {/* Alert Tasks rail — mirrors the classic alert editor's tasks, plus the
                 view switch (like the Dashboard's Card/Table toggle). */}
             <ViewTasks>
-                <RailPane title="Alert Tasks" paneKey="tasks:Alert Tasks" group="alertEdit">
+                <RailPane title="警报任务" paneKey="tasks:Alert Tasks" group="alertEdit">
                     <div className="taskbar" data-pane-title="Alert Tasks">
-                        {getPref('showViewSwitch') !== false && <TaskButton label="Classic editor" icon="edit" onClick={switchToClassic} />}
+                        {getPref('showViewSwitch') !== false && <TaskButton label="经典编辑器" icon="edit" onClick={switchToClassic} />}
                         {/* A NEW alert is still being built (create lives in the footer); an
                             EXISTING alert adds Save (when dirty). */}
-                        {!isNew && dirtyRef.current && <TaskButton label="Save Alert" icon="save" primary task="doSaveAlerts" onClick={() => finish(false)} />}
-                        {!isNew && <TaskButton label="Export Alert" icon="export" task="doExportAlert" onClick={exportAlert} />}
-                        <TaskButton label="Back to Alerts" icon="logout" onClick={() => router.navigate('/alerts')} />
+                        {!isNew && dirtyRef.current && <TaskButton label="保存警报" icon="save" primary task="doSaveAlerts" onClick={() => finish(false)} />}
+                        {!isNew && <TaskButton label="导出警报" icon="export" task="doExportAlert" onClick={exportAlert} />}
+                        <TaskButton label="返回警报列表" icon="logout" onClick={() => router.navigate('/alerts')} />
                     </div>
                 </RailPane>
             </ViewTasks>
-            <WizardHeader icon="alerts" title={isNew ? 'New Alert — Wizard' : `${alert.name || 'Alert'} — Wizard`} />
-            <WizardStepper steps={STEPS} step={step} maxStep={maxStep} onStep={setStep} />
+            <WizardHeader icon="alerts" title={isNew ? '新建警报 — 向导' : `${alert.name || '警报'} — 向导`} />
+            <WizardStepper steps={STEP_LABELS} step={step} maxStep={maxStep} onStep={setStep} />
 
             <div className="view-body overflow-x-hidden">
                 {dataError && <div className="panel border-danger text-danger max-w-[738px]" role="alert">
-                    Failed to load channel and recipient choices: {dataError}
+                    无法加载通道与接收者选项：{dataError}
                 </div>}
                 <div className="wiz-pane" key={step}>
                     {/* ---- Basics ---- */}
@@ -270,16 +274,16 @@ function AlertWizardInner({ alert, isNew }: any) {
                         <div className="panel !mt-0 max-w-[576px]">
                             <div className="panel-body flex flex-col gap-4">
                                 <label className="flex flex-col gap-1">
-                                    <span className="text-text-dim">Alert name</span>
+                                    <span className="text-text-dim">警报名称</span>
                                     <input autoFocus type="text" className={`w-full ${nErr ? 'cform-invalid' : ''}`} value={alert.name}
-                                        placeholder="My Alert" onChange={(e: any) => { alert.name = e.target.value; setNameTouched(true); bump(); }} />
+                                        placeholder="我的警报" onChange={(e: any) => { alert.name = e.target.value; setNameTouched(true); bump(); }} />
                                     {nErr ? <span className="text-err text-[10px]">{nErr}</span> : null}
                                 </label>
                                 <label className="flex items-center gap-2">
                                     <input type="checkbox" checked={alert.enabled === true} onChange={(e: any) => { alert.enabled = e.target.checked; bump(); }} />
-                                    Enabled
+                                    已启用
                                 </label>
-                                <div className="hint">An alert watches for errors on the channels you pick, and notifies via the actions you configure.</div>
+                                <div className="hint">警报会监视您选定通道上的错误，并通过您配置的操作发送通知。</div>
                             </div>
                         </div>
                     )}
@@ -288,7 +292,7 @@ function AlertWizardInner({ alert, isNew }: any) {
                     {stepName === 'Trigger' && (
                         <div className="flex flex-col gap-4 max-w-[648px]">
                             <div className="panel !mt-0">
-                                <div className="panel-header">Error types</div>
+                                <div className="panel-header">错误类型</div>
                                 <div className="panel-body grid sm:grid-cols-2 gap-x-6 gap-y-2">
                                     {ERROR_EVENT_TYPES.map((t: any) => (
                                         <label key={t} className="flex items-center gap-2">
@@ -299,12 +303,12 @@ function AlertWizardInner({ alert, isNew }: any) {
                                 </div>
                             </div>
                             <div className="panel !mt-0">
-                                <div className="panel-header">Error message filter</div>
+                                <div className="panel-header">错误消息筛选</div>
                                 <div className="panel-body flex flex-col gap-1">
                                     <textarea className="w-full" rows={3} value={trigger.regex || ''}
-                                        placeholder="Only trigger when the error matches this regular expression (leave blank to match any error)"
+                                        placeholder="仅当错误匹配此正则表达式时触发（留空则匹配任意错误）"
                                         onChange={(e: any) => { trigger.regex = e.target.value; bump(); }} />
-                                    <span className="text-text-dim text-[10px]">Uses Java regular-expression syntax, as in the desktop administrator.</span>
+                                    <span className="text-text-dim text-[10px]">使用 Java 正则表达式语法，与桌面管理员一致。</span>
                                 </div>
                             </div>
                         </div>
@@ -313,11 +317,11 @@ function AlertWizardInner({ alert, isNew }: any) {
                     {/* ---- Channels ---- */}
                     {stepName === 'Channels' && (
                         <div className="panel !mt-0 max-w-[648px]">
-                            <div className="panel-header">Channels to watch</div>
+                            <div className="panel-header">要监视的通道</div>
                             <div className="panel-body flex flex-col gap-2">
-                                {data.channels.length > 6 && <input type="text" placeholder="Filter channels…" value={chFilter} onChange={(e: any) => setChFilter(e.target.value)} />}
+                                {data.channels.length > 6 && <input type="text" placeholder="筛选通道…" value={chFilter} onChange={(e: any) => setChFilter(e.target.value)} />}
                                 <div className="flex flex-col border border-line rounded-md max-h-[288px] overflow-auto divide-y divide-line">
-                                    {channels.length === 0 && <div className="p-2 text-text-faint text-[11px]">No channels.</div>}
+                                    {channels.length === 0 && <div className="p-2 text-text-faint text-[11px]">无通道</div>}
                                     {channels.map((c: any) => (
                                         <label key={c.id} className="flex items-center gap-2 px-2.5 py-2 hover:bg-bg1 cursor-pointer" title={c.name}>
                                             <input type="checkbox" checked={enabledChannels.has(c.id)} onChange={(e: any) => setChannel(c.id, e.target.checked)} />
@@ -326,10 +330,10 @@ function AlertWizardInner({ alert, isNew }: any) {
                                     ))}
                                 </div>
                                 <div className="grid sm:grid-cols-2 gap-2 pt-1">
-                                    <label className="flex items-center gap-2"><input type="checkbox" checked={ac.newChannelSource === true} onChange={(e: any) => { ac.newChannelSource = e.target.checked; bump(); }} />Apply to sources of new channels</label>
-                                    <label className="flex items-center gap-2"><input type="checkbox" checked={ac.newChannelDestination === true} onChange={(e: any) => { ac.newChannelDestination = e.target.checked; bump(); }} />Apply to destinations of new channels</label>
+                                    <label className="flex items-center gap-2"><input type="checkbox" checked={ac.newChannelSource === true} onChange={(e: any) => { ac.newChannelSource = e.target.checked; bump(); }} />应用于新通道的源</label>
+                                    <label className="flex items-center gap-2"><input type="checkbox" checked={ac.newChannelDestination === true} onChange={(e: any) => { ac.newChannelDestination = e.target.checked; bump(); }} />应用于新通道的目的地</label>
                                 </div>
-                                <div className="hint">Pick which channels this alert watches. Per-connector granularity is available in the classic editor.</div>
+                                <div className="hint">选择此警报要监视的通道。按连接器细分请在经典编辑器中设置。</div>
                             </div>
                         </div>
                     )}
@@ -338,12 +342,12 @@ function AlertWizardInner({ alert, isNew }: any) {
                     {stepName === 'Actions' && (
                         <div className="flex flex-col gap-4 max-w-[738px]">
                             <div className="panel !mt-0">
-                                <div className="panel-header">Notifications</div>
+                                <div className="panel-header">通知</div>
                                 <div className="panel-body flex flex-col gap-2">
-                                    {actionList().length === 0 && <div className="hint">No actions yet — add one to send a notification when the alert fires.</div>}
+                                    {actionList().length === 0 && <div className="hint">尚未添加操作，警报触发时不会发送通知。</div>}
                                     {actionList().length > 0 && (
                                         <div className="flex items-center gap-2 px-0.5 text-[10px] uppercase tracking-wide text-text-faint">
-                                            <span className="w-[144px] flex-none">Protocol</span><span className="flex-1">Recipient</span><span className="w-[27px] flex-none" />
+                                            <span className="w-[144px] flex-none">协议</span><span className="flex-1">接收者</span><span className="w-[27px] flex-none" />
                                         </div>
                                     )}
                                     {actionList().map((a: any, i: any) => {
@@ -355,48 +359,48 @@ function AlertWizardInner({ alert, isNew }: any) {
                                                 </select>
                                                 {Array.isArray(opts) ? (
                                                     <select className="flex-1 min-w-0" value={a.recipient || ''} onChange={(e: any) => patchAction(i, { recipient: e.target.value })}>
-                                                        <option value="">Select…</option>
+                                                        <option value="">请选择…</option>
                                                         {opts.map((o: any) => <option key={o.value} value={o.value}>{o.label}</option>)}
                                                     </select>
                                                 ) : (
-                                                    <input type="text" className="flex-1 min-w-0" placeholder="Recipient (e.g. name@example.com)" value={a.recipient || ''} onChange={(e: any) => patchAction(i, { recipient: e.target.value })} />
+                                                    <input type="text" className="flex-1 min-w-0" placeholder="接收者（如 name@example.com）" value={a.recipient || ''} onChange={(e: any) => patchAction(i, { recipient: e.target.value })} />
                                                 )}
                                                 <button type="button" className="btn btn-sm btn-danger w-[27px] flex-none justify-center" onClick={() => removeAction(i)}><Icon name="trash" size={13} /></button>
                                             </div>
                                         );
                                     })}
-                                    <div><button type="button" className="btn btn-sm" onClick={addAction}><Icon name="plus" size={13} />Add action</button></div>
+                                    <div><button type="button" className="btn btn-sm" onClick={addAction}><Icon name="plus" size={13} />添加操作</button></div>
                                 </div>
                             </div>
 
                             <div className="flex flex-col lg:flex-row gap-4">
                                 <div className="panel !mt-0 flex-1 min-w-0">
-                                    <div className="panel-header">Message</div>
+                                    <div className="panel-header">消息</div>
                                     <div className="panel-body flex flex-col gap-3">
                                         <label className="flex flex-col gap-1">
-                                            <span className="text-text-dim text-[11px]">Subject</span>
+                                            <span className="text-text-dim text-[11px]">主题</span>
                                             <input type="text" className="w-full" value={grp.subject || ''} onFocus={() => { focusedRef.current = 'subject'; }} onChange={(e: any) => { grp.subject = e.target.value; bump(); }} />
                                         </label>
                                         <label className="flex flex-col gap-1">
-                                            <span className="text-text-dim text-[11px]">Template</span>
+                                            <span className="text-text-dim text-[11px]">模板</span>
                                             <textarea className="w-full" rows={8} value={grp.template || ''} onFocus={() => { focusedRef.current = 'template'; }} onChange={(e: any) => { grp.template = e.target.value; bump(); }} />
                                         </label>
                                     </div>
                                 </div>
                                 <div className="panel !mt-0 w-full lg:w-[216px] flex-none">
-                                    <div className="panel-header">Variables</div>
+                                    <div className="panel-header">变量</div>
                                     <div className="panel-body flex flex-col gap-2">
                                         <div className="border border-line rounded overflow-auto max-h-[324px] min-h-[108px]">
                                             {ALERT_VARIABLES.map((v: any) => (
                                                 <div key={v} role="button" draggable
                                                     onDragStart={(e: any) => { e.dataTransfer.setData('text/plain', `\${${v}}`); e.dataTransfer.effectAllowed = 'copy'; }}
                                                     onClick={() => insertVar(v)}
-                                                    className="step-item cursor-grab" title={`Click or drag to insert \${${v}}`}>
+                                                    className="step-item cursor-grab" title={`点击或拖动以插入 \${${v}}`}>
                                                     <div className="flex-1 min-w-0"><div className="truncate">{v}</div></div>
                                                 </div>
                                             ))}
                                         </div>
-                                        <div className="hint">Click to insert into the focused field, or drag onto the subject/template.</div>
+                                        <div className="hint">点击插入到当前聚焦的字段，或拖动到主题/模板上。</div>
                                     </div>
                                 </div>
                             </div>
@@ -415,14 +419,14 @@ function AlertWizardInner({ alert, isNew }: any) {
                             )}
                             <div className="panel-body">
                                 {[
-                                    ['Name', alert.name || <span className="text-err">(required)</span>],
-                                    ['Enabled', alert.enabled ? 'Yes' : 'No'],
-                                    ['Error types', errTypes.size ? [...errTypes].map(eventTypeLabel).join(', ') : 'None'],
-                                    ['Error filter', trigger.regex ? trigger.regex : '(any error)'],
-                                    ['Channels', enabledNames.length ? enabledNames.join(', ') : (ac.newChannelSource || ac.newChannelDestination ? 'New channels only' : 'None')],
-                                    ['Actions', actionList().length ? actionList().map((a: any) => `${a.protocol} → ${recipientLabel(a.protocol, a.recipient) || '(none)'}`).join(', ') : 'None'],
-                                    ['Subject', grp.subject ? grp.subject : '(none)'],
-                                    ['Template', grp.template ? <pre className="whitespace-pre-wrap font-mono text-[11px] max-h-[144px] overflow-auto m-0">{grp.template}</pre> : '(none)']
+                                    ['名称', alert.name || <span className="text-err">（必填）</span>],
+                                    ['已启用', alert.enabled ? '是' : '否'],
+                                    ['错误类型', errTypes.size ? [...errTypes].map(eventTypeLabel).join(', ') : '无'],
+                                    ['错误筛选', trigger.regex ? trigger.regex : '（任意错误）'],
+                                    ['通道', enabledNames.length ? enabledNames.join(', ') : (ac.newChannelSource || ac.newChannelDestination ? '仅新通道' : '无')],
+                                    ['操作', actionList().length ? actionList().map((a: any) => `${a.protocol} → ${recipientLabel(a.protocol, a.recipient) || '（无）'}`).join(', ') : '无'],
+                                    ['主题', grp.subject ? grp.subject : '（无）'],
+                                    ['模板', grp.template ? <pre className="whitespace-pre-wrap font-mono text-[11px] max-h-[144px] overflow-auto m-0">{grp.template}</pre> : '（无）']
                                 ].map(([label, value]) => (
                                     <div key={label} className="flex gap-4 py-2 border-b border-line">
                                         <div className="w-[144px] flex-none text-text-dim">{label}</div>
@@ -437,20 +441,20 @@ function AlertWizardInner({ alert, isNew }: any) {
 
             {/* Footer */}
             <div className="flex items-center gap-2 px-4 py-3 border-t border-line">
-                <button className="btn" disabled={step === 0} onClick={() => setStep(Math.max(0, step - 1))}>Back</button>
+                <button className="btn" disabled={step === 0} onClick={() => setStep(Math.max(0, step - 1))}>上一步</button>
                 <div className="ml-auto flex items-center gap-2">
                     {/* RBAC: save/create affordances hide without alertEdit/doSaveAlerts. */}
                     {!isLast ? (
-                        <button className="btn btn-primary" disabled={stepName === 'Basics' && !!nameError()} onClick={tryNext}>Next</button>
+                        <button className="btn btn-primary" disabled={stepName === 'Basics' && !!nameError()} onClick={tryNext}>下一步</button>
                     ) : isNew && canSave ? (
                         <>
-                            <button className="btn" disabled={saving || !!nameError()} onClick={() => finish(false)}><Icon name="save" size={14} />{saving ? 'Creating…' : 'Create Alert'}</button>
-                            <button className="btn btn-primary" disabled={saving || !!nameError()} onClick={() => finish(true)}><Icon name="check" size={14} />Create &amp; Enable</button>
+                            <button className="btn" disabled={saving || !!nameError()} onClick={() => finish(false)}><Icon name="save" size={14} />{saving ? '正在创建…' : '创建警报'}</button>
+                            <button className="btn btn-primary" disabled={saving || !!nameError()} onClick={() => finish(true)}><Icon name="check" size={14} />创建并启用</button>
                         </>
                     ) : !isNew && dirtyRef.current && canSave ? (
-                        <button className="btn btn-primary" disabled={saving || !!nameError()} onClick={() => finish(false)}><Icon name="save" size={14} />{saving ? 'Saving…' : 'Save Alert'}</button>
+                        <button className="btn btn-primary" disabled={saving || !!nameError()} onClick={() => finish(false)}><Icon name="save" size={14} />{saving ? '正在保存…' : '保存警报'}</button>
                     ) : (
-                        <button className="btn" onClick={() => router.navigate('/alerts')}><Icon name="x" size={14} />Exit</button>
+                        <button className="btn" onClick={() => router.navigate('/alerts')}><Icon name="x" size={14} />退出</button>
                     )}
                 </div>
             </div>

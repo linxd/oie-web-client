@@ -114,7 +114,7 @@ export function attachColumnMenu(headerEl: HTMLElement, { manager, columns, onCh
                 }
             };
         });
-        items.push('-', { label: 'Restore Default', onClick: () => { manager.reset(); onChange && onChange(); } });
+        items.push('-', { label: '恢复默认', onClick: () => { manager.reset(); onChange && onChange(); } });
         contextMenu(e.clientX, e.clientY, items);
     });
 }

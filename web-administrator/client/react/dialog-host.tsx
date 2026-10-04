@@ -141,13 +141,13 @@ function OneDialog({ entry }: any) {
                                     : opts.title}</span>
                             </Dialog.Title>
                             <Dialog.Close asChild>
-                                <button className="icon-btn" title="Close" aria-label="Close" disabled={pending}>
+                                <button className="icon-btn" title="关闭" aria-label="关闭" disabled={pending}>
                                     <IconSlot name="x" />
                                 </button>
                             </Dialog.Close>
                         </div>
                         <NodeSlot content={opts.body} className="modal-body" inert={pending || undefined} />
-                        {pending && <div role="status" className="px-4 py-2">Working…</div>}
+                        {pending && <div role="status" className="px-4 py-2">处理中…</div>}
                         {buttons.length ? (
                             <div className="modal-foot">
                                 {buttons.map((btn: any, i: any) => (

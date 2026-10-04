@@ -3,12 +3,12 @@ import { platform } from "@oie/web-shell";
 import { DESTINATION_MAPPINGS } from "@oie/web-ui";
 var React = platform.React;
 var AUTH_TYPE_OPTIONS = [
-  { value: "NONE", label: "None" },
-  { value: "BASIC", label: "Basic Authentication" },
-  { value: "DIGEST", label: "Digest Authentication" },
+  { value: "NONE", label: "\u65E0" },
+  { value: "BASIC", label: "\u57FA\u672C\u8BA4\u8BC1" },
+  { value: "DIGEST", label: "\u6458\u8981\u8BA4\u8BC1" },
   { value: "JAVASCRIPT", label: "JavaScript" },
-  { value: "CUSTOM", label: "Custom Java Class" },
-  { value: "OAUTH2_VERIFICATION", label: "OAuth 2.0 Token Verification" }
+  { value: "CUSTOM", label: "\u81EA\u5B9A\u4E49 Java \u7C7B" },
+  { value: "OAUTH2_VERIFICATION", label: "OAuth 2.0 \u4EE4\u724C\u9A8C\u8BC1" }
 ];
 var AUTH_CLASSES = {
   NONE: "com.mirth.connect.plugins.httpauth.NoneHttpAuthProperties",
@@ -119,7 +119,7 @@ function register(platform2) {
         minHeight: minHeight || "240px",
         popoutable: true,
         // dedicated full-screen code view
-        popoutTitle: "Script",
+        popoutTitle: "\u811A\u672C",
         popoutVars: DESTINATION_MAPPINGS,
         // connector settings context
         onChange: (v) => onChangeRef.current(v)
@@ -145,7 +145,7 @@ function register(platform2) {
       "input",
       {
         type: "text",
-        placeholder: "Name",
+        placeholder: "\u540D\u79F0",
         className: "flex-1",
         value: row[0],
         onInput: (e) => {
@@ -164,7 +164,7 @@ function register(platform2) {
       {
         type: secretValues ? "password" : "text",
         autoComplete: secretValues ? "off" : void 0,
-        placeholder: "Value",
+        placeholder: "\u503C",
         className: "flex-[2]",
         value: row[1],
         onInput: (e) => {
@@ -183,7 +183,7 @@ function register(platform2) {
       {
         type: "button",
         className: "icon-btn",
-        title: "Remove",
+        title: "\u79FB\u9664",
         onClick: () => {
           const next = rows.slice();
           next.splice(i, 1);
@@ -211,7 +211,7 @@ function register(platform2) {
         className: "btn",
         onClick: () => commit([...rows, ["", ""]])
       },
-      "Add"
+      "\u6DFB\u52A0"
     ));
   }
   function EnumSetField({ entry, fieldKey, elementClass, options, onChange }) {
@@ -270,10 +270,10 @@ function register(platform2) {
       setUseVar(v);
       onChange();
     };
-    return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(CformRow, { label: "Use Credentials" }, /* @__PURE__ */ React.createElement("div", { className: "radio-group inline-row" }, /* @__PURE__ */ React.createElement("label", { className: "check" }, /* @__PURE__ */ React.createElement("input", { type: "radio", name, checked: !useVar, onChange: () => setUse(false) }), " Table"), /* @__PURE__ */ React.createElement("label", { className: "check" }, /* @__PURE__ */ React.createElement("input", { type: "radio", name, checked: useVar, onChange: () => setUse(true) }), " Variable"))), !useVar && /* @__PURE__ */ React.createElement(CformRow, { label: "Credentials (user / password)", top: true }, /* @__PURE__ */ React.createElement(KeyValueField, { entry, fieldKey: "credentials", onChange, secretValues: true })), useVar && /* @__PURE__ */ React.createElement(
+    return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(CformRow, { label: "\u4F7F\u7528\u51ED\u636E" }, /* @__PURE__ */ React.createElement("div", { className: "radio-group inline-row" }, /* @__PURE__ */ React.createElement("label", { className: "check" }, /* @__PURE__ */ React.createElement("input", { type: "radio", name, checked: !useVar, onChange: () => setUse(false) }), " \u8868\u683C"), /* @__PURE__ */ React.createElement("label", { className: "check" }, /* @__PURE__ */ React.createElement("input", { type: "radio", name, checked: useVar, onChange: () => setUse(true) }), " \u53D8\u91CF"))), !useVar && /* @__PURE__ */ React.createElement(CformRow, { label: "\u51ED\u636E\uFF08\u7528\u6237\u540D / \u5BC6\u7801\uFF09", top: true }, /* @__PURE__ */ React.createElement(KeyValueField, { entry, fieldKey: "credentials", onChange, secretValues: true })), useVar && /* @__PURE__ */ React.createElement(
       TextRow,
       {
-        label: "Credentials Variable",
+        label: "\u51ED\u636E\u53D8\u91CF",
         entry,
         fieldKey: "credentialsVariable",
         width: "220px",
@@ -284,9 +284,9 @@ function register(platform2) {
   function AuthEditor({ entry, onChange }) {
     switch (String(entry.authType)) {
       case "BASIC":
-        return /* @__PURE__ */ React.createElement("div", { className: "cform" }, /* @__PURE__ */ React.createElement("div", { className: "cform-section" }, /* @__PURE__ */ React.createElement("div", { className: "cform-grid" }, /* @__PURE__ */ React.createElement(TextRow, { label: "Realm", entry, fieldKey: "realm", width: "220px", onChange }), /* @__PURE__ */ React.createElement(CredentialFields, { entry, onChange }))));
+        return /* @__PURE__ */ React.createElement("div", { className: "cform" }, /* @__PURE__ */ React.createElement("div", { className: "cform-section" }, /* @__PURE__ */ React.createElement("div", { className: "cform-grid" }, /* @__PURE__ */ React.createElement(TextRow, { label: "\u8BA4\u8BC1\u57DF\uFF08Realm\uFF09", entry, fieldKey: "realm", width: "220px", onChange }), /* @__PURE__ */ React.createElement(CredentialFields, { entry, onChange }))));
       case "DIGEST":
-        return /* @__PURE__ */ React.createElement("div", { className: "cform" }, /* @__PURE__ */ React.createElement("div", { className: "cform-section" }, /* @__PURE__ */ React.createElement("div", { className: "cform-grid" }, /* @__PURE__ */ React.createElement(TextRow, { label: "Realm", entry, fieldKey: "realm", width: "220px", onChange }), /* @__PURE__ */ React.createElement(CformRow, { label: "Algorithms" }, /* @__PURE__ */ React.createElement(
+        return /* @__PURE__ */ React.createElement("div", { className: "cform" }, /* @__PURE__ */ React.createElement("div", { className: "cform-section" }, /* @__PURE__ */ React.createElement("div", { className: "cform-grid" }, /* @__PURE__ */ React.createElement(TextRow, { label: "\u8BA4\u8BC1\u57DF\uFF08Realm\uFF09", entry, fieldKey: "realm", width: "220px", onChange }), /* @__PURE__ */ React.createElement(CformRow, { label: "\u7B97\u6CD5" }, /* @__PURE__ */ React.createElement(
           EnumSetField,
           {
             entry,
@@ -295,7 +295,7 @@ function register(platform2) {
             options: [{ value: "MD5", label: "MD5" }, { value: "MD5_SESS", label: "MD5-sess" }],
             onChange
           }
-        )), /* @__PURE__ */ React.createElement(CformRow, { label: "QOP Modes" }, /* @__PURE__ */ React.createElement(
+        )), /* @__PURE__ */ React.createElement(CformRow, { label: "QOP \u6A21\u5F0F" }, /* @__PURE__ */ React.createElement(
           EnumSetField,
           {
             entry,
@@ -306,7 +306,7 @@ function register(platform2) {
           }
         )), /* @__PURE__ */ React.createElement(TextRow, { label: "Opaque", entry, fieldKey: "opaque", width: "220px", onChange }), /* @__PURE__ */ React.createElement(CredentialFields, { entry, onChange }))));
       case "JAVASCRIPT":
-        return /* @__PURE__ */ React.createElement("div", { className: "cform" }, /* @__PURE__ */ React.createElement("div", { className: "cform-section" }, /* @__PURE__ */ React.createElement("div", { className: "cform-grid" }, /* @__PURE__ */ React.createElement(CformRow, { label: "Script", top: true }, /* @__PURE__ */ React.createElement(
+        return /* @__PURE__ */ React.createElement("div", { className: "cform" }, /* @__PURE__ */ React.createElement("div", { className: "cform-section" }, /* @__PURE__ */ React.createElement("div", { className: "cform-grid" }, /* @__PURE__ */ React.createElement(CformRow, { label: "\u811A\u672C", top: true }, /* @__PURE__ */ React.createElement(
           CodeField,
           {
             value: entry.script,
@@ -322,16 +322,16 @@ function register(platform2) {
         return /* @__PURE__ */ React.createElement("div", { className: "cform" }, /* @__PURE__ */ React.createElement("div", { className: "cform-section" }, /* @__PURE__ */ React.createElement("div", { className: "cform-grid" }, /* @__PURE__ */ React.createElement(
           TextRow,
           {
-            label: "Class Name",
+            label: "\u7C7B\u540D",
             entry,
             fieldKey: "authenticatorClass",
             width: "420px",
             placeholder: "com.example.MyAuthenticator",
             onChange
           }
-        ), /* @__PURE__ */ React.createElement(CformRow, { label: "Properties", top: true }, /* @__PURE__ */ React.createElement(KeyValueField, { entry, fieldKey: "properties", onChange })))));
+        ), /* @__PURE__ */ React.createElement(CformRow, { label: "\u5C5E\u6027", top: true }, /* @__PURE__ */ React.createElement(KeyValueField, { entry, fieldKey: "properties", onChange })))));
       case "OAUTH2_VERIFICATION":
-        return /* @__PURE__ */ React.createElement("div", { className: "cform" }, /* @__PURE__ */ React.createElement("div", { className: "cform-section" }, /* @__PURE__ */ React.createElement("div", { className: "cform-grid" }, /* @__PURE__ */ React.createElement(CformRow, { label: "Token Location" }, /* @__PURE__ */ React.createElement(
+        return /* @__PURE__ */ React.createElement("div", { className: "cform" }, /* @__PURE__ */ React.createElement("div", { className: "cform-section" }, /* @__PURE__ */ React.createElement("div", { className: "cform-grid" }, /* @__PURE__ */ React.createElement(CformRow, { label: "\u4EE4\u724C\u4F4D\u7F6E" }, /* @__PURE__ */ React.createElement(
           "select",
           {
             className: "w-[144px]",
@@ -341,9 +341,9 @@ function register(platform2) {
               onChange();
             }
           },
-          /* @__PURE__ */ React.createElement("option", { value: "HEADER" }, "Request Header"),
-          /* @__PURE__ */ React.createElement("option", { value: "QUERY" }, "Query Parameter")
-        )), /* @__PURE__ */ React.createElement(TextRow, { label: "Token Field Name", entry, fieldKey: "locationKey", width: "220px", onChange }), /* @__PURE__ */ React.createElement(TextRow, { label: "Verification URL", entry, fieldKey: "verificationURL", width: "420px", onChange }))));
+          /* @__PURE__ */ React.createElement("option", { value: "HEADER" }, "\u8BF7\u6C42\u5934"),
+          /* @__PURE__ */ React.createElement("option", { value: "QUERY" }, "\u67E5\u8BE2\u53C2\u6570")
+        )), /* @__PURE__ */ React.createElement(TextRow, { label: "\u4EE4\u724C\u5B57\u6BB5\u540D", entry, fieldKey: "locationKey", width: "220px", onChange }), /* @__PURE__ */ React.createElement(TextRow, { label: "\u9A8C\u8BC1 URL", entry, fieldKey: "verificationURL", width: "420px", onChange }))));
       default:
         return /* @__PURE__ */ React.createElement("div", null);
     }
@@ -354,7 +354,7 @@ function register(platform2) {
     const properties = connector.properties;
     const type = currentAuthType(properties);
     const state = findAuthEntry(properties);
-    return /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "field" }, /* @__PURE__ */ React.createElement("label", null, "Authentication Type"), /* @__PURE__ */ React.createElement(
+    return /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "field" }, /* @__PURE__ */ React.createElement("label", null, "\u8BA4\u8BC1\u7C7B\u578B"), /* @__PURE__ */ React.createElement(
       "select",
       {
         className: "w-[198px]",
@@ -370,7 +370,7 @@ function register(platform2) {
   }
   platform2.registerConnectorPropertiesPanel({
     id: "httpauth",
-    title: "Authentication",
+    title: "\u8BA4\u8BC1",
     // A truthy fqcn so the channel editor renders this panel; the auth type
     // (and thus the stored class) is managed inside the component via pluginProperties.
     propertiesClass: (transportName, mode, connector) => AUTH_CLASSES[currentAuthType(connector && connector.properties || {})] || AUTH_CLASSES.NONE,

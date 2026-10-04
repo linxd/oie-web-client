@@ -29,43 +29,43 @@ function msToFreq(ms) {
   return { val: ms || "", unit: "milliseconds" };
 }
 var CONTENT_OPTIONS = [
-  { key: "xml", label: "XML serialized message", contentType: null, dest: false },
-  { key: "src-RAW", label: "Source - Raw", contentType: "RAW", dest: false },
-  { key: "src-PROCESSED_RAW", label: "Source - Processed raw", contentType: "PROCESSED_RAW", dest: false },
-  { key: "src-TRANSFORMED", label: "Source - Transformed", contentType: "TRANSFORMED", dest: false },
-  { key: "src-ENCODED", label: "Source - Encoded", contentType: "ENCODED", dest: false },
-  { key: "src-RESPONSE", label: "Source - Response", contentType: "RESPONSE", dest: false },
-  { key: "dst-RAW", label: "Destination - Raw", contentType: "RAW", dest: true },
-  { key: "dst-TRANSFORMED", label: "Destination - Transformed", contentType: "TRANSFORMED", dest: true },
-  { key: "dst-ENCODED", label: "Destination - Encoded", contentType: "ENCODED", dest: true },
-  { key: "dst-SENT", label: "Destination - Sent", contentType: "SENT", dest: true },
-  { key: "dst-RESPONSE", label: "Destination - Response", contentType: "RESPONSE", dest: true },
-  { key: "dst-PROCESSED_RESPONSE", label: "Destination - Processed response", contentType: "PROCESSED_RESPONSE", dest: true },
-  { key: "map-SOURCE_MAP", label: "Source map", contentType: "SOURCE_MAP", dest: false },
-  { key: "map-CHANNEL_MAP", label: "Channel map", contentType: "CHANNEL_MAP", dest: false },
-  { key: "map-RESPONSE_MAP", label: "Response map", contentType: "RESPONSE_MAP", dest: false }
+  { key: "xml", label: "XML \u5E8F\u5217\u5316\u6D88\u606F", contentType: null, dest: false },
+  { key: "src-RAW", label: "\u6E90 - \u539F\u59CB", contentType: "RAW", dest: false },
+  { key: "src-PROCESSED_RAW", label: "\u6E90 - \u5904\u7406\u540E\u539F\u59CB", contentType: "PROCESSED_RAW", dest: false },
+  { key: "src-TRANSFORMED", label: "\u6E90 - \u8F6C\u6362\u540E", contentType: "TRANSFORMED", dest: false },
+  { key: "src-ENCODED", label: "\u6E90 - \u7F16\u7801\u540E", contentType: "ENCODED", dest: false },
+  { key: "src-RESPONSE", label: "\u6E90 - \u54CD\u5E94", contentType: "RESPONSE", dest: false },
+  { key: "dst-RAW", label: "\u76EE\u7684\u5730 - \u539F\u59CB", contentType: "RAW", dest: true },
+  { key: "dst-TRANSFORMED", label: "\u76EE\u7684\u5730 - \u8F6C\u6362\u540E", contentType: "TRANSFORMED", dest: true },
+  { key: "dst-ENCODED", label: "\u76EE\u7684\u5730 - \u7F16\u7801\u540E", contentType: "ENCODED", dest: true },
+  { key: "dst-SENT", label: "\u76EE\u7684\u5730 - \u5DF2\u53D1\u9001", contentType: "SENT", dest: true },
+  { key: "dst-RESPONSE", label: "\u76EE\u7684\u5730 - \u54CD\u5E94", contentType: "RESPONSE", dest: true },
+  { key: "dst-PROCESSED_RESPONSE", label: "\u76EE\u7684\u5730 - \u5904\u7406\u540E\u54CD\u5E94", contentType: "PROCESSED_RESPONSE", dest: true },
+  { key: "map-SOURCE_MAP", label: "\u6E90\u6620\u5C04", contentType: "SOURCE_MAP", dest: false },
+  { key: "map-CHANNEL_MAP", label: "\u901A\u9053\u6620\u5C04", contentType: "CHANNEL_MAP", dest: false },
+  { key: "map-RESPONSE_MAP", label: "\u54CD\u5E94\u6620\u5C04", contentType: "RESPONSE_MAP", dest: false }
 ];
 var COMPRESS_OPTIONS = [
-  { key: "none", label: "none", archive: null, compress: null },
+  { key: "none", label: "\u65E0", archive: null, compress: null },
   { key: "zip", label: "zip", archive: "zip", compress: null },
   { key: "tar.gz", label: "tar.gz", archive: "tar", compress: "gz" },
   { key: "tar.bz2", label: "tar.bz2", archive: "tar", compress: "bzip2" }
 ];
 var ENCRYPTION_OPTIONS = [
-  { value: "STANDARD", label: "Standard" },
+  { value: "STANDARD", label: "\u6807\u51C6" },
   { value: "AES128", label: "AES-128" },
   { value: "AES256", label: "AES-256" }
 ];
 var ARCHIVE_VARS = [
-  { label: "Message ID", token: "${message.messageId}" },
-  { label: "Server ID", token: "${message.serverId}" },
-  { label: "Channel ID", token: "${message.channelId}" },
-  { label: "Original File Name", token: "${originalFilename}" },
-  { label: "Formatted Message Date", token: "${date.format('yyyy-MM-dd',$message.getConnectorMessages().get(0).getReceivedDate())}" },
-  { label: "Formatted Current Date", token: "${date.get('yyyy-MM-dd')}" },
-  { label: "Timestamp", token: "${SYSTIME}" },
-  { label: "Unique ID", token: "${UUID}" },
-  { label: "Count", token: "${COUNT}" }
+  { label: "\u6D88\u606F ID", token: "${message.messageId}" },
+  { label: "\u670D\u52A1\u5668 ID", token: "${message.serverId}" },
+  { label: "\u901A\u9053 ID", token: "${message.channelId}" },
+  { label: "\u539F\u59CB\u6587\u4EF6\u540D", token: "${originalFilename}" },
+  { label: "\u683C\u5F0F\u5316\u6D88\u606F\u65E5\u671F", token: "${date.format('yyyy-MM-dd',$message.getConnectorMessages().get(0).getReceivedDate())}" },
+  { label: "\u683C\u5F0F\u5316\u5F53\u524D\u65E5\u671F", token: "${date.get('yyyy-MM-dd')}" },
+  { label: "\u65F6\u95F4\u6233", token: "${SYSTIME}" },
+  { label: "\u552F\u4E00 ID", token: "${UUID}" },
+  { label: "\u8BA1\u6570", token: "${COUNT}" }
 ];
 var ARCHIVE_VAR_MIME = "application/x-oie-archivevar";
 function register(platform2) {
@@ -139,7 +139,7 @@ function register(platform2) {
         disabled,
         onChange: () => onChange(true)
       }
-    ), " Yes"), /* @__PURE__ */ React.createElement("label", null, /* @__PURE__ */ React.createElement(
+    ), " \u662F"), /* @__PURE__ */ React.createElement("label", null, /* @__PURE__ */ React.createElement(
       "input",
       {
         type: "radio",
@@ -149,12 +149,12 @@ function register(platform2) {
         disabled,
         onChange: () => onChange(false)
       }
-    ), " No"));
+    ), " \u5426"));
   }
   function Field({ label, hint, children }) {
     return /* @__PURE__ */ React.createElement("div", { className: "field" }, /* @__PURE__ */ React.createElement("label", null, label), children, hint ? /* @__PURE__ */ React.createElement("div", { className: "hint" }, hint) : null);
   }
-  function Loading({ text = "Loading\u2026" }) {
+  function Loading({ text = "\u52A0\u8F7D\u4E2D\u2026" }) {
     return /* @__PURE__ */ React.createElement("div", { className: "loading-block" }, /* @__PURE__ */ React.createElement("div", { className: "spinner" }), text);
   }
   function DataPrunerPanel({ platform: platform3, setTasks, setSave, markDirty, markClean }) {
@@ -346,7 +346,7 @@ function register(platform2) {
         const raw = await api.get("/extensions/datapruner/status");
         setStatusState({ phase: "ready", pairs: statusPairs(raw), message: "" });
       } catch (e) {
-        setStatusState({ phase: "error", pairs: [], message: `Status unavailable: ${e.message}` });
+        setStatusState({ phase: "error", pairs: [], message: `\u65E0\u6CD5\u83B7\u53D6\u72B6\u6001\uFF1A${e.message}` });
       }
     }
     async function load() {
@@ -363,7 +363,7 @@ function register(platform2) {
         refreshStatus();
       } catch (e) {
         if (!mountedRef.current) return;
-        toast(`Failed to load Data Pruner properties: ${e.message}`, "error");
+        toast(`\u52A0\u8F7D\u6570\u636E\u4FEE\u526A\u5668\u5C5E\u6027\u5931\u8D25\uFF1A${e.message}`, "error");
         setErrorMessage(String(e.message || e));
         setPhase("error");
       } finally {
@@ -442,14 +442,14 @@ function register(platform2) {
         }
         await api.extensions.setProperties("Data Pruner", listToProps(propListRef.current));
         if (!mountedRef.current) return false;
-        toast("Data Pruner settings saved");
+        toast("\u6570\u636E\u4FEE\u526A\u5668\u8BBE\u7F6E\u5DF2\u4FDD\u5B58");
         cleanRef.current = submittedSnapshot;
         dirtyRef.current = latestSnapshotRef.current !== submittedSnapshot;
         if (dirtyRef.current) markDirty();
         else markClean();
         return !dirtyRef.current;
       } catch (e) {
-        if (mountedRef.current) toast(`Save failed: ${e.message}`, "error");
+        if (mountedRef.current) toast(`\u4FDD\u5B58\u5931\u8D25\uFF1A${e.message}`, "error");
         return false;
       } finally {
         operationRef.current = false;
@@ -457,12 +457,12 @@ function register(platform2) {
       }
     }
     async function pruneNow() {
-      if (await confirmDialog("Prune Now", "Start the Data Pruner now? Pruning may take a long time on large message stores.", { okLabel: "Start" })) {
+      if (await confirmDialog("\u7ACB\u5373\u4FEE\u526A", "\u786E\u5B9A\u8981\u7ACB\u5373\u542F\u52A8\u6570\u636E\u4FEE\u526A\u5668\u5417\uFF1F\u5728\u5927\u578B\u6D88\u606F\u5E93\u4E0A\u4FEE\u526A\u53EF\u80FD\u8017\u65F6\u8F83\u957F", { okLabel: "\u542F\u52A8" })) {
         try {
           await api.post("/extensions/datapruner/_start");
-          toast("Data Pruner started");
+          toast("\u6570\u636E\u4FEE\u526A\u5668\u5DF2\u542F\u52A8");
         } catch (e) {
-          toast(`Start failed: ${e.message}`, "error");
+          toast(`\u542F\u52A8\u5931\u8D25\uFF1A${e.message}`, "error");
         }
         refreshStatus();
       }
@@ -470,9 +470,9 @@ function register(platform2) {
     async function stopPruner() {
       try {
         await api.post("/extensions/datapruner/_stop");
-        toast("Stop requested");
+        toast("\u5DF2\u8BF7\u6C42\u505C\u6B62");
       } catch (e) {
-        toast(`Stop failed: ${e.message}`, "error");
+        toast(`\u505C\u6B62\u5931\u8D25\uFF1A${e.message}`, "error");
       }
       refreshStatus();
     }
@@ -485,14 +485,14 @@ function register(platform2) {
     }, []);
     React.useEffect(() => {
       setSave(save);
-      setTasks("Data Pruner Tasks", [
-        taskButton("Refresh", "refresh", () => {
+      setTasks("\u6570\u636E\u4FEE\u526A\u5668\u4EFB\u52A1", [
+        taskButton("\u5237\u65B0", "refresh", () => {
           load();
         }, { disabled: busy }),
-        taskButton("Save", "save", save, { primary: true, disabled: busy || phase !== "ready" }),
-        taskButton("View Events", "events", () => platform3.router.navigate("/events")),
-        taskButton("Prune Now", "play", pruneNow),
-        taskButton("Stop Pruner", "stop", stopPruner, { danger: true })
+        taskButton("\u4FDD\u5B58", "save", save, { primary: true, disabled: busy || phase !== "ready" }),
+        taskButton("\u67E5\u770B\u4E8B\u4EF6", "events", () => platform3.router.navigate("/events")),
+        taskButton("\u7ACB\u5373\u4FEE\u526A", "play", pruneNow),
+        taskButton("\u505C\u6B62\u4FEE\u526A", "stop", stopPruner, { danger: true })
       ]);
     }, [
       busy,
@@ -570,7 +570,7 @@ function register(platform2) {
           strokeLinejoin: "round"
         },
         /* @__PURE__ */ React.createElement("path", { d: "M12 3l9 16H3zM12 10v4M12 17.5v.5" })
-      )), /* @__PURE__ */ React.createElement("div", null, "Failed to load"), /* @__PURE__ */ React.createElement("div", { className: "text-text-faint mt-[13px]" }, errorMessage));
+      )), /* @__PURE__ */ React.createElement("div", null, "\u52A0\u8F7D\u5931\u8D25"), /* @__PURE__ */ React.createElement("div", { className: "text-text-faint mt-[13px]" }, errorMessage));
     }
     const attachmentsEnabled = archiveEnabled && contentKey === "xml";
     const passwordSectionEnabled = archiveEnabled && compressKey === "zip";
@@ -578,7 +578,7 @@ function register(platform2) {
       setCronJobs(cronJobs.map((job, i) => i === idx ? { ...job, [key]: value } : job));
       setScheduleDirty(true);
     };
-    return /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("div", { className: "panel-header" }, "Status"), /* @__PURE__ */ React.createElement("div", { className: "panel-body" }, statusState.phase === "loading" && /* @__PURE__ */ React.createElement(Loading, { text: "Loading status\u2026" }), statusState.phase === "error" && /* @__PURE__ */ React.createElement("div", { className: "text-text-faint" }, statusState.message), statusState.phase === "ready" && (statusState.pairs.length ? /* @__PURE__ */ React.createElement("dl", { className: "kv" }, statusState.pairs.map(([k, v], i) => /* @__PURE__ */ React.createElement(React.Fragment, { key: `${k}-${i}` }, /* @__PURE__ */ React.createElement("dt", null, labelCase(k)), /* @__PURE__ */ React.createElement("dd", null, v)))) : /* @__PURE__ */ React.createElement("div", { className: "text-text-faint" }, "No status reported")))), /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("div", { className: "panel-header" }, "Schedule"), /* @__PURE__ */ React.createElement("div", { className: "panel-body" }, /* @__PURE__ */ React.createElement("div", { className: "field" }, /* @__PURE__ */ React.createElement("label", null, "Enable"), /* @__PURE__ */ React.createElement(YesNo, { value: enabled, onChange: setEnabled })), hasSchedule ? /* @__PURE__ */ React.createElement("div", { className: "form-grid" }, /* @__PURE__ */ React.createElement(Field, { label: "Schedule Type" }, /* @__PURE__ */ React.createElement(
+    return /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("div", { className: "panel-header" }, "\u72B6\u6001"), /* @__PURE__ */ React.createElement("div", { className: "panel-body" }, statusState.phase === "loading" && /* @__PURE__ */ React.createElement(Loading, { text: "\u6B63\u5728\u52A0\u8F7D\u72B6\u6001\u2026" }), statusState.phase === "error" && /* @__PURE__ */ React.createElement("div", { className: "text-text-faint" }, statusState.message), statusState.phase === "ready" && (statusState.pairs.length ? /* @__PURE__ */ React.createElement("dl", { className: "kv" }, statusState.pairs.map(([k, v], i) => /* @__PURE__ */ React.createElement(React.Fragment, { key: `${k}-${i}` }, /* @__PURE__ */ React.createElement("dt", null, labelCase(k)), /* @__PURE__ */ React.createElement("dd", null, v)))) : /* @__PURE__ */ React.createElement("div", { className: "text-text-faint" }, "\u672A\u4E0A\u62A5\u72B6\u6001")))), /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("div", { className: "panel-header" }, "\u8C03\u5EA6"), /* @__PURE__ */ React.createElement("div", { className: "panel-body" }, /* @__PURE__ */ React.createElement("div", { className: "field" }, /* @__PURE__ */ React.createElement("label", null, "\u542F\u7528"), /* @__PURE__ */ React.createElement(YesNo, { value: enabled, onChange: setEnabled })), hasSchedule ? /* @__PURE__ */ React.createElement("div", { className: "form-grid" }, /* @__PURE__ */ React.createElement(Field, { label: "\u8C03\u5EA6\u65B9\u5F0F" }, /* @__PURE__ */ React.createElement(
       "select",
       {
         value: scheduleType,
@@ -588,10 +588,10 @@ function register(platform2) {
           setScheduleDirty(true);
         }
       },
-      /* @__PURE__ */ React.createElement("option", { value: "INTERVAL" }, "Interval"),
-      /* @__PURE__ */ React.createElement("option", { value: "TIME" }, "Time"),
+      /* @__PURE__ */ React.createElement("option", { value: "INTERVAL" }, "\u95F4\u9694"),
+      /* @__PURE__ */ React.createElement("option", { value: "TIME" }, "\u65F6\u95F4"),
       /* @__PURE__ */ React.createElement("option", { value: "CRON" }, "Cron")
-    )), scheduleType === "INTERVAL" && /* @__PURE__ */ React.createElement(Field, { label: "Interval", hint: "Must be between 1 and 24 hours when converted to milliseconds." }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement(
+    )), scheduleType === "INTERVAL" && /* @__PURE__ */ React.createElement(Field, { label: "\u95F4\u9694", hint: "\u6362\u7B97\u4E3A\u6BEB\u79D2\u540E\u5FC5\u987B\u5728 1 \u81F3 24 \u5C0F\u65F6\u4E4B\u95F4" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement(
       "input",
       {
         type: "number",
@@ -620,11 +620,11 @@ function register(platform2) {
           setScheduleDirty(true);
         }
       },
-      /* @__PURE__ */ React.createElement("option", { value: "milliseconds" }, "milliseconds"),
-      /* @__PURE__ */ React.createElement("option", { value: "seconds" }, "seconds"),
-      /* @__PURE__ */ React.createElement("option", { value: "minutes" }, "minutes"),
-      /* @__PURE__ */ React.createElement("option", { value: "hours" }, "hours")
-    ))), scheduleType === "TIME" && /* @__PURE__ */ React.createElement(Field, { label: "Time", hint: "Prune once a day at this time of day." }, /* @__PURE__ */ React.createElement(
+      /* @__PURE__ */ React.createElement("option", { value: "milliseconds" }, "\u6BEB\u79D2"),
+      /* @__PURE__ */ React.createElement("option", { value: "seconds" }, "\u79D2"),
+      /* @__PURE__ */ React.createElement("option", { value: "minutes" }, "\u5206\u949F"),
+      /* @__PURE__ */ React.createElement("option", { value: "hours" }, "\u5C0F\u65F6")
+    ))), scheduleType === "TIME" && /* @__PURE__ */ React.createElement(Field, { label: "\u65F6\u95F4", hint: "\u6BCF\u5929\u5728\u6B64\u65F6\u95F4\u4FEE\u526A\u4E00\u6B21" }, /* @__PURE__ */ React.createElement(
       "input",
       {
         type: "time",
@@ -640,7 +640,7 @@ function register(platform2) {
           setScheduleDirty(true);
         }
       }
-    )), scheduleType === "CRON" && /* @__PURE__ */ React.createElement("div", { className: "field span-2" }, /* @__PURE__ */ React.createElement("label", null, "Cron Jobs"), /* @__PURE__ */ React.createElement("div", { className: "dt-wrap" }, /* @__PURE__ */ React.createElement("table", { className: "dt" }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("th", null, "Expression"), /* @__PURE__ */ React.createElement("th", null, "Description"), /* @__PURE__ */ React.createElement("th", null))), /* @__PURE__ */ React.createElement("tbody", null, cronJobs.length === 0 && /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("td", { colSpan: 3, className: "text-text-faint" }, "No cron jobs defined.")), cronJobs.map((job, idx) => /* @__PURE__ */ React.createElement("tr", { key: idx }, /* @__PURE__ */ React.createElement("td", null, /* @__PURE__ */ React.createElement(
+    )), scheduleType === "CRON" && /* @__PURE__ */ React.createElement("div", { className: "field span-2" }, /* @__PURE__ */ React.createElement("label", null, "Cron \u4EFB\u52A1"), /* @__PURE__ */ React.createElement("div", { className: "dt-wrap" }, /* @__PURE__ */ React.createElement("table", { className: "dt" }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("th", null, "\u8868\u8FBE\u5F0F"), /* @__PURE__ */ React.createElement("th", null, "\u63CF\u8FF0"), /* @__PURE__ */ React.createElement("th", null))), /* @__PURE__ */ React.createElement("tbody", null, cronJobs.length === 0 && /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("td", { colSpan: 3, className: "text-text-faint" }, "\u672A\u5B9A\u4E49 Cron \u4EFB\u52A1")), cronJobs.map((job, idx) => /* @__PURE__ */ React.createElement("tr", { key: idx }, /* @__PURE__ */ React.createElement("td", null, /* @__PURE__ */ React.createElement(
       "input",
       {
         type: "text",
@@ -672,7 +672,7 @@ function register(platform2) {
           setScheduleDirty(true);
         }
       },
-      "Delete"
+      "\u5220\u9664"
     ))))))), /* @__PURE__ */ React.createElement("div", { className: "mt-[7px]" }, /* @__PURE__ */ React.createElement(
       "button",
       {
@@ -684,8 +684,8 @@ function register(platform2) {
           setScheduleDirty(true);
         }
       },
-      "Add"
-    )), /* @__PURE__ */ React.createElement("div", { className: "hint mt-[5px]" }, "Quartz cron expressions with at least 6 fields (seconds minutes hours day-of-month month day-of-week [year])."))) : /* @__PURE__ */ React.createElement("div", { className: "hint" }, "The polling schedule (pollingProperties) could not be parsed; it will be preserved unchanged."))), /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("div", { className: "panel-header" }, "Prune Settings"), /* @__PURE__ */ React.createElement("div", { className: "panel-body" }, /* @__PURE__ */ React.createElement("div", { className: "form-grid" }, /* @__PURE__ */ React.createElement(Field, { label: "Block Size" }, /* @__PURE__ */ React.createElement(
+      "\u6DFB\u52A0"
+    )), /* @__PURE__ */ React.createElement("div", { className: "hint mt-[5px]" }, "Quartz cron \u8868\u8FBE\u5F0F\uFF0C\u81F3\u5C11 6 \u4E2A\u5B57\u6BB5\uFF08\u79D2 \u5206 \u65F6 \u65E5 \u6708 \u5468 [\u5E74]\uFF09"))) : /* @__PURE__ */ React.createElement("div", { className: "hint" }, "\u65E0\u6CD5\u89E3\u6790\u8F6E\u8BE2\u8C03\u5EA6\uFF08pollingProperties\uFF09\uFF0C\u5C06\u539F\u6837\u4FDD\u7559"))), /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("div", { className: "panel-header" }, "\u4FEE\u526A\u8BBE\u7F6E"), /* @__PURE__ */ React.createElement("div", { className: "panel-body" }, /* @__PURE__ */ React.createElement("div", { className: "form-grid" }, /* @__PURE__ */ React.createElement(Field, { label: "\u5757\u5927\u5C0F" }, /* @__PURE__ */ React.createElement(
       "input",
       {
         type: "number",
@@ -694,7 +694,7 @@ function register(platform2) {
         onInput: (e) => setBlockSize(e.target.value),
         onChange: (e) => setBlockSize(e.target.value)
       }
-    )), /* @__PURE__ */ React.createElement("div", { className: "field" }, /* @__PURE__ */ React.createElement("label", null, "Prune Events"), /* @__PURE__ */ React.createElement(YesNo, { value: pruneEvents, onChange: setPruneEvents })), /* @__PURE__ */ React.createElement(Field, { label: "Prune Event Age (days)" }, /* @__PURE__ */ React.createElement(
+    )), /* @__PURE__ */ React.createElement("div", { className: "field" }, /* @__PURE__ */ React.createElement("label", null, "\u4FEE\u526A\u4E8B\u4EF6"), /* @__PURE__ */ React.createElement(YesNo, { value: pruneEvents, onChange: setPruneEvents })), /* @__PURE__ */ React.createElement(Field, { label: "\u4FEE\u526A\u4E8B\u4EF6\u4FDD\u7559\u5929\u6570" }, /* @__PURE__ */ React.createElement(
       "input",
       {
         type: "number",
@@ -704,7 +704,7 @@ function register(platform2) {
         onInput: (e) => setMaxEventAge(e.target.value),
         onChange: (e) => setMaxEventAge(e.target.value)
       }
-    ))))), /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("div", { className: "panel-header" }, "Archive Settings"), /* @__PURE__ */ React.createElement("div", { className: "panel-body" }, /* @__PURE__ */ React.createElement("div", { className: "form-grid" }, /* @__PURE__ */ React.createElement("div", { className: "field" }, /* @__PURE__ */ React.createElement("label", null, "Enable Archiving"), /* @__PURE__ */ React.createElement(YesNo, { value: archiveEnabled, onChange: setArchiveEnabled })), /* @__PURE__ */ React.createElement(Field, { label: "Archiver Block Size" }, /* @__PURE__ */ React.createElement(
+    ))))), /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("div", { className: "panel-header" }, "\u5F52\u6863\u8BBE\u7F6E"), /* @__PURE__ */ React.createElement("div", { className: "panel-body" }, /* @__PURE__ */ React.createElement("div", { className: "form-grid" }, /* @__PURE__ */ React.createElement("div", { className: "field" }, /* @__PURE__ */ React.createElement("label", null, "\u542F\u7528\u5F52\u6863"), /* @__PURE__ */ React.createElement(YesNo, { value: archiveEnabled, onChange: setArchiveEnabled })), /* @__PURE__ */ React.createElement(Field, { label: "\u5F52\u6863\u5668\u5757\u5927\u5C0F" }, /* @__PURE__ */ React.createElement(
       "input",
       {
         type: "number",
@@ -714,7 +714,7 @@ function register(platform2) {
         onInput: (e) => setArchiverBlockSize(e.target.value),
         onChange: (e) => setArchiverBlockSize(e.target.value)
       }
-    ))), hasArchiver ? /* @__PURE__ */ React.createElement("div", { className: "form-grid mt-[11px]" }, /* @__PURE__ */ React.createElement(Field, { label: "Content" }, /* @__PURE__ */ React.createElement(
+    ))), hasArchiver ? /* @__PURE__ */ React.createElement("div", { className: "form-grid mt-[11px]" }, /* @__PURE__ */ React.createElement(Field, { label: "\u5185\u5BB9" }, /* @__PURE__ */ React.createElement(
       "select",
       {
         value: contentKey,
@@ -727,7 +727,7 @@ function register(platform2) {
         }
       },
       CONTENT_OPTIONS.map((o) => /* @__PURE__ */ React.createElement("option", { key: o.key, value: o.key }, o.label))
-    )), /* @__PURE__ */ React.createElement("div", { className: "field" }, /* @__PURE__ */ React.createElement("label", null, "Encrypt"), /* @__PURE__ */ React.createElement("label", { className: "inline-flex items-center gap-2" }, /* @__PURE__ */ React.createElement(
+    )), /* @__PURE__ */ React.createElement("div", { className: "field" }, /* @__PURE__ */ React.createElement("label", null, "\u52A0\u5BC6"), /* @__PURE__ */ React.createElement("label", { className: "inline-flex items-center gap-2" }, /* @__PURE__ */ React.createElement(
       "input",
       {
         type: "checkbox",
@@ -738,7 +738,7 @@ function register(platform2) {
           setArchiverDirty(true);
         }
       }
-    ), "Encrypt exported content")), includeAttachments !== null && /* @__PURE__ */ React.createElement("div", { className: "field" }, /* @__PURE__ */ React.createElement("label", null, "Include Attachments"), /* @__PURE__ */ React.createElement(
+    ), "\u52A0\u5BC6\u5BFC\u51FA\u7684\u5185\u5BB9")), includeAttachments !== null && /* @__PURE__ */ React.createElement("div", { className: "field" }, /* @__PURE__ */ React.createElement("label", null, "\u5305\u542B\u9644\u4EF6"), /* @__PURE__ */ React.createElement(
       YesNo,
       {
         value: includeAttachments,
@@ -748,7 +748,7 @@ function register(platform2) {
           setArchiverDirty(true);
         }
       }
-    )), /* @__PURE__ */ React.createElement(Field, { label: "Compression" }, /* @__PURE__ */ React.createElement(
+    )), /* @__PURE__ */ React.createElement(Field, { label: "\u538B\u7F29\u65B9\u5F0F" }, /* @__PURE__ */ React.createElement(
       "select",
       {
         value: compressKey,
@@ -759,7 +759,7 @@ function register(platform2) {
         }
       },
       COMPRESS_OPTIONS.map((o) => /* @__PURE__ */ React.createElement("option", { key: o.key, value: o.key }, o.label))
-    )), /* @__PURE__ */ React.createElement("div", { className: "field" }, /* @__PURE__ */ React.createElement("label", null, "Password Protect"), /* @__PURE__ */ React.createElement(
+    )), /* @__PURE__ */ React.createElement("div", { className: "field" }, /* @__PURE__ */ React.createElement("label", null, "\u5BC6\u7801\u4FDD\u62A4"), /* @__PURE__ */ React.createElement(
       YesNo,
       {
         value: passwordEnabled,
@@ -769,7 +769,7 @@ function register(platform2) {
           setArchiverDirty(true);
         }
       }
-    )), /* @__PURE__ */ React.createElement(Field, { label: "Password" }, /* @__PURE__ */ React.createElement(
+    )), /* @__PURE__ */ React.createElement(Field, { label: "\u5BC6\u7801" }, /* @__PURE__ */ React.createElement(
       "input",
       {
         type: "password",
@@ -784,7 +784,7 @@ function register(platform2) {
           setArchiverDirty(true);
         }
       }
-    )), /* @__PURE__ */ React.createElement(Field, { label: "Encryption" }, /* @__PURE__ */ React.createElement(
+    )), /* @__PURE__ */ React.createElement(Field, { label: "\u52A0\u5BC6\u7C7B\u578B" }, /* @__PURE__ */ React.createElement(
       "select",
       {
         value: encryptionType,
@@ -795,7 +795,7 @@ function register(platform2) {
         }
       },
       ENCRYPTION_OPTIONS.map((o) => /* @__PURE__ */ React.createElement("option", { key: o.value, value: o.value }, o.label))
-    )), /* @__PURE__ */ React.createElement("div", { className: "span-2 flex gap-3 items-stretch" }, /* @__PURE__ */ React.createElement("div", { className: "flex-1 min-w-0 flex flex-col gap-2" }, /* @__PURE__ */ React.createElement(Field, { label: "Root Path" }, /* @__PURE__ */ React.createElement(
+    )), /* @__PURE__ */ React.createElement("div", { className: "span-2 flex gap-3 items-stretch" }, /* @__PURE__ */ React.createElement("div", { className: "flex-1 min-w-0 flex flex-col gap-2" }, /* @__PURE__ */ React.createElement(Field, { label: "\u6839\u8DEF\u5F84" }, /* @__PURE__ */ React.createElement(
       "input",
       {
         ref: rootInputRef,
@@ -816,7 +816,7 @@ function register(platform2) {
           setArchiverDirty(true);
         }
       }
-    )), /* @__PURE__ */ React.createElement(Field, { label: "File Pattern" }, /* @__PURE__ */ React.createElement(
+    )), /* @__PURE__ */ React.createElement(Field, { label: "\u6587\u4EF6\u6A21\u5F0F" }, /* @__PURE__ */ React.createElement(
       "input",
       {
         ref: patternInputRef,
@@ -842,7 +842,7 @@ function register(platform2) {
       {
         className: "border border-line rounded-[4px] py-1 min-w-[162px] max-w-[207px] bg-bg1 overflow-auto self-stretch",
         style: { opacity: archiveEnabled ? 1 : 0.5 },
-        title: "Drag a variable into Root Path / File Pattern, or click to insert it at the last-focused one"
+        title: "\u62D6\u52A8\u53D8\u91CF\u5230\u6839\u8DEF\u5F84 / \u6587\u4EF6\u6A21\u5F0F\uFF0C\u6216\u70B9\u51FB\u63D2\u5165\u5230\u6700\u8FD1\u805A\u7126\u7684\u8F93\u5165\u6846"
       },
       ARCHIVE_VARS.map((v) => /* @__PURE__ */ React.createElement(
         "div",
@@ -859,7 +859,7 @@ function register(platform2) {
         },
         v.label
       ))
-    ))) : /* @__PURE__ */ React.createElement("div", { className: "hint mt-[11px]" }, "Advanced archiver options (archiverOptions) could not be parsed; they will be preserved unchanged."))));
+    ))) : /* @__PURE__ */ React.createElement("div", { className: "hint mt-[11px]" }, "\u65E0\u6CD5\u89E3\u6790\u5F52\u6863\u9AD8\u7EA7\u9009\u9879\uFF08archiverOptions\uFF09\uFF0C\u5C06\u539F\u6837\u4FDD\u7559"))));
   }
   platform2.registerSettingsPanel({
     label: "Data Pruner",

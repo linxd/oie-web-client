@@ -98,7 +98,7 @@ export async function persistLibraryAssociations(channel, ref, version, confirmO
         let needsWrite = false;
         const payload = current.map(library => {
             if (!library.id || !Number.isFinite(Number(library.revision)))
-                throw new Error('The engine returned an invalid code template library. Save was stopped.');
+                throw new Error('引擎返回了无效的代码模板库，保存已中止。');
             const copy = JSON.parse(JSON.stringify(library));
             if (intents.includes(library.id) && libraryEnabledFor(library, channel.id) !== state.checked.get(library.id)) {
                 needsWrite = true;
@@ -134,7 +134,7 @@ export async function persistLibraryAssociations(channel, ref, version, confirmO
                 return attempt(true);
             }
             if (String(result?.librariesSuccess) !== 'true')
-                throw new Error('Code template library changes were not confirmed. Your selections are retained for retry.');
+                throw new Error('代码模板库变更未获确认。您的选择已保留，可重试。');
         }
         // Includes a lost-response retry whose membership already matches. Checkpoint
         // only after the server confirms this stage, independently of later stages.

@@ -10,12 +10,12 @@ export async function mutateChannelGroups(
     const read = async () => {
         const groups = await api.channelGroups.list();
         if (options.expectedGroup && !groups.some(group => group.id === options.expectedGroup!.id)) {
-            throw new Error('This group was removed. Refresh the channel list before saving.');
+            throw new Error('该通道组已被删除。请刷新通道列表后再保存。');
         }
         return groups;
     };
     const confirm = async () => {
-        if (!options.confirmOverwrite) throw new Error('Groups were not saved. Refresh and review the current groups before retrying; another administrator may have changed them.');
+        if (!options.confirmOverwrite) throw new Error('通道组未保存。请刷新并查看当前通道组后重试；其他管理员可能已修改过。');
         return options.confirmOverwrite();
     };
     let current = await read();
@@ -30,6 +30,6 @@ export async function mutateChannelGroups(
         if (!await confirm()) return false;
         result = await api.channelGroups.bulkUpdate(change(structuredClone(await read())), removedIds, true);
     }
-    if (result !== true && result !== 'true') throw new Error('The engine did not confirm the group save. Your changes are still unsaved.');
+    if (result !== true && result !== 'true') throw new Error('引擎未确认通道组保存。您的更改仍未保存。');
     return true;
 }

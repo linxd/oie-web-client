@@ -21,10 +21,10 @@ import { RailPane, TaskButton, CodeEditor, Tabs } from '../ui.jsx';
 
 /* ScriptController script keys + JavaScriptConstants default bodies */
 const SCRIPTS = [
-    { key: 'Deploy', label: 'Deploy', defaultValue: '// This script executes once for each deploy or redeploy task\n// You only have access to the globalMap here to persist data\nreturn;' },
-    { key: 'Undeploy', label: 'Undeploy', defaultValue: '// This script executes once for each deploy, undeploy, or redeploy task\n// if at least one channel was undeployed\n// You only have access to the globalMap here to persist data\nreturn;' },
-    { key: 'Preprocessor', label: 'Preprocessor', defaultValue: '// Modify the message variable below to pre process data\n// This script applies across all channels\nreturn message;' },
-    { key: 'Postprocessor', label: 'Postprocessor', defaultValue: '// This script executes once after a message has been processed\n// This script applies across all channels\n// Responses returned from here will be stored as "Postprocessor" in the response map\n// You have access to "response", if returned from the channel postprocessor\nreturn;' }
+    { key: 'Deploy', label: '部署', defaultValue: '// This script executes once for each deploy or redeploy task\n// You only have access to the globalMap here to persist data\nreturn;' },
+    { key: 'Undeploy', label: '取消部署', defaultValue: '// This script executes once for each deploy, undeploy, or redeploy task\n// if at least one channel was undeployed\n// You only have access to the globalMap here to persist data\nreturn;' },
+    { key: 'Preprocessor', label: '预处理器', defaultValue: '// Modify the message variable below to pre process data\n// This script applies across all channels\nreturn message;' },
+    { key: 'Postprocessor', label: '后处理器', defaultValue: '// This script executes once after a message has been processed\n// This script applies across all channels\n// Responses returned from here will be stored as "Postprocessor" in the response map\n// You have access to "response", if returned from the channel postprocessor\nreturn;' }
 ];
 
 function parseScripts(xml: string, importing = false): Record<string, string> {
@@ -35,17 +35,17 @@ function parseScripts(xml: string, importing = false): Record<string, string> {
     const hasText = (element: Element) => Array.from(element.childNodes)
         .some(node => (node.nodeType === Node.TEXT_NODE || node.nodeType === Node.CDATA_SECTION_NODE) && !!node.textContent?.trim());
     if (doc.querySelector('parsererror') || doc.doctype || map.tagName !== 'map' || hasText(map)) {
-        throw new Error('Expected a global scripts XML <map> export.');
+        throw new Error('应为全局脚本 XML <map> 导出文件');
     }
     const out: Record<string, string> = Object.create(null);
     for (const entry of map.children) {
         const pair = Array.from(entry.children);
         if (entry.tagName !== 'entry' || entry.attributes.length > 0 || hasText(entry) || pair.length !== 2
             || pair.some(node => node.tagName !== 'string' || node.attributes.length > 0 || node.children.length > 0)) {
-            throw new Error('Invalid global script entry.');
+            throw new Error('全局脚本条目无效');
         }
         const key = pair[0].textContent ?? '';
-        if (Object.hasOwn(out, key)) throw new Error('Duplicate global script entry.');
+        if (Object.hasOwn(out, key)) throw new Error('存在重复的全局脚本条目');
         out[key] = pair[1].textContent ?? '';
     }
     if (importing) {
@@ -58,10 +58,10 @@ function parseScripts(xml: string, importing = false): Record<string, string> {
         }
     }
     if (Object.keys(out).some(key => !SCRIPTS.some(def => def.key === key))) {
-        throw new Error('Unknown global script entry.');
+        throw new Error('未知的全局脚本条目');
     }
     if (!importing && SCRIPTS.some(def => !Object.hasOwn(out, def.key))) {
-        throw new Error('The engine returned an incomplete global scripts map.');
+        throw new Error('引擎返回的全局脚本映射不完整');
     }
     return out;
 }
@@ -95,7 +95,7 @@ export function GlobalScriptsView() {
         } catch (e: any) {
             if (generation !== loadGeneration.current) return;
             setLoadStatus('failed');
-            toast(`Load failed: ${e.message}`, 'error');
+            toast(`加载失败：${e.message}`, 'error');
         }
     };
 
@@ -106,21 +106,21 @@ export function GlobalScriptsView() {
         return new Promise((resolve: any) => {
             if (!platform.checkTask('script', 'doSaveGlobalScripts')) {
                 modal({
-                    title: 'Unsaved Changes',
-                    body: h('div', "You don't have permission to save the global scripts. Your changes will be discarded."),
+                    title: '未保存的更改',
+                    body: h('div', '您没有保存全局脚本的权限，更改将被丢弃'),
                     onClose: () => resolve('cancel'),
-                    buttons: [{ label: 'OK', primary: true, onClick: () => resolve('discard') }]
+                    buttons: [{ label: '确定', primary: true, onClick: () => resolve('discard') }]
                 });
                 return;
             }
             modal({
-                title: 'Unsaved Changes',
-                body: h('div', 'You have unsaved changes to the global scripts. Would you like to save them?'),
+                title: '未保存的更改',
+                body: h('div', '全局脚本有未保存的更改，要保存吗？'),
                 onClose: () => resolve('cancel'),
                 buttons: [
-                    { label: 'Cancel', onClick: () => resolve('cancel') },
-                    { label: "Don't Save", danger: true, onClick: () => resolve('discard') },
-                    { label: 'Save Changes', primary: true, onClick: () => resolve('save') }
+                    { label: '取消', onClick: () => resolve('cancel') },
+                    { label: '不保存', danger: true, onClick: () => resolve('discard') },
+                    { label: '保存更改', primary: true, onClick: () => resolve('save') }
                 ]
             });
         });
@@ -163,19 +163,19 @@ export function GlobalScriptsView() {
             if (!isCurrent()) return;
             const errors = results.flatMap((result, index) => result.ok === true ? [] : [
                 result.ok === false
-                    ? `Error in global script "${SCRIPTS[index].label}": ${result.message}`
-                    : `Validation unavailable for "${SCRIPTS[index].label}": ${result.message || 'Try again when the engine validator is available.'}`
+                    ? `全局脚本“${SCRIPTS[index].label}”出错：${result.message}`
+                    : `无法校验“${SCRIPTS[index].label}”：${result.message || '请等待引擎校验器可用后重试'}`
             ]);
             if (errors.length) throw new Error(errors.join('\n\n'));
             await api.server.setGlobalScripts(map);
             assertSession();
             if (!isCurrent()) return;
             setDirtyState(false);
-            toast('Global scripts saved');
+            toast('全局脚本已保存');
         } catch (e: any) {
             if (!isCurrent()) return;
             try { assertSession?.(); } catch { return; }
-            toast(`Save failed: ${e.message}`, 'error');
+            toast(`保存失败：${e.message}`, 'error');
         }
     }
 
@@ -189,8 +189,8 @@ export function GlobalScriptsView() {
         const result = await validateScript(editors.current[def.key]?.getValue() ?? '');
         try { assertSession(); } catch { return; }
         if (!readyRef.current || generation !== loadGeneration.current) return;
-        if (result.ok === true) toast(`${def.label} script validated successfully`);
-        else if (result.ok === false) toast(`${def.label} script — ${result.message}`, 'error');
+        if (result.ok === true) toast(`${def.label}脚本校验通过`);
+        else if (result.ok === false) toast(`${def.label}脚本 — ${result.message}`, 'error');
         else toast(result.message, 'warn');
     }
 
@@ -209,16 +209,16 @@ export function GlobalScriptsView() {
             };
             const assertCurrent = () => {
                 assertSession();
-                if (!isCurrent()) throw new Error('Export cancelled.');
+                if (!isCurrent()) throw new Error('导出已取消');
             };
             if (dirtyRef.current) {
                 if (!platform.checkTask('script', 'doSaveGlobalScripts')) {
-                    toast("You don't have permission to save the global scripts before exporting.", 'error');
+                    toast('您没有权限在导出前保存全局脚本', 'error');
                     return;
                 }
-                if (!await confirmDialog('Export Scripts',
-                    'You must save your global scripts before exporting. Would you like to save them now?',
-                    { okLabel: 'Save and Export' }) || !isCurrent()) return;
+                if (!await confirmDialog('导出脚本',
+                    '导出前必须先保存全局脚本，要现在保存吗？',
+                    { okLabel: '保存并导出' }) || !isCurrent()) return;
                 await saveUnlocked();
                 if (!isCurrent() || dirtyRef.current) return;
             }
@@ -233,9 +233,9 @@ export function GlobalScriptsView() {
                 }, assertCurrent);
             } catch (e: any) {
                 if (!isCurrent()) return;
-                toast(`Export failed: ${e.message}`, 'error');
+                toast(`导出失败：${e.message}`, 'error');
             }
-        }, 'Exporting global scripts…');
+        }, '正在导出全局脚本…');
     }
 
     async function importScripts() {
@@ -257,18 +257,18 @@ export function GlobalScriptsView() {
                 const file = await pickFile('.xml');
                 if (!file || !isCurrent()) return;
                 const imported = parseScripts(file.content, true);
-                if (!await confirmDialog('Import Scripts',
-                    `Import "${file.name}" into the editor? Included scripts will replace your current drafts. Save Scripts applies the changes to the server.`,
-                    { danger: true, okLabel: 'Import' })) return;
+                if (!await confirmDialog('导入脚本',
+                    `将“${file.name}”导入编辑器？包含的脚本会替换当前草稿，点击“保存脚本”后才会应用到服务器`,
+                    { danger: true, okLabel: '导入' })) return;
                 if (!isCurrent()) return;
                 for (const [key, value] of Object.entries(imported)) editors.current[key]?.setValue(value);
                 setDirtyState(true);
-                toast(`Imported ${file.name}`);
+                toast(`已导入 ${file.name}`);
             } catch (e: any) {
                 if (!isCurrent()) return;
-                toast(`Import failed: ${e.message}`, 'error');
+                toast(`导入失败：${e.message}`, 'error');
             }
-        }, 'Importing global scripts…');
+        }, '正在导入全局脚本…');
     }
 
     const tabs = SCRIPTS.map((def: any) => ({
@@ -285,20 +285,20 @@ export function GlobalScriptsView() {
     return (
         <div className="view">
             <ViewTasks>
-                <RailPane title="Script Tasks" paneKey="tasks:Script Tasks" group="script">
+                <RailPane title="脚本任务" paneKey="tasks:Script Tasks" group="script">
                     <div className="taskbar" data-pane-title="Script Tasks">
-                        {dirty && loadStatus === 'loaded' && <TaskButton label="Save Scripts" icon="save" primary task="doSaveGlobalScripts" onClick={save} />}
-                        <TaskButton label="Validate Script" icon="check" task="doValidateCurrentGlobalScript" disabled={loadStatus !== 'loaded'} onClick={validateActive} />
-                        <TaskButton label="Import Scripts" icon="import" task="doImportGlobalScripts" disabled={loadStatus !== 'loaded'} onClick={importScripts} />
-                        <TaskButton label="Export Scripts" icon="export" task="doExportGlobalScripts" onClick={exportScripts} />
+                        {dirty && loadStatus === 'loaded' && <TaskButton label="保存脚本" icon="save" primary task="doSaveGlobalScripts" onClick={save} />}
+                        <TaskButton label="校验脚本" icon="check" task="doValidateCurrentGlobalScript" disabled={loadStatus !== 'loaded'} onClick={validateActive} />
+                        <TaskButton label="导入脚本" icon="import" task="doImportGlobalScripts" disabled={loadStatus !== 'loaded'} onClick={importScripts} />
+                        <TaskButton label="导出脚本" icon="export" task="doExportGlobalScripts" onClick={exportScripts} />
                     </div>
                 </RailPane>
             </ViewTasks>
             <div className="view-body flush flex flex-col">
                 {loadStatus === 'loaded'
-                    ? <Tabs tabs={tabs} active={active} onActiveChange={setActive} label="Global scripts" />
-                    : <div className="p-4" role="status">{loadStatus === 'loading' ? 'Loading global scripts…' : <>
-                        Global scripts could not be loaded. <button className="btn" onClick={load}>Retry</button>
+                    ? <Tabs tabs={tabs} active={active} onActiveChange={setActive} label="全局脚本" />
+                    : <div className="p-4" role="status">{loadStatus === 'loading' ? '正在加载全局脚本…' : <>
+                        无法加载全局脚本 <button className="btn" onClick={load}>重试</button>
                     </>}</div>}
             </div>
         </div>

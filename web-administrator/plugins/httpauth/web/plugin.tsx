@@ -23,12 +23,12 @@ import { DESTINATION_MAPPINGS } from '@oie/web-ui';
 const React = platform.React;
 
 const AUTH_TYPE_OPTIONS = [
-    { value: 'NONE', label: 'None' },
-    { value: 'BASIC', label: 'Basic Authentication' },
-    { value: 'DIGEST', label: 'Digest Authentication' },
+    { value: 'NONE', label: '无' },
+    { value: 'BASIC', label: '基本认证' },
+    { value: 'DIGEST', label: '摘要认证' },
     { value: 'JAVASCRIPT', label: 'JavaScript' },
-    { value: 'CUSTOM', label: 'Custom Java Class' },
-    { value: 'OAUTH2_VERIFICATION', label: 'OAuth 2.0 Token Verification' }
+    { value: 'CUSTOM', label: '自定义 Java 类' },
+    { value: 'OAUTH2_VERIFICATION', label: 'OAuth 2.0 令牌验证' }
 ];
 
 const AUTH_CLASSES: Record<string, string> = {
@@ -162,7 +162,7 @@ export function register(platform: Platform) {
                 language: language || 'text',
                 minHeight: minHeight || '240px',
                 popoutable: true,   // dedicated full-screen code view
-                popoutTitle: 'Script',
+                popoutTitle: '脚本',
                 popoutVars: DESTINATION_MAPPINGS,   // connector settings context
                 onChange: (v: any) => onChangeRef.current(v)
             });
@@ -192,15 +192,15 @@ export function register(platform: Platform) {
             <div>
                 {rows.map((row: any, i: any) => (
                     <div key={i} className="flex gap-1.5 mb-1.5">
-                        <input type="text" placeholder="Name" className="flex-1" value={row[0]}
+                        <input type="text" placeholder="名称" className="flex-1" value={row[0]}
                             onInput={(e: any) => { const next = rows.slice(); next[i] = [e.target.value, row[1]]; commit(next); }}
                             onChange={(e: any) => { const next = rows.slice(); next[i] = [e.target.value, row[1]]; commit(next); }} />
                         <input type={secretValues ? 'password' : 'text'}
                             autoComplete={secretValues ? 'off' : undefined}
-                            placeholder="Value" className="flex-[2]" value={row[1]}
+                            placeholder="值" className="flex-[2]" value={row[1]}
                             onInput={(e: any) => { const next = rows.slice(); next[i] = [row[0], e.target.value]; commit(next); }}
                             onChange={(e: any) => { const next = rows.slice(); next[i] = [row[0], e.target.value]; commit(next); }} />
-                        <button type="button" className="icon-btn" title="Remove"
+                        <button type="button" className="icon-btn" title="移除"
                             onClick={() => { const next = rows.slice(); next.splice(i, 1); commit(next); }}>
                             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
                                 strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
@@ -210,7 +210,7 @@ export function register(platform: Platform) {
                     </div>
                 ))}
                 <button type="button" className="btn"
-                    onClick={() => commit([...rows, ['', '']])}>Add</button>
+                    onClick={() => commit([...rows, ['', '']])}>添加</button>
             </div>
         );
     }
@@ -274,25 +274,25 @@ export function register(platform: Platform) {
         const setUse = (v: any) => { entry.isUseCredentialsVariable = v; setUseVar(v); onChange(); };
         return (
             <React.Fragment>
-                <CformRow label="Use Credentials">
+                <CformRow label="使用凭据">
                     <div className="radio-group inline-row">
                         <label className="check">
-                            <input type="radio" name={name} checked={!useVar} onChange={() => setUse(false)} /> Table
+                            <input type="radio" name={name} checked={!useVar} onChange={() => setUse(false)} /> 表格
                         </label>
                         <label className="check">
-                            <input type="radio" name={name} checked={useVar} onChange={() => setUse(true)} /> Variable
+                            <input type="radio" name={name} checked={useVar} onChange={() => setUse(true)} /> 变量
                         </label>
                     </div>
                 </CformRow>
                 {!useVar && (
-                    <CformRow label="Credentials (user / password)" top>
+                    <CformRow label="凭据（用户名 / 密码）" top>
                         {/* secretValues: these are HTTP auth passwords — mask them
                             and keep the browser's password manager out of it (#24). */}
                         <KeyValueField entry={entry} fieldKey="credentials" onChange={onChange} secretValues />
                     </CformRow>
                 )}
                 {useVar && (
-                    <TextRow label="Credentials Variable" entry={entry} fieldKey="credentialsVariable"
+                    <TextRow label="凭据变量" entry={entry} fieldKey="credentialsVariable"
                         width="220px" onChange={onChange} />
                 )}
             </React.Fragment>
@@ -307,20 +307,20 @@ export function register(platform: Platform) {
             case 'BASIC':
                 return (
                     <div className="cform"><div className="cform-section"><div className="cform-grid">
-                        <TextRow label="Realm" entry={entry} fieldKey="realm" width="220px" onChange={onChange} />
+                        <TextRow label="认证域（Realm）" entry={entry} fieldKey="realm" width="220px" onChange={onChange} />
                         <CredentialFields entry={entry} onChange={onChange} />
                     </div></div></div>
                 );
             case 'DIGEST':
                 return (
                     <div className="cform"><div className="cform-section"><div className="cform-grid">
-                        <TextRow label="Realm" entry={entry} fieldKey="realm" width="220px" onChange={onChange} />
-                        <CformRow label="Algorithms">
+                        <TextRow label="认证域（Realm）" entry={entry} fieldKey="realm" width="220px" onChange={onChange} />
+                        <CformRow label="算法">
                             <EnumSetField entry={entry} fieldKey="algorithms" elementClass={DIGEST_ALGORITHM_CLASS}
                                 options={[{ value: 'MD5', label: 'MD5' }, { value: 'MD5_SESS', label: 'MD5-sess' }]}
                                 onChange={onChange} />
                         </CformRow>
-                        <CformRow label="QOP Modes">
+                        <CformRow label="QOP 模式">
                             <EnumSetField entry={entry} fieldKey="qopModes" elementClass={DIGEST_QOP_CLASS}
                                 options={[{ value: 'AUTH', label: 'auth' }, { value: 'AUTH_INT', label: 'auth-int' }]}
                                 onChange={onChange} />
@@ -332,7 +332,7 @@ export function register(platform: Platform) {
             case 'JAVASCRIPT':
                 return (
                     <div className="cform"><div className="cform-section"><div className="cform-grid">
-                        <CformRow label="Script" top>
+                        <CformRow label="脚本" top>
                             <CodeField value={entry.script} language="javascript" minHeight="200px"
                                 onChange={(v: any) => { entry.script = v; onChange(); }} />
                         </CformRow>
@@ -341,9 +341,9 @@ export function register(platform: Platform) {
             case 'CUSTOM':
                 return (
                     <div className="cform"><div className="cform-section"><div className="cform-grid">
-                        <TextRow label="Class Name" entry={entry} fieldKey="authenticatorClass" width="420px"
+                        <TextRow label="类名" entry={entry} fieldKey="authenticatorClass" width="420px"
                             placeholder="com.example.MyAuthenticator" onChange={onChange} />
-                        <CformRow label="Properties" top>
+                        <CformRow label="属性" top>
                             <KeyValueField entry={entry} fieldKey="properties" onChange={onChange} />
                         </CformRow>
                     </div></div></div>
@@ -351,15 +351,15 @@ export function register(platform: Platform) {
             case 'OAUTH2_VERIFICATION':
                 return (
                     <div className="cform"><div className="cform-section"><div className="cform-grid">
-                        <CformRow label="Token Location">
+                        <CformRow label="令牌位置">
                             <select className="w-[144px]" value={entry.tokenLocation == null ? '' : String(entry.tokenLocation)}
                                 onChange={(e: any) => { entry.tokenLocation = e.target.value; onChange(); }}>
-                                <option value="HEADER">Request Header</option>
-                                <option value="QUERY">Query Parameter</option>
+                                <option value="HEADER">请求头</option>
+                                <option value="QUERY">查询参数</option>
                             </select>
                         </CformRow>
-                        <TextRow label="Token Field Name" entry={entry} fieldKey="locationKey" width="220px" onChange={onChange} />
-                        <TextRow label="Verification URL" entry={entry} fieldKey="verificationURL" width="420px" onChange={onChange} />
+                        <TextRow label="令牌字段名" entry={entry} fieldKey="locationKey" width="220px" onChange={onChange} />
+                        <TextRow label="验证 URL" entry={entry} fieldKey="verificationURL" width="420px" onChange={onChange} />
                     </div></div></div>
                 );
             default:
@@ -382,7 +382,7 @@ export function register(platform: Platform) {
         return (
             <div>
                 <div className="field">
-                    <label>Authentication Type</label>
+                    <label>认证类型</label>
                     <select className="w-[198px]" value={type}
                         onChange={(e: any) => { setAuthType(properties, e.target.value); onChange(); force(); }}>
                         {AUTH_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -397,7 +397,7 @@ export function register(platform: Platform) {
 
     platform.registerConnectorPropertiesPanel({
         id: 'httpauth',
-        title: 'Authentication',
+        title: '认证',
         // A truthy fqcn so the channel editor renders this panel; the auth type
         // (and thus the stored class) is managed inside the component via pluginProperties.
         propertiesClass: (transportName: any, mode: any, connector: any) =>

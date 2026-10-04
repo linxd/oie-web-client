@@ -47,7 +47,7 @@ export async function resolveGroupImport(current: Model[], imported: Model, call
             const id = callbacks.newId();
             if (id && id !== 'Default Group' && !current.some(candidate => candidate.id === id)) return id;
         }
-        throw new Error('Could not allocate an unused channel group ID.');
+        throw new Error('无法分配未使用的通道组 ID');
     };
     const match = current.find(candidate => candidate.name === group.name);
     if (match) {
@@ -79,7 +79,7 @@ export function applyGroupImports(current: Model[], baseline: Model[], imports: 
     if (current.length !== baseline.length || baseline.some(group => {
         const latest = current.find(candidate => candidate.id === group.id);
         return !latest || latest.revision !== group.revision || JSON.stringify(latest) !== JSON.stringify(group);
-    })) throw new Error('Channel groups changed during import. Import again to review the latest groups. Channels already imported have been kept.');
+    })) throw new Error('导入期间通道组已发生变化，请重新导入以核对最新的通道组；已导入的通道已保留');
     let groups = structuredClone(current);
     const removedIds = new Set<string>();
     for (const { group, replacedId } of imports) {
@@ -96,11 +96,11 @@ export function applyGroupImports(current: Model[], baseline: Model[], imports: 
 }
 
 export function bundledLibrarySaveError(result: any): string {
-    if (String(result?.overrideNeeded) === 'true') return 'Libraries or code templates changed during import. Import again to review the latest server versions.';
-    if (String(result?.librariesSuccess) !== 'true') return result?.librariesCause?.detailMessage || 'The library set could not be saved';
+    if (String(result?.overrideNeeded) === 'true') return '导入期间库或代码模板已发生变化，请重新导入以核对服务器最新版本';
+    if (String(result?.librariesSuccess) !== 'true') return result?.librariesCause?.detailMessage || '库集合保存失败';
     const scan = (value: any): string => {
         if (!value || typeof value !== 'object') return '';
-        if (String(value.success) === 'false') return value.cause?.detailMessage || 'A code template could not be saved';
+        if (String(value.success) === 'false') return value.cause?.detailMessage || '代码模板保存失败';
         return Object.values(value).map(scan).find(Boolean) || '';
     };
     return scan(result.codeTemplateResults);

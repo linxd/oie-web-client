@@ -53,13 +53,13 @@ export function register(platform: Platform) {
         }, [id, api]);
 
         if (state.phase === 'loading') {
-            return <div className="loading-block"><div className="spinner" />Loading libraries…</div>;
+            return <div className="loading-block"><div className="spinner" />正在加载库…</div>;
         }
         if (state.phase === 'error') {
-            return <div className="text-text-faint">Library list unavailable</div>;
+            return <div className="text-text-faint">无法获取库列表</div>;
         }
         if (!state.libs.length) {
-            return <div className="text-text-faint">No libraries loaded</div>;
+            return <div className="text-text-faint">未加载任何库</div>;
         }
         return (
             <ul className="m-0 pl-[16px] max-h-[162px] overflow-auto font-mono text-[11px]">
@@ -80,36 +80,36 @@ export function register(platform: Platform) {
         return (
             <div className="form-grid">
                 <div className="field">
-                    <label>Name</label>
+                    <label>名称</label>
                     <input type="text" value={name} disabled={locked}
                         onInput={(e: any) => { obj.name = e.target.value; setName(e.target.value); }}
                         onChange={(e: any) => { obj.name = e.target.value; setName(e.target.value); }}
                         onBlur={() => { if (refreshTable) refreshTable(); }} />
-                    {locked ? <div className="hint">The Default Resource cannot be renamed</div> : null}
+                    {locked ? <div className="hint">缺省资源不能重命名</div> : null}
                 </div>
                 <div className="field">
-                    <label>Directory</label>
+                    <label>目录</label>
                     <input type="text" value={directory} disabled={locked}
                         onInput={(e: any) => { obj.directory = e.target.value; setDirectory(e.target.value); }}
                         onChange={(e: any) => { obj.directory = e.target.value; setDirectory(e.target.value); }} />
-                    {locked ? <div className="hint">The Default Resource directory cannot be changed</div> : null}
+                    {locked ? <div className="hint">缺省资源的目录不能更改</div> : null}
                 </div>
                 <div className="field">
-                    <label>Subdirectories</label>
+                    <label>子目录</label>
                     <label className="check">
                         <input type="checkbox" checked={recursion}
                             onChange={(e: any) => { obj.directoryRecursion = e.target.checked; setRecursion(e.target.checked); }} />
-                        Include All Subdirectories
+                        包含所有子目录
                     </label>
                 </div>
                 <div className="field span-2">
-                    <label>Description</label>
+                    <label>描述</label>
                     <textarea value={description}
                         onInput={(e: any) => { obj.description = e.target.value; setDescription(e.target.value); }}
                         onChange={(e: any) => { obj.description = e.target.value; setDescription(e.target.value); }} />
                 </div>
                 <div className="field span-2">
-                    <label>Loaded Libraries</label>
+                    <label>已加载的库</label>
                     <LoadedLibraries entry={entry} api={platform.api} />
                 </div>
             </div>
@@ -118,9 +118,9 @@ export function register(platform: Platform) {
 
     platform.registerResourceType('Directory', {
         type: 'Directory',
-        label: 'Directory',
+        label: '目录',
         propertiesClass: DIRECTORY_RESOURCE_CLASS,
-        detailHeader: 'Directory Settings',
+        detailHeader: '目录设置',
 
         /* New directory resource. ctx: { version, containerIsArray } — version
            mirrors an existing entry so the engine doesn't migrate from scratch;

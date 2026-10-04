@@ -19,26 +19,26 @@ const bool = (key: any, label: any, def: any, hint?: any) => ({ key, label, type
 const opt = (key: any, label: any, options: any, def: any, hint?: any) => ({ key, label, type: 'select', options, default: def, hint });
 const code = (key: any, label: any, def: any, hint?: any) => ({ key, label, type: 'code', default: def, hint });
 
-const BATCH_SCRIPT_HINT = 'JavaScript that splits the batch and returns the next message. ' +
-    "Has access to 'reader' (a Java BufferedReader); return null/empty to signal end of input. " +
-    'Only used when Process Batch is enabled in the connector.';
+const BATCH_SCRIPT_HINT = '拆分批处理并返回下一条消息的 JavaScript，' +
+    "可访问 'reader'（Java BufferedReader），返回 null/空 表示输入结束；" +
+    '仅在连接器中启用批处理时使用';
 
 const DEF: any = {
     name: 'HL7V3', label: 'HL7 v3.x', order: 20,
     propertiesClass: `${PKG}.HL7V3DataTypeProperties`,
     groups: [
         {
-            key: 'serializationProperties', label: 'Serialization',
+            key: 'serializationProperties', label: '序列化',
             class: `${PKG}.HL7V3SerializationProperties`,
             fields: [
-                bool('stripNamespaces', 'Strip Namespaces', false, 'Strip namespace definitions from the transformed XML message (prefixes are not removed).')
+                bool('stripNamespaces', '去除命名空间', false, '从转换后的 XML 消息中去除命名空间定义（不会移除前缀）')
             ]
         },
         {
-            key: 'batchProperties', label: 'Batch', class: `${PKG}.HL7V3BatchProperties`,
+            key: 'batchProperties', label: '批处理', class: `${PKG}.HL7V3BatchProperties`,
             fields: [
-                opt('splitType', 'Split Batch By', [{ value: 'JavaScript', label: 'JavaScript' }], 'JavaScript',
-                    'Method for splitting the batch message. Only used when Process Batch is enabled in the connector.'),
+                opt('splitType', '批处理拆分方式', [{ value: 'JavaScript', label: 'JavaScript' }], 'JavaScript',
+                    '拆分批处理消息的方式，仅在连接器中启用批处理时使用'),
                 code('batchScript', 'JavaScript', null, BATCH_SCRIPT_HINT)
             ]
         }

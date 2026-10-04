@@ -65,7 +65,28 @@ export const ALERT_VARIABLES = [
     'channelId', 'channelName', 'connectorName', 'connectorType', 'messageId'
 ];
 
+/* Display-only captions for the ErrorEventType values above — the values
+   themselves are engine enums and are sent to the server unchanged. */
+export const EVENT_TYPE_LABEL: Record<string, string> = {
+    ANY: '任意',
+    SOURCE_CONNECTOR: '源连接器',
+    DESTINATION_CONNECTOR: '目的地连接器',
+    SERIALIZER: '序列化器',
+    FILTER: '过滤器',
+    TRANSFORMER: '转换器',
+    USER_DEFINED_TRANSFORMER: '用户自定义转换器',
+    RESPONSE_VALIDATION: '响应校验',
+    RESPONSE_TRANSFORMER: '响应转换器',
+    ATTACHMENT_HANDLER: '附件处理器',
+    DEPLOY_SCRIPT: '部署脚本',
+    PREPROCESSOR_SCRIPT: '预处理器脚本',
+    POSTPROCESSOR_SCRIPT: '后处理器脚本',
+    UNDEPLOY_SCRIPT: '取消部署脚本'
+};
+
 export function eventTypeLabel(type: any) {
+    const label = EVENT_TYPE_LABEL[String(type)];
+    if (label) return label;
     return String(type).toLowerCase().split('_')
         .map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
@@ -117,12 +138,12 @@ function channelConnectorEntriesOf(channels: any) {
     const entries: any[] = [];
     for (const channel of channels) {
         if (!channel || !channel.id) continue;
-        const connectors = [{ name: 'Source', metaDataId: 0 }];
+        const connectors = [{ name: '源连接器', metaDataId: 0 }];
         for (const dest of api.asList(channel.destinationConnectors, 'connector')) {
             if (!dest || dest.metaDataId === undefined || dest.metaDataId === null) continue;
-            connectors.push({ name: String(dest.name ?? `Destination ${dest.metaDataId}`), metaDataId: Number(dest.metaDataId) });
+            connectors.push({ name: String(dest.name ?? `目的地 ${dest.metaDataId}`), metaDataId: Number(dest.metaDataId) });
         }
-        connectors.push({ name: '[New Destinations]', metaDataId: null as any });
+        connectors.push({ name: '[新目的地]', metaDataId: null as any });
         entries.push({ id: String(channel.id), name: String(channel.name ?? channel.id), connectors });
     }
     // The Swing pane sorts channels case-insensitively by name.
@@ -225,7 +246,7 @@ function RecipientControl({ row, index, tree, patchAction }: any) {
         );
     }
     return (
-        <input type="text" placeholder="Recipient" value={row.recipient}
+        <input type="text" placeholder="接收者" value={row.recipient}
             onChange={(e: any) => patchAction(index, { recipient: e.target.value })} />
     );
 }
@@ -287,7 +308,7 @@ export function AlertEditor({ params, query = {} }: any) {
         if (!model) return;
         try {
             saveModelRef.current();
-            if (!String(model.name || '').trim()) { toast('Alert name is required', 'warn'); return; }
+            if (!String(model.name || '').trim()) { toast('警报名称为必填项', 'warn'); return; }
             if (isNew) {
                 await api.alerts.create(model);
             } else {
@@ -298,7 +319,7 @@ export function AlertEditor({ params, query = {} }: any) {
             store.setState('editingAlertDirty', false);
             store.setState('navGuard', null);   // saved — don't prompt on the redirect
             await invalidate('alerts');
-            toast(isNew ? `Alert "${model.name}" created` : `Alert "${model.name}" saved`);
+            toast(isNew ? `警报“${model.name}”已创建` : `警报“${model.name}”已保存`);
             return true;
         } catch (e: any) {
             toast(e.message, 'error');
@@ -312,17 +333,17 @@ export function AlertEditor({ params, query = {} }: any) {
         try { assertSession = captureEngineSession(); } catch { return; }
         const model = modelRef.current;
         if (!model) return;
-        if (isNew) { toast('Save the alert first, then export it', 'warn'); return; }
+        if (isNew) { toast('请先保存警报，再执行导出', 'warn'); return; }
         try {
             await saveFile(`${model.name || model.id}.xml`, 'application/xml', async () => {
                 const xml = await api.getXml(`/alerts/${model.id}`);
-                if (!xml || !String(xml).trim()) throw new Error('Alert not found on the server — save it first');
+                if (!xml || !String(xml).trim()) throw new Error('服务器上未找到该警报，请先保存');
                 return xml;
             }, assertSession);
             assertSession();
         } catch (e: any) {
             try { assertSession(); } catch { return; }
-            toast(`Export failed: ${e.message}`, 'error');
+            toast(`导出失败：${e.message}`, 'error');
         }
     }
 
@@ -336,7 +357,7 @@ export function AlertEditor({ params, query = {} }: any) {
                 model = await loadAlertForEdit(alertId);
                 store.setState('editingAlertDirty', false);
             }
-            if (!model || !model.id) throw new Error('Alert not found');
+            if (!model || !model.id) throw new Error('未找到警报');
             modelRef.current = model;
             if (!isNew) baselineRef.current = alertBaseline(model);
 
@@ -344,7 +365,7 @@ export function AlertEditor({ params, query = {} }: any) {
             // async handler returns; defer past it (rAF runs after that microtask,
             // before paint) so 'Edit Alert - <name>' sticks without a flash.
             window.requestAnimationFrame(() => window.dispatchEvent(new CustomEvent('webadmin:set-title', {
-                detail: { title: isNew ? 'Edit Alert' : `Edit Alert - ${model.name || model.id}` }
+                detail: { title: isNew ? '编辑警报' : `编辑警报 - ${model.name || model.id}` }
             })));
 
             // Full channel models give us per-connector granularity (cached for
@@ -358,7 +379,7 @@ export function AlertEditor({ params, query = {} }: any) {
             if (includeConnectors) {
                 channelEntries = channelConnectorEntriesOf(channelModels);
             } else {
-                toast('Could not load channel connectors; channel-level granularity only', 'warn');
+                toast('无法加载通道连接器，仅支持通道级粒度', 'warn');
                 channelEntries = channelEntriesOf(await api.channels.idsAndNames().catch(() => null));
             }
             initForm(channelEntries, includeConnectors, protocolsOf(optionsRaw), recipientOptionsOf(optionsRaw));
@@ -414,10 +435,10 @@ export function AlertEditor({ params, query = {} }: any) {
         // Tree state. The '[New Channels]' pseudo-node binds Source ->
         // newChannelSource and [New Destinations] -> newChannelDestination.
         const newChannelsNode = {
-            id: null, name: '[New Channels]', dirty: false,
+            id: null, name: '[新通道]', dirty: false,
             connectors: includeConnectors ? [
-                { name: 'Source', metaDataId: 0, enabled: alertChannels.newChannelSource === true },
-                { name: '[New Destinations]', metaDataId: null, enabled: alertChannels.newChannelDestination === true }
+                { name: '源连接器', metaDataId: 0, enabled: alertChannels.newChannelSource === true },
+                { name: '[新目的地]', metaDataId: null, enabled: alertChannels.newChannelDestination === true }
             ] : null,
             enabled: alertChannels.newChannelSource === true || alertChannels.newChannelDestination === true
         };
@@ -582,7 +603,7 @@ export function AlertEditor({ params, query = {} }: any) {
                 }
             }
         }
-        toast('Select a channel or connector in the tree first', 'warn');
+        toast('请先在树中选择一个通道或连接器', 'warn');
     }
 
     function setAllExpanded(expanded: any) {
@@ -607,12 +628,12 @@ export function AlertEditor({ params, query = {} }: any) {
             if (!isDirty()) return;
             // No save permission -> say the edits can't be kept (channel editor parity).
             const ok = platform.checkTask('alertEdit', 'doSaveAlerts')
-                ? await confirmDialog('Unsaved Changes',
-                    'You have unsaved alert changes. Leave without saving?',
-                    { danger: true, okLabel: 'Leave' })
-                : await confirmDialog('Unsaved Changes',
-                    "You don't have permission to save alert changes. Leaving will discard them.",
-                    { okLabel: 'OK' });
+                ? await confirmDialog('未保存的更改',
+                    '有未保存的警报更改，要直接离开吗？',
+                    { danger: true, okLabel: '离开' })
+                : await confirmDialog('未保存的更改',
+                    '您没有保存警报更改的权限，离开后更改将被丢弃。',
+                    { okLabel: '确定' });
             return ok ? undefined : false;
         });
         // Tab-close guard: same snapshot comparison, synchronous (core/unsaved.js).
@@ -691,13 +712,13 @@ export function AlertEditor({ params, query = {} }: any) {
     function pip(stateClass: any, onToggle: any) {
         return (
             <span className={'pip cursor-pointer flex-none' + (stateClass ? ' ' + stateClass : '')}
-                title="Toggle enabled"
+                title="切换启用状态"
                 onClick={(e: any) => { e.stopPropagation(); onToggle(); }} />
         );
     }
 
     const channelColumns = [{
-        key: 'name', label: 'Channel', tree: true,
+        key: 'name', label: '通道', tree: true,
         render: (n: any) => {
             if (n.kind === 'connector') {
                 return (
@@ -730,14 +751,14 @@ export function AlertEditor({ params, query = {} }: any) {
     return (
         <div className="view">
             <ViewTasks>
-                <RailPane title="Alert Edit Tasks" paneKey="tasks:Alert Edit Tasks" group="alertEdit">
+                <RailPane title="警报编辑任务" paneKey="tasks:Alert Edit Tasks" group="alertEdit">
                     <div className="taskbar" data-pane-title="Alert Edit Tasks">
-                        <TaskButton label="Save Alert" icon="save" primary task="doSaveAlerts" onClick={save} />
-                        <TaskButton label="Export Alert" icon="export" task="doExportAlert" onClick={exportTask} />
+                        <TaskButton label="保存警报" icon="save" primary task="doSaveAlerts" onClick={save} />
+                        <TaskButton label="导出警报" icon="export" task="doExportAlert" onClick={exportTask} />
                         <span className="sep" />
-                        <TaskButton label="Back to Alerts" icon="logout" onClick={() => router.navigate('/alerts')} />
+                        <TaskButton label="返回警报列表" icon="logout" onClick={() => router.navigate('/alerts')} />
                         {/* Open in Wizard — always pinned to the bottom of the task list. */}
-                        {getPref('showViewSwitch') !== false && <TaskButton label="Open in Wizard" icon="wand" onClick={() => {
+                        {getPref('showViewSwitch') !== false && <TaskButton label="在向导中打开" icon="wand" onClick={() => {
                             // Flush the form state into the model FIRST — the wizard
                             // receives the model object, not this editor's state.
                             saveModelRef.current();
@@ -756,26 +777,26 @@ export function AlertEditor({ params, query = {} }: any) {
                 {loadError
                     ? <div className="dt-empty">
                         <div className="empty-icon"><Icon name="alerts" size={30} /></div>
-                        <div>Could not load alert: {loadError}</div>
+                        <div>无法加载警报：{loadError}</div>
                     </div>
                     : !ready
-                        ? <div className="loading-block"><div className="spinner" />Loading alert…</div>
+                        ? <div className="loading-block"><div className="spinner" />正在加载警报…</div>
                         : (
                             <>
                                 {/* ---- top row: name + enabled ---- */}
                                 <div className="flex items-center gap-3 mb-3.5">
-                                    <label className="text-[10px] font-[650] tracking-[0.08em] uppercase text-text-dim">Alert Name:</label>
+                                    <label className="text-[10px] font-[650] tracking-[0.08em] uppercase text-text-dim">警报名称：</label>
                                     <input ref={nameRef} type="text" className="flex-1 max-w-[504px]" value={form.name}
                                         onChange={(e: any) => patchForm({ name: e.target.value })} />
                                     <label className="check">
                                         <input type="checkbox" checked={form.enabled}
                                             onChange={(e: any) => patchForm({ enabled: e.target.checked })} />
-                                        Enabled
+                                        已启用
                                     </label>
                                 </div>
                                 <div className="grid grid-cols-[repeat(auto-fit,minmax(min(220px,100%),1fr))] gap-3.5 items-stretch">
                                     <div className="panel m-0 flex flex-col min-h-0">
-                                        <div className="panel-header">Errors (select all that apply)</div>
+                                        <div className="panel-header">错误（可多选）</div>
                                         <div className="panel-body flex-1 flex flex-col gap-0.5 overflow-auto">
                                             {ERROR_EVENT_TYPES.map((type: any) => (
                                                 <label key={type} className="check">
@@ -791,29 +812,29 @@ export function AlertEditor({ params, query = {} }: any) {
                                         </div>
                                     </div>
                                     <div className="panel m-0 flex flex-col min-h-0">
-                                        <div className="panel-header">Regex (optional)</div>
+                                        <div className="panel-header">正则表达式（可选）</div>
                                         <div className="panel-body flex-1 flex min-h-0">
                                             <textarea className="flex-1 resize-none min-h-[162px] font-mono"
-                                                placeholder="Only trigger when the error matches this regular expression (leave blank to match any error)"
+                                                placeholder="仅当错误匹配此正则表达式时触发（留空则匹配任意错误）"
                                                 value={form.regex} onChange={(e: any) => patchForm({ regex: e.target.value })} />
                                         </div>
                                     </div>
                                     <div className="panel m-0 flex flex-col min-h-0">
-                                        <div className="panel-header">Channels</div>
+                                        <div className="panel-header">通道</div>
                                         <div className="panel-body flex-1 flex flex-col gap-2 min-h-0">
                                             <div className="flex gap-1.5 items-center">
-                                                <input type="text" placeholder="Filter channels" className="flex-1"
+                                                <input type="text" placeholder="筛选通道" className="flex-1"
                                                     value={channelFilter}
                                                     onChange={(e: any) => setChannelFilter(e.target.value)} />
-                                                <TaskButton label="Enable" icon="check" onClick={() => setSelectedNode(true)} />
-                                                <TaskButton label="Disable" icon="x" onClick={() => setSelectedNode(false)} />
+                                                <TaskButton label="启用" icon="check" onClick={() => setSelectedNode(true)} />
+                                                <TaskButton label="禁用" icon="x" onClick={() => setSelectedNode(false)} />
                                             </div>
                                             {tree.includeConnectors
                                                 ? <div className="flex gap-2.5 justify-end">
-                                                    <span title="Expand all nodes below." className="text-accent cursor-pointer underline text-[11px]"
-                                                        onClick={() => setAllExpanded(true)}>Expand All</span>
-                                                    <span title="Collapse all nodes below." className="text-accent cursor-pointer underline text-[11px]"
-                                                        onClick={() => setAllExpanded(false)}>Collapse All</span>
+                                                    <span title="展开下方全部节点。" className="text-accent cursor-pointer underline text-[11px]"
+                                                        onClick={() => setAllExpanded(true)}>全部展开</span>
+                                                    <span title="折叠下方全部节点。" className="text-accent cursor-pointer underline text-[11px]"
+                                                        onClick={() => setAllExpanded(false)}>全部折叠</span>
                                                 </div>
                                                 : null}
                                             <div className="tree flex-1 min-h-0 max-h-[288px] overflow-auto">
@@ -833,14 +854,14 @@ export function AlertEditor({ params, query = {} }: any) {
                                                     })}
                                                     columnsKey="alert-channels"
                                                     pinnedKeys={['name']}
-                                                    emptyText="No matching channels" />
+                                                    emptyText="未找到匹配的通道" />
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-[repeat(auto-fit,minmax(min(240px,100%),1fr))] gap-3.5 mt-3.5 items-stretch">
                                     <div className="panel m-0 flex flex-col min-h-0">
-                                        <div className="panel-header">Actions</div>
+                                        <div className="panel-header">操作</div>
                                         <div className="panel-body flex-1 flex flex-col min-h-0">
                                             <div className="flex-1 overflow-auto min-h-0"
                                                 onContextMenu={(e: any) => {
@@ -849,16 +870,16 @@ export function AlertEditor({ params, query = {} }: any) {
                                                     e.preventDefault();
                                                     const tr = e.target.closest('tbody tr');
                                                     const index = tr ? [...tr.parentNode.children].indexOf(tr) : -1;
-                                                    const items: any[] = [{ label: 'Add Action', icon: 'plus', onClick: addAction }];
-                                                    if (index >= 0) items.push({ label: 'Delete Action', icon: 'trash', danger: true, onClick: () => removeAction(index) });
+                                                    const items: any[] = [{ label: '添加操作', icon: 'plus', onClick: addAction }];
+                                                    if (index >= 0) items.push({ label: '删除操作', icon: 'trash', danger: true, onClick: () => removeAction(index) });
                                                     contextMenu(e.clientX, e.clientY, items);
                                                 }}>
                                                 {form.actionRows.length === 0
-                                                    ? <div className="text-text-dim py-1.5 px-0">No actions defined</div>
+                                                    ? <div className="text-text-dim py-1.5 px-0">未定义操作</div>
                                                     : (
                                                         <div className="dt-wrap">
                                                             <table className="dt">
-                                                                <thead><tr><th>Protocol</th><th>Recipient</th><th></th></tr></thead>
+                                                                <thead><tr><th>协议</th><th>接收者</th><th></th></tr></thead>
                                                                 <tbody>
                                                                     {form.actionRows.map((row: any, i: any) => (
                                                                         <tr key={i}>
@@ -871,7 +892,7 @@ export function AlertEditor({ params, query = {} }: any) {
                                                                             </td>
                                                                             <td><RecipientControl row={row} index={i} tree={tree} patchAction={patchAction} /></td>
                                                                             <td className="w-[36px] text-right">
-                                                                                <button type="button" className="icon-btn" title="Remove action"
+                                                                                <button type="button" className="icon-btn" title="移除该操作"
                                                                                     onClick={() => removeAction(i)}><Icon name="trash" /></button>
                                                                             </td>
                                                                         </tr>
@@ -881,20 +902,20 @@ export function AlertEditor({ params, query = {} }: any) {
                                                         </div>
                                                     )}
                                             </div>
-                                            <div className="mt-[13px]"><TaskButton label="Add" icon="plus" onClick={addAction} /></div>
+                                            <div className="mt-[13px]"><TaskButton label="添加" icon="plus" onClick={addAction} /></div>
                                         </div>
                                     </div>
                                     <div className="panel m-0 flex flex-col min-h-0">
-                                        <div className="panel-header">Template</div>
+                                        <div className="panel-header">模板</div>
                                         <div className="panel-body flex-1 flex flex-col min-h-0">
                                             <div className="field">
-                                                <label>Subject (only used for email messages)</label>
+                                                <label>主题（仅用于邮件消息）</label>
                                                 <input ref={subjectRef} type="text" value={form.subject}
                                                     onFocus={() => { lastFocusedRef.current = 'subject'; }}
                                                     onChange={(e: any) => patchForm({ subject: e.target.value })} />
                                             </div>
                                             <div className="field flex-1 flex min-h-0 mb-0">
-                                                <label>Template</label>
+                                                <label>模板</label>
                                                 <textarea ref={templateRef} rows={8} className="flex-1 resize-none min-h-[126px]"
                                                     value={form.template}
                                                     onFocus={() => { lastFocusedRef.current = 'template'; }}
@@ -903,12 +924,12 @@ export function AlertEditor({ params, query = {} }: any) {
                                         </div>
                                     </div>
                                     <div className="panel m-0 flex flex-col min-h-0">
-                                        <div className="panel-header">Alert Variables</div>
+                                        <div className="panel-header">警报变量</div>
                                         <div className="panel-body flush flex-1 overflow-auto min-h-0 p-1.5">
                                             <div className="tree">
                                                 {ALERT_VARIABLES.map((name: any) => (
                                                     <div key={name} className="tree-node cursor-grab" draggable
-                                                        title={'Insert ${' + name + '} (drag onto the subject/template or click)'}
+                                                        title={'插入 ${' + name + '}（可拖到主题/模板上，或点击）'}
                                                         onClick={() => insertVariable(name)}
                                                         onDragStart={(e: any) => {
                                                             e.dataTransfer.setData('text/plain', '${' + name + '}');

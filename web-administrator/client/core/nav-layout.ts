@@ -286,7 +286,7 @@ export function withNewGroup(layout: NavLayout | null | undefined, groups: Array
     const taken = new Set(l.groups.map((g) => g.id));
     while (taken.has('u' + n)) n++;
     const id = 'u' + n;
-    l.groups.push({ id, label: String(label || '').trim() || 'New group', custom: true });
+    l.groups.push({ id, label: String(label || '').trim() || '新分组', custom: true });
     return { layout: l, id };
 }
 

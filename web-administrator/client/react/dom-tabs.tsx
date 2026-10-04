@@ -30,7 +30,7 @@ function DomPanel({ render }: any) {
     return <div ref={ref} className="contents" />;
 }
 
-export function DomTabs({ defs, label = 'Tabs', bodyStyle }: any) {
+export function DomTabs({ defs, label = '页签', bodyStyle }: any) {
     const [active, setActive] = useState(0);
     return (
         <TabsPrimitive.Root value={String(active)} onValueChange={(v: any) => setActive(Number(v))}

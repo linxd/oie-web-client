@@ -32,7 +32,7 @@ export function engineContext(): string { return expected; }
 
 function changed(): never {
     if (typeof window !== 'undefined') window.dispatchEvent(new Event('oie-session-changed'));
-    throw new Error('The browser session changed. Reload to continue.');
+    throw new Error('浏览器会话已变更，请刷新页面后继续。');
 }
 
 let responseGeneration = 0;
@@ -47,7 +47,7 @@ export function captureEngineSession(): () => void {
     const capturedGeneration = responseGeneration;
     const assertCurrent = () => {
         if (capturedContext !== expected || capturedGeneration !== responseGeneration) {
-            throw new Error('Discarded an operation from the previous session.');
+            throw new Error('已丢弃上一会话发起的操作。');
         }
         if (capturedContext !== context()) changed();
     };
@@ -58,7 +58,7 @@ export function captureEngineSession(): () => void {
 // fetch resolves at response headers; callers check again after reading a body.
 export function assertEngineResponse(response: Response): void {
     const sent = responseContexts.get(response);
-    if (sent?.context !== expected || sent.generation !== responseGeneration) throw new Error('Discarded a response from the previous session.');
+    if (sent?.context !== expected || sent.generation !== responseGeneration) throw new Error('已丢弃上一会话返回的响应。');
     if (expected !== context()) changed();
 }
 

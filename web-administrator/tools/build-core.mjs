@@ -31,12 +31,12 @@ if (!sources.length) { console.log('[build-core] no TypeScript client modules');
 // typescript is a devDependency; on a production install (`npm ci --omit=dev`)
 // it is absent — the committed generated twins are current, so skip gracefully
 // instead of crashing `npm start`.
-const tsc = path.join(root, '..', 'node_modules', '.bin', 'tsc');
+const tsc = path.join(root, '..', 'node_modules', 'typescript', 'bin', 'tsc');
 if (!existsSync(tsc)) {
     console.log('[build-core] typescript not installed (production install?) — using the committed generated files.');
     process.exit(0);
 }
-const res = spawnSync(tsc, ['-p', path.join(root, 'tsconfig.emit.json')], { stdio: 'inherit' });
+const res = spawnSync(process.execPath, [tsc, '-p', path.join(root, 'tsconfig.emit.json')], { stdio: 'inherit' });
 if (res.status !== 0) process.exit(res.status ?? 1);
 
 // tsc has no banner option — stamp the generated files so nobody edits them.

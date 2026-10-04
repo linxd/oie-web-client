@@ -145,15 +145,15 @@ function KeyValueEditor({ properties, field, onChange, disabled }: { properties:
         <div style={disabled ? { opacity: 0.6 } : undefined}>
             {rows.map((row, i) => (
                 <div key={i} className="flex gap-1.5 mb-1.5">
-                    <input type="text" value={row[0]} placeholder="Name" className="flex-1" disabled={disabled}
+                    <input type="text" value={row[0]} placeholder="名称" className="flex-1" disabled={disabled}
                         onChange={(e) => { row[0] = e.target.value; tick(); commit(); }} />
-                    <input type="text" value={row[1]} placeholder="Value" className="flex-[2]" disabled={disabled}
+                    <input type="text" value={row[1]} placeholder="值" className="flex-[2]" disabled={disabled}
                         onChange={(e) => { row[1] = e.target.value; tick(); commit(); }} />
-                    <button type="button" className="icon-btn" title="Remove" disabled={disabled}
+                    <button type="button" className="icon-btn" title="移除" disabled={disabled}
                         onClick={() => { rows.splice(i, 1); commit(); tick(); }}><Icon name="x" /></button>
                 </div>
             ))}
-            <button type="button" className="btn" disabled={disabled} onClick={() => { rows.push(['', '']); tick(); }}>Add</button>
+            <button type="button" className="btn" disabled={disabled} onClick={() => { rows.push(['', '']); tick(); }}>添加</button>
         </div>
     );
 }
@@ -354,7 +354,7 @@ export function PortsInUseButton() {
     const ref = useRef<HTMLSpanElement | null>(null);
     useEffect(() => {
         const host = ref.current!;
-        const btn = taskButton('Ports in Use', 'search', async () => {
+        const btn = taskButton('使用中的端口', 'search', async () => {
             btn.disabled = true;
             try {
                 const ports = await api.channels.portsInUse();
@@ -362,11 +362,11 @@ export function PortsInUseButton() {
                     .filter((p: any) => p && typeof p === 'object')
                     .map((p: any) => h('tr', h('td.num', String(p.port ?? '')), h('td', String(p.name ?? ''))));
                 modal({
-                    title: 'Ports in Use',
+                    title: '使用中的端口',
                     body: h('table.dt',
-                        h('thead', h('tr', h('th', 'Port'), h('th', 'Channel Name'))),
-                        h('tbody', rows.length ? rows : h('tr', h('td', { colSpan: 2 }, 'No listener ports in use')))),
-                    buttons: [{ label: 'Close', primary: true }]
+                        h('thead', h('tr', h('th', '端口'), h('th', '通道名称'))),
+                        h('tbody', rows.length ? rows : h('tr', h('td', { colSpan: 2 }, '没有正在使用的监听端口')))),
+                    buttons: [{ label: '关闭', primary: true }]
                 });
             } catch (e) {
                 toast(apiErrorMessage(e), 'error');
@@ -382,7 +382,7 @@ export function PortsInUseButton() {
 
 /* ---- 'Test Connection' style button ----------------------------------------- */
 
-export function ConnectorTestButton({ label = 'Test Connection', icon: iconName = 'link', path, channel, properties }: { label?: string; icon?: string; path: string; channel: any; properties: any }) {
+export function ConnectorTestButton({ label = '连接测试', icon: iconName = 'link', path, channel, properties }: { label?: string; icon?: string; path: string; channel: any; properties: any }) {
     const ref = useRef<HTMLSpanElement | null>(null);
     // Latest props captured by ref so the button (built once) always POSTs the
     // current mutated properties.
@@ -396,7 +396,7 @@ export function ConnectorTestButton({ label = 'Test Connection', icon: iconName 
             try {
                 const result = await postConnectorProperties(s.path, s.properties, s.channel);
                 const type = result && typeof result === 'object' ? String(result.type ?? '') : '';
-                const message = (result && typeof result === 'object' && result.message) || type || 'No response received';
+                const message = (result && typeof result === 'object' && result.message) || type || '未收到响应';
                 if (type === 'SUCCESS') successToast(message);
                 else toast(message, 'error');
             } catch (e) {
@@ -416,7 +416,7 @@ export function ConnectorTestButton({ label = 'Test Connection', icon: iconName 
 export function PollSection({ properties, onChange }: { properties: any; onChange: () => void }) {
     return (
         <div className="cform-section mt-4">
-            <div className="cform-section-title">Polling Settings</div>
+            <div className="cform-section-title">轮询设置</div>
             <PollSettings properties={properties} onChange={onChange} />
         </div>
     );
@@ -427,10 +427,10 @@ export function PollSection({ properties, onChange }: { properties: any; onChang
    is the largest one the stored ms divides into evenly (so 18000000 → 5 hours,
    5000 → 5 seconds), defaulting to milliseconds. */
 const FREQ_UNITS: Array<{ value: string; label: string; ms: number }> = [
-    { value: 'ms', label: 'milliseconds', ms: 1 },
-    { value: 's', label: 'seconds', ms: 1000 },
-    { value: 'm', label: 'minutes', ms: 60000 },
-    { value: 'h', label: 'hours', ms: 3600000 }
+    { value: 'ms', label: '毫秒', ms: 1 },
+    { value: 's', label: '秒', ms: 1000 },
+    { value: 'm', label: '分钟', ms: 60000 },
+    { value: 'h', label: '小时', ms: 3600000 }
 ];
 function deriveFreqUnit(freq: any): string {
     const f = Number(freq) || 0;
@@ -466,17 +466,17 @@ function PollSettings({ properties, onChange }: { properties: any; onChange: () 
     return (
         <div className="form-grid">
             <div className="field">
-                <label>Schedule Type</label>
+                <label>调度方式</label>
                 <select value={p.pollingType} onChange={(e) => { p.pollingType = e.target.value; notify(); }}>
-                    <option value="INTERVAL">Interval</option>
-                    <option value="TIME">Time</option>
+                    <option value="INTERVAL">按间隔</option>
+                    <option value="TIME">按时分</option>
                     <option value="CRON">Cron</option>
                 </select>
             </div>
 
             {p.pollingType === 'INTERVAL' && (
                 <div className="field">
-                    <label>Polling Frequency</label>
+                    <label>轮询频率</label>
                     <div className="flex items-center gap-2">
                         <input type="number" min={0} className="w-[99px]"
                             value={Math.round((Number(p.pollingFrequency ?? 5000)) / unitMs(freqUnit))}
@@ -500,12 +500,12 @@ function PollSettings({ properties, onChange }: { properties: any; onChange: () 
             {p.pollingType === 'TIME' && (
                 <>
                     <div className="field">
-                        <label>Hour (0-23)</label>
+                        <label>小时（0-23）</label>
                         <input type="number" min={0} max={23} value={p.pollingHour ?? 0}
                             onChange={(e) => { p.pollingHour = parseInt(e.target.value, 10) || 0; notify(); }} />
                     </div>
                     <div className="field">
-                        <label>Minute (0-59)</label>
+                        <label>分钟（0-59）</label>
                         <input type="number" min={0} max={59} value={p.pollingMinute ?? 0}
                             onChange={(e) => { p.pollingMinute = parseInt(e.target.value, 10) || 0; notify(); }} />
                     </div>
@@ -514,19 +514,19 @@ function PollSettings({ properties, onChange }: { properties: any; onChange: () 
 
             {p.pollingType === 'CRON' && (
                 <div className="field">
-                    <label>Cron Jobs</label>
+                    <label>Cron 任务</label>
                     <div className="span-2">
                         {cron.map((row, i) => (
                             <div key={i} className="flex gap-1.5 mb-1.5">
-                                <input type="text" value={row.expression} placeholder="Cron expression (e.g. 0 */5 * ? * *)" className="flex-[2]"
+                                <input type="text" value={row.expression} placeholder="Cron 表达式（如 0 */5 * ? * *）" className="flex-[2]"
                                     onChange={(e) => { row.expression = e.target.value; tick(); commitCron(); }} />
-                                <input type="text" value={row.description} placeholder="Description" className="flex-1"
+                                <input type="text" value={row.description} placeholder="描述" className="flex-1"
                                     onChange={(e) => { row.description = e.target.value; tick(); commitCron(); }} />
-                                <button type="button" className="icon-btn" title="Remove"
+                                <button type="button" className="icon-btn" title="移除"
                                     onClick={() => { cron.splice(i, 1); commitCron(); tick(); }}><Icon name="x" /></button>
                             </div>
                         ))}
-                        <button type="button" className="btn" onClick={() => { cron.push({ expression: '', description: '' }); tick(); }}>Add Cron Job</button>
+                        <button type="button" className="btn" onClick={() => { cron.push({ expression: '', description: '' }); tick(); }}>添加 Cron 任务</button>
                     </div>
                 </div>
             )}
@@ -539,7 +539,7 @@ function PollSettings({ properties, onChange }: { properties: any; onChange: () 
                     <label className="check">
                         <input type="checkbox" checked={asBool(p.pollOnStart)}
                             onChange={(e) => { p.pollOnStart = e.target.checked; notify(); }} />
-                        Poll Once on Start
+                        启动时轮询一次
                     </label>
                 </div>
             </div>
@@ -558,13 +558,13 @@ function PollSettings({ properties, onChange }: { properties: any; onChange: () 
    is the java.util.Calendar constant used to index the inactiveDays boolean[8]
    (SUNDAY=1 … SATURDAY=7; element 0 is unused). */
 const POLL_DAYS: Array<{ label: string; idx: number; title: string }> = [
-    { label: 'S', idx: 1, title: 'Sunday' },
-    { label: 'M', idx: 2, title: 'Monday' },
-    { label: 'T', idx: 3, title: 'Tuesday' },
-    { label: 'W', idx: 4, title: 'Wednesday' },
-    { label: 'Th', idx: 5, title: 'Thursday' },
-    { label: 'F', idx: 6, title: 'Friday' },
-    { label: 'S', idx: 7, title: 'Saturday' }
+    { label: '日', idx: 1, title: '星期日' },
+    { label: '一', idx: 2, title: '星期一' },
+    { label: '二', idx: 3, title: '星期二' },
+    { label: '三', idx: 4, title: '星期三' },
+    { label: '四', idx: 5, title: '星期四' },
+    { label: '五', idx: 6, title: '星期五' },
+    { label: '六', idx: 7, title: '星期六' }
 ];
 
 /* Port of AdvancedPollingSettingsDialog. Binds the existing
@@ -611,32 +611,32 @@ function PollAdvancedSettings({ p, pollingType, onChange }: { p: any; pollingTyp
     return (
         <div className="span-2 my-2.5">
             <button type="button" className="btn" onClick={() => setOpen((o) => !o)}>
-                {open ? 'Hide Advanced Settings' : 'Advanced Settings'}
+                {open ? '隐藏高级设置' : '高级设置'}
             </button>
 
             {open && (
                 <div className="cform-section mt-2">
-                    <div className="cform-section-title">Advanced Settings</div>
+                    <div className="cform-section-title">高级设置</div>
                     <div className="form-grid">
                         <div className="field">
-                            <label>Active Days</label>
+                            <label>活动日期</label>
                             <div className="radio-group inline-row">
                                 <label className="check">
                                     <input type="radio" name={`poll-days-${uid}`} checked={weekly}
                                         onChange={() => { adv.weekly = true; notify(); }} />
-                                    Weekly
+                                    每周
                                 </label>
                                 <label className="check">
                                     <input type="radio" name={`poll-days-${uid}`} checked={!weekly}
                                         onChange={() => { adv.weekly = false; notify(); }} />
-                                    Monthly
+                                    每月
                                 </label>
                             </div>
                         </div>
 
                         {weekly ? (
                             <div className="field">
-                                <label>Days of Week</label>
+                                <label>每周活动日</label>
                                 <div className="radio-group inline-row min-h-[31px] items-center">
                                     {POLL_DAYS.map((d) => (
                                         <label className="check" key={d.idx} title={d.title}>
@@ -649,30 +649,30 @@ function PollAdvancedSettings({ p, pollingType, onChange }: { p: any; pollingTyp
                             </div>
                         ) : (
                             <div className="field">
-                                <label>Day of Month (1-31)</label>
+                                <label>每月活动日（1-31）</label>
                                 {numField(adv.dayOfMonth ?? 1, 1, 31, (v) => { adv.dayOfMonth = Math.min(31, Math.max(1, v || 1)); })}
                             </div>
                         )}
 
                         <div className="field">
-                            <label>Active Time</label>
+                            <label>活动时间</label>
                             <div className="radio-group inline-row">
                                 <label className="check">
                                     <input type="radio" name={`poll-time-${uid}`} disabled={!timeEnabled}
                                         checked={allDay} onChange={() => { adv.allDay = true; notify(); }} />
-                                    All Day
+                                    全天
                                 </label>
                                 <label className="check">
                                     <input type="radio" name={`poll-time-${uid}`} disabled={!timeEnabled}
                                         checked={!allDay} onChange={() => { adv.allDay = false; notify(); }} />
-                                    Range
+                                    指定时段
                                 </label>
                             </div>
                         </div>
 
                         {rangeEnabled && (
                             <div className="field span-2">
-                                <label>Time Range (Start - End, H:M 24h)</label>
+                                <label>时间范围（开始 - 结束，时:分，24 小时制）</label>
                                 <div className="flex gap-1.5 items-center">
                                     {numField(adv.startingHour ?? 0, 0, 23, (v) => { adv.startingHour = v; })}
                                     <span>:</span>
@@ -724,9 +724,9 @@ export function TransmissionModePanel({ properties, onChange }: { properties: an
         <div className="mb-4">
             <div className="cform">
                 <div className="cform-section">
-                    <div className="cform-section-title">Transmission Mode</div>
+                    <div className="cform-section-title">传输模式</div>
                     <div className="cform-grid">
-                        <label className="cform-label">Transmission Mode:</label>
+                        <label className="cform-label">传输模式</label>
                         <div className="cform-control">
                             <div className="flex gap-1.5 items-center">
                                 <select value={tm.pluginPointName} className="w-[162px]"
@@ -740,12 +740,12 @@ export function TransmissionModePanel({ properties, onChange }: { properties: an
                                     {modes.map((m) => <option key={m.name} value={m.name}>{m.label}</option>)}
                                 </select>
                                 {mode && mode.openSettings && (
-                                    <button type="button" className="icon-btn" title="Transmission Mode Settings"
+                                    <button type="button" className="icon-btn" title="传输模式设置"
                                         onClick={openSettings}><Icon name="settings" /></button>
                                 )}
                             </div>
                         </div>
-                        <label className="cform-label">Sample Frame:</label>
+                        <label className="cform-label">示例帧</label>
                         <div className="cform-control"><span className="mono text-text-faint text-[11px]">{sample}</span></div>
                     </div>
                 </div>

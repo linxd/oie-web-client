@@ -67,7 +67,7 @@ eq('null channel ok', JSON.stringify(decodeChannelTemplates(null) ?? null), 'nul
 eq('no transformers ok', JSON.stringify(encodeChannelTemplates({ sourceConnector: {} })), JSON.stringify({ sourceConnector: {} }));
 
 // ---- validateChannel: a channel must keep an enabled destination (issue #57) ----
-const NEEDS_ENABLED = 'At least one destination must be enabled';
+const NEEDS_ENABLED = '至少需要启用一个目的地连接器';
 const connector = (enabled) => ({ transportName: 'Channel Writer', enabled, properties: { '@class': 'x' } });
 const withDests = (...dests) => ({ name: 'c', sourceConnector: connector(true), destinationConnectors: { connector: dests } });
 eq('all destinations disabled -> problem', validateChannel(withDests(connector(false), connector(false))).includes(NEEDS_ENABLED), true);

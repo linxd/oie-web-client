@@ -100,7 +100,7 @@ function useSideContent(ref: any, gen: number) {
                     .filter(Boolean);
                 const cm = cms.find((c: any) => Number(c.metaDataId) === Number(ref.metaDataId));
                 if (!cm) {
-                    setState({ ...LOADING, status: 'missing', error: `Connector ${ref.metaDataId} is no longer part of message ${ref.messageId}.` });
+                    setState({ ...LOADING, status: 'missing', error: `连接器 ${ref.metaDataId} 已不再属于消息 ${ref.messageId}` });
                     return;
                 }
                 const storedTypes = storedContentTypes(cm);
@@ -109,7 +109,7 @@ function useSideContent(ref: any, gen: number) {
                     // Pruned between selection and open, or never stored.
                     setState({
                         ...LOADING, status: 'missing', storedTypes,
-                        error: `${stageLabel(ref.contentType)} content is not stored for this message.`
+                        error: `该消息未存储 ${stageLabel(ref.contentType)} 内容`
                     });
                     return;
                 }
@@ -135,10 +135,10 @@ function SideHeader({ side, compareRef, state, onStage }: any) {
     const stored: string[] = state.storedTypes || compareRef.storedTypes || [];
     return (
         <div className="compare-side-head">
-            <span className={'tag ' + (side === 'left' ? 'accent' : 'amber')}>{side === 'left' ? 'Left' : 'Right'}</span>
+            <span className={'tag ' + (side === 'left' ? 'accent' : 'amber')}>{side === 'left' ? '左' : '右'}</span>
             <span className="compare-side-ref mono">{describeRef(compareRef)}</span>
             <label className="compare-side-stage">
-                <select aria-label={`${side === 'left' ? 'Left' : 'Right'} stage`}
+                <select aria-label={`${side === 'left' ? '左侧' : '右侧'}阶段`}
                     value={compareRef.contentType}
                     onChange={(e: any) => onStage(e.target.value)}>
                     {COMPARE_STAGES
@@ -147,7 +147,7 @@ function SideHeader({ side, compareRef, state, onStage }: any) {
                         .map(s => (
                             <option key={s.type} value={s.type}
                                 disabled={!stored.includes(s.type) && s.type !== compareRef.contentType}>
-                                {s.label}{stored.includes(s.type) ? '' : ' (not stored)'}
+                                {s.label}{stored.includes(s.type) ? '' : '（未存储）'}
                             </option>
                         ))}
                 </select>
@@ -230,13 +230,13 @@ export function CompareOverlay({ pair, onClose }: any) {
         return (
             <div className={'compare-pane-overlay ' + side}>
                 {state.status === 'loading'
-                    ? <div className="loading-block"><div className="spinner" />Loading content…</div>
+                    ? <div className="loading-block"><div className="spinner" />正在加载内容…</div>
                     : (
                         <div className="compare-pane-error">
                             <Icon name="warning" size={16} />
                             <span>{state.error}</span>
                             {state.status === 'error' &&
-                                <button className="btn btn-sm" onClick={onRetry}><Icon name="refresh" />Retry</button>}
+                                <button className="btn btn-sm" onClick={onRetry}><Icon name="refresh" />重试</button>}
                         </div>
                     )}
             </div>
@@ -257,15 +257,15 @@ export function CompareOverlay({ pair, onClose }: any) {
                         }}>
                         <div className="compare-head">
                             <Dialog.Title asChild>
-                                <h2 className="compare-title">Compare Content</h2>
+                                <h2 className="compare-title">对比内容</h2>
                             </Dialog.Title>
                             {/* No channel chip in the header: the two sides need not
                                 be from the same channel, so naming one here would be
                                 wrong for the other. Each side's reference carries its
                                 own channel instead. */}
                             <span className="flex-1" />
-                            <button className="btn" onClick={swap} title="Swap the two sides">
-                                <Icon name="transform" />Swap
+                            <button className="btn" onClick={swap} title="交换两侧内容">
+                                <Icon name="transform" />交换
                             </button>
                             {/* Two exits, because closing a comparison means two
                                 different things: one more thing to compare against
@@ -274,14 +274,14 @@ export function CompareOverlay({ pair, onClose }: any) {
                                 read as the same action twice, which is the one thing
                                 these buttons exist to distinguish. */}
                             <button className="btn" onClick={() => { clearCompare(); onClose({ cleared: true }); }}
-                                title="Close and drop the compare selection">
-                                <Icon name="clear" />Clear and Close
+                                title="关闭并清除对比选择">
+                                <Icon name="clear" />清除并关闭
                             </button>
                             {/* Esc and a click outside land here too — the exit that
                                 changes the least. */}
                             <Dialog.Close asChild>
-                                <button className="btn compare-close" title="Close, keeping the selection for another comparison">
-                                    <Icon name="x" />Close
+                                <button className="btn compare-close" title="关闭并保留该选择，以便再次对比">
+                                    <Icon name="x" />关闭
                                 </button>
                             </Dialog.Close>
                         </div>
@@ -304,8 +304,8 @@ export function CompareOverlay({ pair, onClose }: any) {
                         </div>
 
                         <div className="compare-foot">
-                            <span className="compare-legend"><i className="swatch left" />Left only</span>
-                            <span className="compare-legend"><i className="swatch right" />Right only</span>
+                            <span className="compare-legend"><i className="swatch left" />仅左侧</span>
+                            <span className="compare-legend"><i className="swatch right" />仅右侧</span>
                         </div>
                     </Dialog.Content>
                 </Dialog.Overlay>

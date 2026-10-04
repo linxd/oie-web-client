@@ -34,6 +34,7 @@ function runBuild() {
     const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
     const result = spawnSync(npm, ['run', 'build'], {
         cwd: root,
+        shell: process.platform === 'win32',
         env: {
             ...process.env,
             OIE_WEBADMIN_BUILD_BASE: './',

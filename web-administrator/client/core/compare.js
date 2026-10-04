@@ -27,12 +27,12 @@ import { onSessionExpired } from './api.js';
 /* Stage order + labels, and the ConnectorMessage field each one reads. One
    table so the menus, the dropdowns and the fetch can never disagree. */
 export const COMPARE_STAGES = [
-    { type: 'RAW', label: 'Raw', key: 'raw' },
-    { type: 'PROCESSED_RAW', label: 'Processed Raw', key: 'processedRaw' },
-    { type: 'TRANSFORMED', label: 'Transformed', key: 'transformed' },
-    { type: 'ENCODED', label: 'Encoded', key: 'encoded' },
-    { type: 'SENT', label: 'Sent', key: 'sent' },
-    { type: 'RESPONSE', label: 'Response', key: 'response' }
+    { type: 'RAW', label: '原始', key: 'raw' },
+    { type: 'PROCESSED_RAW', label: '处理后原始', key: 'processedRaw' },
+    { type: 'TRANSFORMED', label: '转换后', key: 'transformed' },
+    { type: 'ENCODED', label: '编码后', key: 'encoded' },
+    { type: 'SENT', label: '已发送', key: 'sent' },
+    { type: 'RESPONSE', label: '响应', key: 'response' }
 ];
 const BY_TYPE = new Map(COMPARE_STAGES.map(s => [s.type, s]));
 /** Human label for a stage ("Processed Raw"). */
@@ -81,7 +81,7 @@ export function refFromConnectorMessage(channel, messageId, cm, contentType) {
         channelName: channel.name ? String(channel.name) : undefined,
         messageId: Number(messageId),
         metaDataId,
-        connectorName: cm?.connectorName || (metaDataId === 0 ? 'Source' : `Connector ${metaDataId}`),
+        connectorName: cm?.connectorName || (metaDataId === 0 ? '源连接器' : `连接器 ${metaDataId}`),
         contentType,
         storedTypes,
         dataTypes
@@ -108,8 +108,8 @@ export function samePair(a, b) {
 export function describeRef(ref) {
     if (!ref)
         return '';
-    const connector = ref.connectorName || `Connector ${ref.metaDataId}`;
-    return `${ref.channelName || ref.channelId} · Msg ${ref.messageId} · ${connector} · ${stageLabel(ref.contentType)}`;
+    const connector = ref.connectorName || `连接器 ${ref.metaDataId}`;
+    return `${ref.channelName || ref.channelId} · 消息 ${ref.messageId} · ${connector} · ${stageLabel(ref.contentType)}`;
 }
 /** True when both references are for the same message of the same channel. */
 export function sameMessage(a, b) {

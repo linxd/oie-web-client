@@ -34,7 +34,7 @@ export function TreeTable({
     selectedKey, selectedKeys, onSelect, onActivate, onRowContextMenu, onEmptyContextMenu,
     rowDraggable, onRowDrop,
     columnsKey, columnWidths = {}, defaultHidden = [], pinnedKeys = [],
-    emptyText = 'No items', matches, collapsedKeys, onToggleCollapse,
+    emptyText = '暂无数据', matches, collapsedKeys, onToggleCollapse,
     // Controlled sort (opt-in): pass `sort={{key,dir}}` + `onSort(key)` to let the
     // parent own sorting (it pre-sorts `data`, e.g. the dashboard keeping display and
     // shift-select order in sync). Omit both for TreeTable's built-in header sort.
@@ -201,7 +201,7 @@ export function TreeTable({
                 onClick: () => { if (shown && visibleCount <= 1) return; mgr.setHidden(c.key, shown); force(); }
             };
         });
-        items.push('-', { label: 'Restore Default', onClick: () => { mgr.reset(); force(); } });
+        items.push('-', { label: '恢复默认', onClick: () => { mgr.reset(); force(); } });
         contextMenu(e.clientX, e.clientY, items);
     };
 

@@ -53,7 +53,21 @@ function compareVersions(v1: string, v2: string): number {
  *   { action: 'block',   message }   — newer than the server
  *   { action: 'confirm', message }   — older/unknown; ask before converting
  */
-export function checkImportVersion(exportVersion: string | null | undefined, objectName: string = 'file'): ImportVerdict {
+// Call sites pass the Swing export identifiers; map them to display names so the
+// localized messages never render an English noun mid-sentence. Unknown/Chinese
+// names pass through unchanged.
+const OBJECT_DISPLAY_NAMES: Record<string, string> = {
+    'channel': '通道',
+    'channel or group': '通道或组',
+    'group': '组',
+    'alert': '警报',
+    'server configuration': '服务器配置',
+    'configuration map': '配置映射',
+    'code template': '代码模板',
+};
+
+export function checkImportVersion(exportVersion: string | null | undefined, objectName: string = '文件'): ImportVerdict {
+    objectName = OBJECT_DISPLAY_NAMES[objectName] ?? objectName;
     const server = store.getState('serverVersion');
     if (!server) return { action: 'ok' };   // server version unknown: engine stays the authority
 
@@ -63,26 +77,26 @@ export function checkImportVersion(exportVersion: string | null | undefined, obj
         if (comparison > 0) {
             return {
                 action: 'block',
-                message: `The ${objectName} being imported originated from ${PRODUCT} version ${exportVersion}.\n`
-                    + `You are using ${PRODUCT} version ${server}.\n`
-                    + `The ${objectName} cannot be imported, because it originated from a newer version of ${PRODUCT}.`
+                message: `正在导入的${objectName}来自 ${PRODUCT} ${exportVersion} 版本。\n`
+                    + `您当前使用的版本为 ${PRODUCT} ${server}。\n`
+                    + `无法导入该${objectName}，因为它来自更高版本的 ${PRODUCT}。`
             };
         }
         // older
         return {
             action: 'confirm',
-            message: `The ${objectName} being imported originated from ${PRODUCT} version ${exportVersion}.\n`
-                + `You are using ${PRODUCT} version ${server}.\n`
-                + `Would you like to automatically convert the ${objectName} to the ${server} format?`
+            message: `正在导入的${objectName}来自 ${PRODUCT} ${exportVersion} 版本。\n`
+                + `您当前使用的版本为 ${PRODUCT} ${server}。\n`
+                + `是否将该${objectName}自动转换为 ${server} 格式？`
         };
     }
 
     // unknown version
     return {
         action: 'confirm',
-        message: `The ${objectName} being imported is from an older or unknown version of ${PRODUCT}.\n`
-            + `You are using ${PRODUCT} version ${server}.\n`
-            + `Would you like to automatically convert the ${objectName} to the ${server} format?`
+        message: `正在导入的${objectName}来自较旧或未知版本的 ${PRODUCT}。\n`
+            + `您当前使用的版本为 ${PRODUCT} ${server}。\n`
+            + `是否将该${objectName}自动转换为 ${server} 格式？`
     };
 }
 

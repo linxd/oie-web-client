@@ -53,8 +53,8 @@ function displayValue(value: any) {
 function localZoneAbbr() {
     try {
         const parts = new Intl.DateTimeFormat(undefined, { timeZoneName: 'short' }).formatToParts(new Date());
-        return parts.find((p: any) => p.type === 'timeZoneName')?.value || 'local';
-    } catch { return 'local'; }
+        return parts.find((p: any) => p.type === 'timeZoneName')?.value || '本地时区';
+    } catch { return '本地时区'; }
 }
 
 /* One half of the clock. A spinner rather than a scrolling list: a 60-item
@@ -71,7 +71,7 @@ function TimePart({ label, value, max, onChange }: any) {
     return (
         <span className="dtf-part">
             <button type="button" className="dtf-step" tabIndex={-1}
-                aria-label={`${label} up`} onClick={() => step(1)}>▲</button>
+                aria-label={`${label} 增加`} onClick={() => step(1)}>▲</button>
             <input className="dtf-num" inputMode="numeric" aria-label={label}
                 value={draft ?? pad(value)}
                 onChange={(e: any) => setDraft(e.target.value.replace(/\D/g, '').slice(0, 2))}
@@ -82,7 +82,7 @@ function TimePart({ label, value, max, onChange }: any) {
                     else if (e.key === 'Enter') { e.preventDefault(); commit(e.currentTarget.value); }
                 }} />
             <button type="button" className="dtf-step" tabIndex={-1}
-                aria-label={`${label} down`} onClick={() => step(-1)}>▼</button>
+                aria-label={`${label} 减少`} onClick={() => step(-1)}>▼</button>
         </span>
     );
 }
@@ -115,26 +115,26 @@ export function DateTimeField({ value, onChange, label, placeholder = 'yyyy-mm-d
                             onSelect={(picked: any) => { if (picked) commit(picked, hour, minute); }}
                             showOutsideDays />
                         <div className="dtf-time">
-                            <div className="dtf-time-head">Time</div>
+                            <div className="dtf-time-head">时间</div>
                             <div className="dtf-clock">
-                                <TimePart label="Hour" value={hour} max={23}
+                                <TimePart label="时" value={hour} max={23}
                                     onChange={(h: any) => commit(date, h, minute)} />
                                 <span className="dtf-colon" aria-hidden="true">:</span>
-                                <TimePart label="Minute" value={minute} max={59}
+                                <TimePart label="分" value={minute} max={59}
                                     onChange={(m: any) => commit(date, hour, m)} />
                             </div>
                         </div>
                     </div>
                     <div className="dtf-foot">
-                        <span className="dtf-zone">Entered in {localZoneAbbr()}</span>
+                        <span className="dtf-zone">按 {localZoneAbbr()} 输入</span>
                         <span className="dtf-actions">
                             <button type="button" className="dtf-link"
-                                onClick={() => { onChange(''); setOpen(false); }}>Clear</button>
+                                onClick={() => { onChange(''); setOpen(false); }}>清除</button>
                             <button type="button" className="dtf-link" onClick={() => {
                                 const now = new Date();
                                 onChange(formatValue(now, now.getHours(), now.getMinutes()));
                                 setOpen(false);
-                            }}>Now</button>
+                            }}>当前时间</button>
                         </span>
                     </div>
                 </Popover.Content>

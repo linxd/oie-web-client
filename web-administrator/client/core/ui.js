@@ -154,8 +154,8 @@ function domCornerToast(message, type, timeout) {
 export function toast(message, type = 'info', timeout = 4200) {
     if (type === 'error' || type === 'warn') {
         return detailModal({
-            title: type === 'error' ? 'Error' : 'Warning',
-            badge: { text: type === 'error' ? 'Error' : 'Warning', tone: type === 'error' ? 'err' : 'warn' },
+            title: type === 'error' ? '错误' : '警告',
+            badge: { text: type === 'error' ? '错误' : '警告', tone: type === 'error' ? 'err' : 'warn' },
             sections: [{ text: String(message) }]
         });
     }
@@ -192,7 +192,7 @@ function domModal({ title, body, buttons = [], size = '', onClose, label }) {
     const titleId = 'modal-title-' + (++modalSeq);
     let closed = false;
     let pending = false;
-    const pendingStatus = h('div', { role: 'status', hidden: true }, 'Working…');
+    const pendingStatus = h('div', { role: 'status', hidden: true }, '正在处理…');
     const close = () => {
         if (closed)
             return; // idempotent: overlay click + button can race
@@ -213,7 +213,7 @@ function domModal({ title, body, buttons = [], size = '', onClose, label }) {
         tabindex: '-1',
         // Prefer the visible title; `label` covers dialogs built with a node title.
         ...(label ? { 'aria-label': label } : { 'aria-labelledby': titleId })
-    }, h('div.modal-header', h('span', { id: titleId }, title), h('button.icon-btn', { onClick: requestClose, title: 'Close', 'aria-label': 'Close' }, icon('x'))), h('div.modal-body', body), pendingStatus, buttons.length ? h('div.modal-foot', buttons.map(btn => h(`button.btn${btn.primary ? '.btn-primary' : ''}${btn.danger ? '.btn-danger' : ''}`, {
+    }, h('div.modal-header', h('span', { id: titleId }, title), h('button.icon-btn', { onClick: requestClose, title: '关闭', 'aria-label': '关闭' }, icon('x'))), h('div.modal-body', body), pendingStatus, buttons.length ? h('div.modal-foot', buttons.map(btn => h(`button.btn${btn.primary ? '.btn-primary' : ''}${btn.danger ? '.btn-danger' : ''}`, {
         onClick: async () => {
             if (pending)
                 return;
@@ -314,14 +314,14 @@ function syncAppHidden() {
     else
         app.removeAttribute('aria-hidden');
 }
-export function confirmDialog(title, message, { danger = false, okLabel = 'OK' } = {}) {
+export function confirmDialog(title, message, { danger = false, okLabel = '确定' } = {}) {
     return new Promise(resolve => {
         modal({
             title,
             body: h('div', String(message)),
             onClose: () => resolve(false),
             buttons: [
-                { label: 'Cancel', onClick: () => { resolve(false); } },
+                { label: '取消', onClick: () => { resolve(false); } },
                 { label: okLabel, primary: !danger, danger, onClick: () => { resolve(true); } }
             ]
         });
@@ -335,8 +335,8 @@ export function promptDialog(title, label, initial = '') {
             body: h('div.field', h('label', label), input),
             onClose: () => resolve(null),
             buttons: [
-                { label: 'Cancel', onClick: () => { resolve(null); } },
-                { label: 'OK', primary: true, onClick: () => { resolve(input.value); } }
+                { label: '取消', onClick: () => { resolve(null); } },
+                { label: '确定', primary: true, onClick: () => { resolve(input.value); } }
             ]
         });
         input.addEventListener('keydown', (e) => {
@@ -357,12 +357,12 @@ async function copyToClipboard(text) {
     try {
         if (navigator.clipboard && navigator.clipboard.writeText) {
             await navigator.clipboard.writeText(String(text));
-            toast('Copied to clipboard');
+            toast('已复制到剪贴板');
             return;
         }
     }
     catch { /* fall through to the unavailable notice */ }
-    toast('Clipboard unavailable', 'warn');
+    toast('无法访问剪贴板', 'warn');
 }
 const DETAIL_TONE = { err: 'var(--err)', warn: 'var(--warn)', ok: 'var(--ok)', info: 'var(--accent)' };
 export function detailModal({ title, badge, meta, sections = [], copy } = {}) {
@@ -382,8 +382,8 @@ export function detailModal({ title, badge, meta, sections = [], copy } = {}) {
             h('pre', { class: preClass }, String(s.text ?? ''))
         ])),
         buttons: [
-            { label: 'Copy', onClick: () => { copyToClipboard(copyText); return false; } },
-            { label: 'Close', primary: true }
+            { label: '复制', onClick: () => { copyToClipboard(copyText); return false; } },
+            { label: '关闭', primary: true }
         ]
     });
 }
@@ -393,9 +393,9 @@ export function detailModal({ title, badge, meta, sections = [], copy } = {}) {
 export function errorModal(title, error, meta) {
     return detailModal({
         title,
-        badge: { text: 'Error', tone: 'err' },
+        badge: { text: '错误', tone: 'err' },
         meta,
-        sections: [{ label: 'Message', text: (error && error.message) || String(error) }]
+        sections: [{ label: '消息', text: (error && error.message) || String(error) }]
     });
 }
 /* ---- context menu ----------------------------------------------------------------------- */
@@ -579,7 +579,7 @@ export function closeContextMenu({ restore = true } = {}) {
         opener.focus();
 }
 /* ---- tabs ----------------------------------------------------------------------------------- */
-export function tabs(defs, { onChange, active = 0, label = 'Tabs' } = {}) {
+export function tabs(defs, { onChange, active = 0, label = '标签页' } = {}) {
     // role=tablist + roving tabindex, matching react/ui.jsx useTabList: one tab
     // stop for the strip, arrows move and select (the APG default for tabs).
     const bar = h('div.tabs', { role: 'tablist', 'aria-label': label });
@@ -703,7 +703,7 @@ export class DataTable {
                 this.render();
             }
         }));
-        items.push('-', { label: 'Restore Default', onClick: () => { this.hidden = new Set(this.defaultHidden); this.saveHidden(); this.render(); } });
+        items.push('-', { label: '恢复默认', onClick: () => { this.hidden = new Set(this.defaultHidden); this.saveHidden(); this.render(); } });
         contextMenu(e.clientX, e.clientY, items);
     }
     setRows(rows) {
@@ -741,7 +741,7 @@ export class DataTable {
         clear(this.el);
         const { options } = this;
         if (!this.rows.length) {
-            this.el.appendChild(h('div.dt-empty', h('div.empty-icon', icon('search', 30)), h('div', options.emptyText || 'Nothing to display')));
+            this.el.appendChild(h('div.dt-empty', h('div.empty-icon', icon('search', 30)), h('div', options.emptyText || '暂无数据')));
             return;
         }
         const cols = this.visibleColumns();
@@ -951,7 +951,7 @@ export async function saveFile(suggestedName, type, getContent, assertCurrent = 
         try {
             handle = await window.showSaveFilePicker({
                 suggestedName,
-                types: ext ? [{ description: 'File', accept: { [type || 'application/octet-stream']: [ext] } }] : undefined
+                types: ext ? [{ description: '文件', accept: { [type || 'application/octet-stream']: [ext] } }] : undefined
             });
         }
         catch (e) {
@@ -1003,7 +1003,7 @@ export function pickFile(accept, { binary = false } = {}) {
                 name: file.name,
                 content: binary ? (String(reader.result).split(',')[1] || '') : reader.result
             });
-            reader.onerror = () => reject(reader.error || new Error('The selected file could not be read.'));
+            reader.onerror = () => reject(reader.error || new Error('无法读取所选文件。'));
             reader.onabort = () => resolve(null);
             try {
                 if (binary)
@@ -1019,6 +1019,6 @@ export function pickFile(accept, { binary = false } = {}) {
         input.click();
     });
 }
-export function loading(text = 'Loading…') {
+export function loading(text = '加载中…') {
     return h('div.loading-block', h('div.spinner'), text);
 }
