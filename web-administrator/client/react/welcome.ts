@@ -11,7 +11,7 @@
  */
 import { h, modal, field, textInput, select, toast } from '@oie/web-ui';
 import api from '@oie/web-api';
-import { passwordRequirementHints } from '../core/passwords.js';
+import { passwordRequirementHints, passwordRejectedMessage } from '../core/passwords.js';
 
 export const DEFAULT_OPTION = '--请选择--';
 
@@ -296,8 +296,9 @@ export function placeholderOpts(list: any) {
     return [{ value: '', label: DEFAULT_OPTION }, ...list.map((v: any) => ({ value: v, label: v }))];
 }
 
-function showWelcomeDialog(user: any) {
+function showWelcomeDialog(user: any): Promise<boolean> {
     return new Promise((resolve: any) => {
+        let completed = false;
         const usernameInput = textInput(user.username || '', { disabled: true });
         const pwInput = h('input', { type: 'password', autocomplete: 'new-password' });
         const confirmInput = h('input', { type: 'password', autocomplete: 'new-password' });
@@ -345,11 +346,11 @@ function showWelcomeDialog(user: any) {
                 field('所属行业', industry),
                 field('描述', description)));
 
-        modal({
+        const dialog = modal({
             title: '欢迎使用 Open Integration Engine',
             size: 'wide',
             body,
-            onClose: () => resolve(),
+            onClose: () => resolve(completed),
             buttons: [
                 {
                     label: '完成', primary: true,
@@ -361,7 +362,7 @@ function showWelcomeDialog(user: any) {
                             // Set the password first (Swing order); the engine answers
                             // with a list of policy violations if it's rejected.
                             const violations = passwordViolations(await api.users.updatePassword(user.id, pw));
-                            if (violations.length) { toast(violations.join('; '), 'warn'); return false; }
+                            if (violations.length) { toast(passwordRejectedMessage(violations), 'error'); return false; }
                             // Round-trip the user object: mutate the editable fields,
                             // preserve everything else the engine sent.
                             user.firstName = firstName.value.trim();
@@ -377,6 +378,7 @@ function showWelcomeDialog(user: any) {
                             await api.users.update(user.id, user);
                             await api.users.setPreference(user.id, 'firstlogin', 'false');
                             toast('欢迎 — 您的账号已就绪');
+                            completed = true;
                             return true;   // closes the modal → onClose resolves
                         } catch (e: any) {
                             toast(e.message || '无法完成初始设置', 'error');
@@ -391,6 +393,10 @@ function showWelcomeDialog(user: any) {
         // steals it back mid-input (e.g. a fast typist, or a test filling the
         // confirm field, within 30ms of the modal opening), landing their next
         // keystrokes in the wrong field.
+        const finish = dialog.el.querySelector('.modal-foot .btn-primary') as HTMLButtonElement | null;
+        const syncFinish = () => { if (finish) finish.disabled = !((pwInput as any).value && (confirmInput as any).value); };
+        body.addEventListener('input', syncFinish);
+        syncFinish();
         setTimeout(() => { if (!body.contains(document.activeElement)) pwInput.focus(); }, 30);
     });
 }
@@ -404,11 +410,11 @@ function showWelcomeDialog(user: any) {
  * "firstlogin" would lose the key. The single-key read returns the raw value
  * (empty when unset). Fail-closed on error: a transient read failure skips the
  * wizard rather than forcing it on every login. */
-export async function maybeShowWelcome(user: any) {
-    if (!user || user.id == null) return;
+export async function maybeShowWelcome(user: any): Promise<boolean> {
+    if (!user || user.id == null) return true;
     let fl: any;
     try { fl = await api.users.getPreference(user.id, 'firstlogin'); }
-    catch { return; }
+    catch { return true; }
     const show = !fl || /^(true|yes|on|1)$/i.test(String(fl).trim());
-    if (show) await showWelcomeDialog(user);
+    return show ? showWelcomeDialog(user) : true;
 }

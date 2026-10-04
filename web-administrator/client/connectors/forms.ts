@@ -41,11 +41,17 @@ export interface FormField {
     compute?(properties: any): any;
     render?(properties: any, ctx: { onChange: () => void; repaint: () => void }): HTMLElement;
     append?(properties: any, ctx: { onChange: () => void; repaint: () => void }): HTMLElement | null;
-    onSet?(properties: any, value: any): void;
+    onSet?(properties: any, value: any, previousValue?: any): void;
     [extra: string]: any;
 }
 
-export interface RequiredFieldSpec { key: string; label: string; when?(properties: any): boolean; }
+export interface RequiredFieldSpec {
+    key: string;
+    label: string;
+    when?(properties: any): boolean;
+    /** A placeholder that counts as missing, such as a driver select prompt. */
+    unset?: string;
+}
 
 /* ---- dot-path access ----------------------------------------------------- */
 
@@ -84,7 +90,7 @@ export function requireFields(properties: any, specs: RequiredFieldSpec[]): Arra
     for (const spec of specs) {
         if (typeof spec.when === 'function' && !spec.when(properties)) continue;
         const v = getPath(properties, spec.key);
-        if (v === undefined || v === null || String(v).trim() === '') {
+        if (v === undefined || v === null || String(v).trim() === '' || (spec.unset !== undefined && String(v) === spec.unset)) {
             errors.push({ key: spec.key, label: spec.label });
         }
     }
@@ -105,7 +111,7 @@ export function listenerAddressField(hostKey: string, label = '监听器地址')
             // "Specific" stays selected even before an address is typed.
             let mode = String(getPath(p, hostKey) ?? '0.0.0.0') === '0.0.0.0' ? 'all' : 'specific';
             const input = textInput(String(getPath(p, hostKey) ?? ''), {
-                class: 'w-[180px]',
+                class: 'w-[180px]', 'data-fkey': hostKey,
                 onInput: (e: any) => { setPath(p, hostKey, e.target.value); ctx.onChange(); }
             });
             const sync = () => { input.disabled = mode === 'all'; input.style.opacity = mode === 'all' ? '0.5' : '1'; };
@@ -267,7 +273,7 @@ function renderRow(grid: HTMLElement, properties: any, f: FormField, onChange: (
     const value = f.key === undefined ? undefined : getPath(properties, f.key);
     const set = (v: any) => {
         if (f.key !== undefined) setPath(properties, f.key, v);
-        if (f.onSet) f.onSet(properties, v);
+        if (f.onSet) f.onSet(properties, v, value);
         onChange();
         if (repaint) repaint();
     };

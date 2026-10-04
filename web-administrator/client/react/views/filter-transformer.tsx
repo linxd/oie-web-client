@@ -48,9 +48,11 @@ import * as store from '../../core/store.js';
 import { captureEngineSession } from '../../core/engine-fetch.js';
 import { generateElementScript } from '../../core/step-script.js';
 import * as router from '../../core/router.js';
+import { routeUrl } from '../../core/deployment.js';
+import { registerUnsavedCheck } from '../../core/unsaved.js';
 import { setActiveScope, clearActiveScope } from '../../core/script-completions.js';
 import { serializeTemplate, validateScript } from '../../core/serialize.js';
-import { dataTypeDef, dataTypeList } from '../../datatypes/index.js';
+import { dataTypeDef, dataTypeList, normalizeDataTypeProperties } from '../../datatypes/index.js';
 import { DataTypePropertiesEditor } from '../../datatypes/props-editor.jsx';
 import { REFERENCE_CATALOG } from '../../core/reference-catalog.js';
 import { platform } from '@oie/web-shell';
@@ -642,6 +644,8 @@ function GeneratedScriptPane({ kind, element, rev }: any) {
     const editorRef = useRef<any>(null);
     useEffect(() => {
         const editor = createCodeEditor({ value: '', readOnly: true, minHeight: '200px', popoutable: true, popoutTitle: '生成的脚本' });
+        editor.el.style.flex = '1';
+        editor.el.style.minHeight = '0';
         editorRef.current = editor;
         hostRef.current.appendChild(editor.el);
         return () => {
@@ -662,7 +666,7 @@ function GeneratedScriptPane({ kind, element, rev }: any) {
         }
         if (editorRef.current) editorRef.current.setValue(script);
     }, [kind, element, rev]);
-    return <div ref={hostRef} />;
+    return <div ref={hostRef} className="flex flex-col flex-1 min-w-0 min-h-0" />;
 }
 
 /* ---- right panel: Reference --------------------------------------------------- */
@@ -804,20 +808,28 @@ function TemplatesSide({ side, title, templateKey, target, version, connectorTyp
     const openPropsModal = () => {
         let draft = JSON.parse(JSON.stringify(ensureProps()));
         const editorHost = h('div');
+        const validationErrors = h('div', { role: 'alert', class: 'hint whitespace-pre-line', style: { color: 'var(--err)' } });
         const root = mountReact(editorHost, <DataTypePropertiesEditor
             typeName={typeName} props={draft} version={version}
             direction={side} connectorType={connectorType}
+            onChange={() => { validationErrors.textContent = ''; }}
             onReplace={(obj: any) => { draft = obj; }} />);
         modal({
             title: `${title}数据类型属性 — ${dtLabel(typeName)}`,
             size: 'wide',
-            body: editorHost,
+            body: h('div', validationErrors, editorHost),
             onClose: () => { try { root(); } catch { /* ignore */ } },
             buttons: [
                 { label: '取消' },
                 {
                     label: '确定', primary: true,
-                    onClick: () => { target[`${side}Properties`] = draft; commit(); }
+                    onClick: () => {
+                        const errors = normalizeDataTypeProperties(typeName, draft);
+                        validationErrors.textContent = errors.join('\n');
+                        if (errors.length) return false;
+                        target[`${side}Properties`] = draft;
+                        commit();
+                    }
                 }
             ]
         });
@@ -1314,6 +1326,7 @@ function EditorBody({ params, kindName, onTasksChange, apiRef, embedded }: any) 
         setActiveScope(params.channelId, [connectorType === 'RESPONSE' ? 'DESTINATION_RESPONSE_TRANSFORMER'
             : connectorType === 'SOURCE' ? 'SOURCE_FILTER_TRANSFORMER' : 'DESTINATION_FILTER_TRANSFORMER']);
         if (!embedded) store.setState('navGuard', (info: any) => guardImplRef.current(info));
+        const unregister = embedded ? () => {} : registerUnsavedCheck(channelDirty);
         if (!embedded) {
             // Banner: "Edit Channel - <name> - <connector> <Filter/Transformer>"
             // (Swing parity). Deferred past the route:changed title reset (see
@@ -1329,6 +1342,7 @@ function EditorBody({ params, kindName, onTasksChange, apiRef, embedded }: any) 
         return () => {
             persistRef.current();
             if (!embedded) store.setState('navGuard', null);
+            unregister();
             clearActiveScope();
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1949,7 +1963,12 @@ function FilterTransformerView({ params, kindName }: any) {
             store.setState('editingChannel', loaded);
             store.setState('editingChannelNew', false);
             setReady(true);
-        }).catch((e: any) => { if (alive) { toast(e.message, 'error'); setReady(false); } });
+        }).catch((e: any) => {
+            if (!alive) return;
+            toast(e.message, 'error');
+            history.replaceState(null, '', routeUrl('/channels'));
+            router.navigate('/channels');
+        });
         return () => { alive = false; };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);

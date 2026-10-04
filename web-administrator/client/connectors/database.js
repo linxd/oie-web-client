@@ -97,7 +97,9 @@ function insertUrlTemplateButton(properties, platform, onChange) {
    list (falling back to a free-text input on error). Mirrors the imperative
    driverSelectField; the wrench append opens the drivers modal. */
 function driverControlNode(properties, platform, onChange) {
-    const wrap = h('div', { class: 'flex items-center gap-1.5' });
+    // The control is replaced after loading (or falling back after a failure).
+    // Keep validation state on the stable wrapper so neither result erases it.
+    const wrap = h('div', { class: 'cform-driver flex items-center gap-1.5', 'data-fkey': 'driver' });
     const wrench = h('button.icon-btn', {
         type: 'button', title: '查看并管理数据库 JDBC 驱动列表',
         class: 'ml-1.5',
@@ -306,15 +308,16 @@ const databaseReader = {
                     }
                 ] })));
     },
-    // Swing DatabaseReader.checkProperties: URL required unless Use JavaScript; the
+    // Swing DatabaseReader.checkProperties: URL is required unless Use JavaScript; the
     // SQL/JavaScript select is always required; the post-process SQL/script is
-    // required unless Run Post-Process = Never (UPDATE_NEVER = 1); Driver required.
+    // required unless Run Post-Process = Never (UPDATE_NEVER = 1).
+    // A nonblank, non-placeholder driver is required in both SQL and JavaScript.
     validate(properties) {
         return requireFields(properties, [
             { key: 'url', label: 'URL', when: (p) => !asBool(p.useScript) },
             { key: 'select', label: 'SQL' },
             { key: 'update', label: '后处理 SQL', when: (p) => Number(p.updateMode) !== 1 },
-            { key: 'driver', label: '驱动' }
+            { key: 'driver', label: '驱动', unset: DRIVER_DEFAULT }
         ]);
     }
 };
@@ -356,13 +359,13 @@ const databaseWriter = {
                 }
             ] }));
     },
-    // Swing DatabaseWriter.checkProperties: URL required unless Use JavaScript; the
-    // SQL/JavaScript query is always required; Driver required (must not be blank).
+    // Swing DatabaseWriter.checkProperties: URL is required unless Use JavaScript;
+    // the SQL/JavaScript query and a nonblank, non-placeholder driver are always required.
     validate(properties) {
         return requireFields(properties, [
             { key: 'url', label: 'URL', when: (p) => !asBool(p.useScript) },
             { key: 'query', label: 'SQL' },
-            { key: 'driver', label: '驱动' }
+            { key: 'driver', label: '驱动', unset: DRIVER_DEFAULT }
         ]);
     }
 };

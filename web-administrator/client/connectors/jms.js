@@ -251,7 +251,8 @@ const jmsSender = {
             { key: 'jndiInitialContextFactory', label: '初始上下文工厂', when: usingJndi },
             { key: 'jndiConnectionFactoryName', label: '连接工厂名称', when: usingJndi },
             { key: 'connectionFactoryClass', label: '连接工厂类', when: (p) => !usingJndi(p) },
-            { key: 'destinationName', label: '目标名称' }
+            { key: 'destinationName', label: '目标名称' },
+            { key: 'template', label: '模板' }
         ]);
     }
 };

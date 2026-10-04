@@ -19,6 +19,7 @@ const num = (key: any, label: any, def: any, hint?: any) => ({ key, label, type:
 const bool = (key: any, label: any, def: any, hint?: any) => ({ key, label, type: 'checkbox', default: def, hint });
 const opt = (key: any, label: any, options: any, def: any, hint?: any) => ({ key, label, type: 'select', options, default: def, hint });
 const code = (key: any, label: any, def: any, hint?: any) => ({ key, label, type: 'code', default: def, hint });
+const list = (key: string, label: string, item: 'int' | 'string', hint: string) => ({ key, label, type: 'list', item, xmlNames: item === 'string', hint });
 
 const BATCH_SCRIPT_HINT = '拆分批处理并返回下一条消息的 JavaScript，' +
     "可访问 'reader'（Java BufferedReader），返回 null/空 表示输入结束；" +
@@ -34,11 +35,11 @@ const DEF: any = {
             fields: [
                 text('columnDelimiter', '列分隔符', ',', '分隔列的字符（例如 CSV 文件中的逗号）'),
                 text('recordDelimiter', '记录分隔符', '\\n', '分隔每条记录的字符（例如 CSV 文件中的换行符）'),
-                text('columnWidths', '列宽', null, '逗号分隔的固定列宽列表；分隔式列请留空'),
+                list('columnWidths', '列宽', 'int', '逗号分隔的正整数固定列宽列表；分隔式列请留空'),
                 text('quoteToken', '引号符', '"', '用于包裹含内嵌特殊字符取值的引号字符'),
                 bool('escapeWithDoubleQuote', '双引号转义', true, '连续两个引号符表示内嵌引号；取消勾选则改用转义符'),
                 text('quoteEscapeToken', '转义符', '\\', '用于转义内嵌引号的字符（仅在未勾选双引号转义时生效）'),
-                text('columnNames', '列名', null, '逗号分隔的列表，覆盖默认列名（column1…columnN）'),
+                list('columnNames', '列名', 'string', '逗号分隔的 XML 列名列表，覆盖默认列名（column1…columnN）'),
                 bool('numberedRows', '行编号', false, '在消息的 XML 表示中为每行编号'),
                 bool('ignoreCR', '忽略回车符', true, '跳过回车符（\\r），不作处理')
             ]
@@ -49,7 +50,7 @@ const DEF: any = {
             fields: [
                 text('columnDelimiter', '列分隔符', ',', '分隔列的字符（例如 CSV 文件中的逗号）'),
                 text('recordDelimiter', '记录分隔符', '\\n', '分隔每条记录的字符（例如 CSV 文件中的换行符）'),
-                text('columnWidths', '列宽', null, '逗号分隔的固定列宽列表；分隔式列请留空'),
+                list('columnWidths', '列宽', 'int', '逗号分隔的正整数固定列宽列表；分隔式列请留空'),
                 text('quoteToken', '引号符', '"', '用于包裹含内嵌特殊字符取值的引号字符'),
                 bool('escapeWithDoubleQuote', '双引号转义', true, '连续两个引号符表示内嵌引号；取消勾选则改用转义符'),
                 text('quoteEscapeToken', '转义符', '\\', '用于转义内嵌引号的字符（仅在未勾选双引号转义时生效）')
@@ -78,7 +79,11 @@ DEF.defaults = (version: any) => {
     const props: any = { '@class': DEF.propertiesClass, '@version': version };
     for (const group of DEF.groups) {
         const obj: any = { '@class': group.class, '@version': version };
-        for (const f of group.fields) obj[f.key] = f.default ?? null;
+        for (const f of group.fields) {
+            // Java null arrays are omitted. An empty element creates a zero-length
+            // widths array, which activates fixed-width mode with zero columns.
+            if (f.type !== 'list') obj[f.key] = f.default ?? null;
+        }
         props[group.key] = obj;
     }
     return props;

@@ -7,7 +7,7 @@
 
 import { h, toast, modal, field, textInput, select } from '@oie/web-ui';
 import api from '@oie/web-api';
-import { passwordRequirementHints } from '../../core/passwords.js';
+import { passwordRequirementHints, passwordRejectedMessage } from '../../core/passwords.js';
 import * as store from '../../core/store.js';
 import { COUNTRIES, US_STATES, ROLES, INDUSTRIES, placeholderOpts } from '../welcome.js';
 import { isSsoSelf, SSO_MANAGED_NOTE } from '../sso-session.js';
@@ -34,6 +34,15 @@ export const USER_FIELDS = [
 
 export function passwordViolations(result: any) {
     return api.asList(result, 'string').map(String).filter(s => s.trim());
+}
+
+export function gateSubmit(dialog: any, ready: () => boolean): () => void {
+    const button = dialog?.el?.querySelector('.modal-foot .btn-primary') as HTMLButtonElement | null;
+    const sync = () => { if (button) button.disabled = !ready(); };
+    dialog?.el?.addEventListener('input', sync);
+    dialog?.el?.addEventListener('change', sync);
+    sync();
+    return sync;
 }
 
 /* A label with a red required-asterisk — Swing's mandatory-field marker
@@ -104,8 +113,9 @@ export function passwordFields({ optional = false, label = '密码', managedNote
     if (optional && !managedNote) children.push(h('div.hint', { class: 'mt-1.5' }, '留空则保持当前密码不变'));
     // True once either field has input — the caller only pushes a password change then.
     const hasValue = () => Boolean((password as any).value || (confirm as any).value);
+    const filled = () => optional || Boolean((password as any).value && (confirm as any).value);
     return {
-        password, confirm, hasValue,
+        password, confirm, hasValue, filled,
         grid: h('div', ...children),
         validate() {
             // Optional + untouched → no password change, nothing to validate.
@@ -131,8 +141,10 @@ export function openEditUserModal(user: any, { onSaved }: any = {}) {
         managedNote: isSsoSelf(user, store.getState('user')) ? SSO_MANAGED_NOTE : ''
     });
     const progress = h('div.hint', { role: 'status' });
+    const isSelf = String(user.id) === String(store.getState('user')?.id);
     let acceptedProfile: string | null = null;
-    modal({
+    let acceptedPassword: string | null = null;
+    const dialog = modal({
         title: `编辑用户 — ${user.username}`,
         size: 'wide',
         body: h('div', form.grid, pw.grid, progress),
@@ -144,12 +156,16 @@ export function openEditUserModal(user: any, { onSaved }: any = {}) {
                     const username = form.inputs.username.value.trim();
                     if (!username) { toast('请填写用户名', 'warn'); return false; }
                     if (!pw.validate()) return false;
+                    const password = (pw.password as any).value;
+                    if (isSelf && !(pw.password as any).disabled && username !== user.username && !password) {
+                        toast('If you are changing your username, you must also update your password.', 'warn');
+                        return false;
+                    }
                     try {
-                        // Preflight policy can change before the password write;
-                        // its final receipt must still be checked below.
-                        if (pw.hasValue()) {
-                            const violations = passwordViolations(await api.users.checkPassword((pw.password as any).value));
-                            if (violations.length) { toast(`密码未通过校验：${violations.join('; ')}`, 'warn'); return false; }
+                        if (password && acceptedPassword !== password) {
+                            const violations = passwordViolations(await api.users.updatePassword(user.id, password));
+                            if (violations.length) { toast(passwordRejectedMessage(violations), 'error'); return false; }
+                            acceptedPassword = password;
                         }
                         const submitted = { ...user };
                         for (const def of USER_FIELDS) submitted[def.key] = form.inputs[def.key].value.trim();
@@ -159,20 +175,11 @@ export function openEditUserModal(user: any, { onSaved }: any = {}) {
                             acceptedProfile = signature;
                             Object.assign(user, submitted);
                         }
-                        if (pw.hasValue()) {
-                            progress.textContent = '资料已保存，正在设置密码…';
-                            const violations = passwordViolations(await api.users.updatePassword(user.id, (pw.password as any).value));
-                            if (violations.length) {
-                                progress.textContent = '资料已保存，但密码未通过校验，请修正后再次保存';
-                                toast(`密码未通过校验：${violations.join('; ')}`, 'warn');
-                                return false;
-                            }
-                        }
                         toast(`已保存用户 "${username}"`);
                         if (onSaved) onSaved(user);
                         return true;
                     } catch (e: any) {
-                        if (acceptedProfile) progress.textContent = '资料已保存，其余更改尚未确认，请先查看错误再重试';
+                        if (acceptedPassword) progress.textContent = '密码已保存，但资料尚未保存，请查看错误后重试';
                         toast(e.message, 'error');
                         return false;
                     }
@@ -180,14 +187,16 @@ export function openEditUserModal(user: any, { onSaved }: any = {}) {
             }
         ]
     });
+    gateSubmit(dialog, () => Boolean(form.inputs.username.value.trim()));
 }
 
 /* Change an existing user's password (enforces the server policy up front). */
-export function openChangePasswordModal(user: any, { onSaved }: any = {}) {
+export function openChangePasswordModal(user: any, { onSaved, message }: any = {}) {
     const pw = passwordFields();
-    modal({
+    const notice = message ? h('p', { role: 'alert', class: 'mb-3', style: { color: 'var(--err, #d9534f)' } }, String(message)) : null;
+    const dialog = modal({
         title: `修改密码 — ${user.username}`,
-        body: pw.grid,
+        body: h('div', notice, pw.grid),
         buttons: [
             { label: '取消' },
             {
@@ -196,7 +205,7 @@ export function openChangePasswordModal(user: any, { onSaved }: any = {}) {
                     if (!pw.validate()) return false;
                     try {
                         const violations = passwordViolations(await api.users.updatePassword(user.id, (pw.password as any).value));
-                        if (violations.length) { toast(violations.join('; '), 'warn'); return false; }
+                        if (violations.length) { toast(passwordRejectedMessage(violations), 'error'); return false; }
                         toast(`已更新 "${user.username}" 的密码`);
                         if (onSaved) onSaved(user);
                         return true;
@@ -208,4 +217,5 @@ export function openChangePasswordModal(user: any, { onSaved }: any = {}) {
             }
         ]
     });
+    gateSubmit(dialog, pw.filled);
 }

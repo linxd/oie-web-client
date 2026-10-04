@@ -39,13 +39,15 @@ export interface FormField {
         onChange: () => void;
         repaint: () => void;
     }): HTMLElement | null;
-    onSet?(properties: any, value: any): void;
+    onSet?(properties: any, value: any, previousValue?: any): void;
     [extra: string]: any;
 }
 export interface RequiredFieldSpec {
     key: string;
     label: string;
     when?(properties: any): boolean;
+    /** A placeholder that counts as missing, such as a driver select prompt. */
+    unset?: string;
 }
 export declare function getPath(obj: any, path: string): any;
 export declare function setPath(obj: any, path: string, value: any): any;

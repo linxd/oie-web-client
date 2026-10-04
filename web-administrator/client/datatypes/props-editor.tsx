@@ -15,6 +15,7 @@ import { useReducer } from 'react';
 import { toast, modal, pickFile, createCodeEditor } from '@oie/web-ui';
 import { validateScript } from '../core/serialize.js';
 import { dataTypeDef } from './index.js';
+import { dataTypeListText, normalizeDataTypeList } from '../core/datatype-arrays.js';
 
 /* Script editor in a modal (the Swing data-type properties "Edit" → Script
    dialog): code editor + Open File / Validate Script / OK / Cancel. */
@@ -54,6 +55,7 @@ function openScriptModal(value: any, onSave: any) {
  *   outbound: Deserialization, then serialization relabeled "Template Serialization"
  */
 function groupSpecsFor(def: any, direction: any, connectorType: any) {
+    const connectorTypes = Array.isArray(connectorType) ? connectorType : [connectorType];
     const has = (key: any) => def.groups.some((g: any) => g.key === key);
     const specs: any[] = [];
     if (direction === 'outbound') {
@@ -61,9 +63,9 @@ function groupSpecsFor(def: any, direction: any, connectorType: any) {
         if (has('serializationProperties')) specs.push({ key: 'serializationProperties', label: '模板序列化' });
     } else {
         if (has('serializationProperties')) specs.push({ key: 'serializationProperties', label: '序列化' });
-        if (has('batchProperties') && connectorType === 'SOURCE') specs.push({ key: 'batchProperties', label: '批处理' });
-        if (has('responseGenerationProperties') && connectorType === 'SOURCE') specs.push({ key: 'responseGenerationProperties', label: '响应生成' });
-        if (has('responseValidationProperties') && connectorType === 'RESPONSE') specs.push({ key: 'responseValidationProperties', label: '响应校验' });
+        if (has('batchProperties') && connectorTypes.includes('SOURCE')) specs.push({ key: 'batchProperties', label: '批处理' });
+        if (has('responseGenerationProperties') && connectorTypes.includes('SOURCE')) specs.push({ key: 'responseGenerationProperties', label: '响应生成' });
+        if (has('responseValidationProperties') && connectorTypes.includes('RESPONSE')) specs.push({ key: 'responseValidationProperties', label: '响应校验' });
     }
     return specs;
 }
@@ -85,6 +87,29 @@ function Field({ label, hint, children }: any) {
 function FieldControl({ groupObj, f, notify }: any) {
     const value = groupObj[f.key];
     switch (f.type) {
+        case 'list': {
+            const item = f.item === 'int' ? 'int' : 'string';
+            const error = normalizeDataTypeList(value, item, f.xmlNames).error;
+            return (
+                <Field label={f.label} hint={f.hint}>
+                    <input type="text" aria-label={f.label} data-datatype-key={f.key}
+                        value={dataTypeListText(value, item)} aria-invalid={!!error}
+                        className={error ? 'cform-invalid' : undefined}
+                        onChange={(e: any) => {
+                            const text = e.target.value;
+                            const result = normalizeDataTypeList(text, item, f.xmlNames);
+                            if (!result.error && result.value === undefined) delete groupObj[f.key];
+                            else {
+                                // Keep wire attributes/unknown children when editing a loaded array.
+                                const previous = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+                                groupObj[f.key] = { ...previous, [item]: result.error ? text : result.value![item] };
+                            }
+                            notify();
+                        }} />
+                    {error && <div className="hint" role="alert">{error}</div>}
+                </Field>
+            );
+        }
         case 'checkbox':
             return (
                 <label className="check" title={f.hint || undefined}>
@@ -151,7 +176,7 @@ function RawProperties({ typeName, props, onReplace }: any) {
  *   props          the properties object to edit (mutated in place)
  *   version        engine version (for seeding group defaults)
  *   direction      'inbound' | 'outbound'
- *   connectorType  'SOURCE' | 'DESTINATION' | 'RESPONSE' (default 'SOURCE')
+ *   connectorType  'SOURCE' | 'DESTINATION' | 'RESPONSE', or an array for bulk edits
  *   onChange       called after each grouped-field edit
  *   onReplace      called with a new object when an unknown type's raw JSON is edited
  */

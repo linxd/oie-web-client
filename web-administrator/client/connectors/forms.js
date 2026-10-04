@@ -47,7 +47,7 @@ export function requireFields(properties, specs) {
         if (typeof spec.when === 'function' && !spec.when(properties))
             continue;
         const v = getPath(properties, spec.key);
-        if (v === undefined || v === null || String(v).trim() === '') {
+        if (v === undefined || v === null || String(v).trim() === '' || (spec.unset !== undefined && String(v) === spec.unset)) {
             errors.push({ key: spec.key, label: spec.label });
         }
     }
@@ -67,7 +67,7 @@ export function listenerAddressField(hostKey, label = '监听器地址') {
             // "Specific" stays selected even before an address is typed.
             let mode = String(getPath(p, hostKey) ?? '0.0.0.0') === '0.0.0.0' ? 'all' : 'specific';
             const input = textInput(String(getPath(p, hostKey) ?? ''), {
-                class: 'w-[180px]',
+                class: 'w-[180px]', 'data-fkey': hostKey,
                 onInput: (e) => { setPath(p, hostKey, e.target.value); ctx.onChange(); }
             });
             const sync = () => { input.disabled = mode === 'all'; input.style.opacity = mode === 'all' ? '0.5' : '1'; };
@@ -237,7 +237,7 @@ function renderRow(grid, properties, f, onChange, repaint, displays) {
         if (f.key !== undefined)
             setPath(properties, f.key, v);
         if (f.onSet)
-            f.onSet(properties, v);
+            f.onSet(properties, v, value);
         onChange();
         if (repaint)
             repaint();
