@@ -92,10 +92,12 @@ const META_COLUMN_TYPES = ['STRING', 'NUMBER', 'BOOLEAN', 'TIMESTAMP'];
 
 const DEFAULT_ATTACHMENT_SCRIPT = '// Modify the message variable below to create attachments\nreturn message;';
 
-/* Classic Administrator "Destination Mappings" velocity variables — canonical list
-   lives in core/mappings.js (shared with the wizard rail and the code-view vars). */
+/* Classic Administrator "Destination Mappings" variables — canonical list
+   lives in core/mappings.js (shared with the wizard rail and the code-view vars).
+   It carries both the Velocity and the JavaScript (Rhino) insert forms; a rail
+   must show and insert the form the target editor actually understands. */
 export { DESTINATION_MAPPINGS } from '../../core/mappings.js';
-import { DESTINATION_MAPPINGS, SCRIPT_REFERENCE } from '../../core/mappings.js';
+import { SCRIPT_REFERENCE, mappingsFor, mappingTextFor, mappingLanguageOf } from '../../core/mappings.js';
 
 /* Summary text shown next to the Advanced Queue Settings button, replicating
    the Swing DestinationSettingsPanel.updateAdvancedSettingsLabel(). */
@@ -2106,7 +2108,7 @@ function DestEditor({ dest, channel, version, engineTypes, markDirty, syncRows }
     );
 }
 
-function MappingsRail({ onInsert, dragRef }: any) {
+function MappingsRail({ onInsert, dragRef, language }: any) {
     // Shares its collapse flag with the wizard's rail — same rail, same choice.
     const [collapsed, setCollapsed] = useSideCollapse('dest-mappings');
     if (collapsed) {
@@ -2122,8 +2124,8 @@ function MappingsRail({ onInsert, dragRef }: any) {
                 </div>
             </div>
             <div className="overflow-auto flex-1 py-1 px-0">
-                {DESTINATION_MAPPINGS.map(([label, token]) => (
-                    <div key={token} draggable title={token}
+                {mappingsFor(language).map(([label, token]) => (
+                    <div key={label} draggable title={token}
                         className="py-[3px] px-3 cursor-pointer text-[11px] truncate hover:bg-bg3"
                         onClick={() => onInsert(token)}
                         onDragStart={(e: any) => {
@@ -2149,7 +2151,13 @@ function DestinationsTab({ channel, version, engineTypes, markDirty, actionsRef,
     // drives re-renders.
     const [, setSelectedIdState] = useState<any>(null);
     const selectedIdRef = useRef<any>(null);
-    const setSelectedId = (id: any) => { selectedIdRef.current = id; setSelectedIdState(id); };
+    // Language of the last focused insertable: drives which column the mapping
+    // rail shows, mirroring Swing's per-connector TransferMode.
+    const [railLang, setRailLang] = useState('velocity');
+    const setSelectedId = (id: any) => {
+        if (String(id) !== String(selectedIdRef.current)) setRailLang('velocity');
+        selectedIdRef.current = id; setSelectedIdState(id);
+    };
     const tableHostRef = useRef<any>(null);
     const tableRef = useRef<any>(null);
 
@@ -2387,6 +2395,19 @@ function DestinationsTab({ channel, version, engineTypes, markDirty, actionsRef,
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    /* Translate a rail token into the form the target editor's language expects
+       (Velocity for connector templates, Rhino for JavaScript). Returns null and
+       warns when the row has no equivalent in that language. */
+    function mappingText(token: any, target: any): string | null {
+        const language = mappingLanguageOf(target);
+        const text = mappingTextFor(token, language);
+        if (text === null) {
+            toast('此项仅支持连接器模板（Velocity）写法，脚本编辑器请改用 JavaScript 表达式', 'warn');
+            return null;
+        }
+        return text;
+    }
+
     /* Mapping token insertion (click) — into the last focused field/editor. */
     function insertToken(token: any) {
         const target = insertTargetRef.current;
@@ -2394,15 +2415,19 @@ function DestinationsTab({ channel, version, engineTypes, markDirty, actionsRef,
             const inst = target.monaco;
             const node = inst.getDomNode && inst.getDomNode();
             if (node && node.isConnected) {
+                const text = mappingText(token, target);
+                if (text === null) return;
                 inst.executeEdits('destination-mapping', [{
-                    range: inst.getSelection(), text: token, forceMoveMarkers: true
+                    range: inst.getSelection(), text, forceMoveMarkers: true
                 }]);
                 inst.focus();
                 return;
             }
         }
         if (target && target.el && target.el.isConnected) {
-            insertIntoField(target.el, token);
+            const text = mappingText(token, target);
+            if (text === null) return;
+            insertIntoField(target.el, text);
             return;
         }
         // No known target — fall back to the clipboard.
@@ -2425,10 +2450,14 @@ function DestinationsTab({ channel, version, engineTypes, markDirty, actionsRef,
                 const node = ed.getDomNode && ed.getDomNode();
                 return node && node.contains(t);
             });
-            if (inst) insertTargetRef.current = { monaco: inst };
+            if (inst) {
+                insertTargetRef.current = { monaco: inst };
+                setRailLang(mappingLanguageOf(insertTargetRef.current));
+            }
         } else if ((t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && (t as any).type === 'text')) &&
                    !(t as any).readOnly && !(t as any).disabled) {
             insertTargetRef.current = { el: t };
+            setRailLang(mappingLanguageOf(insertTargetRef.current));
         }
     }
 
@@ -2445,6 +2474,8 @@ function DestinationsTab({ channel, version, engineTypes, markDirty, actionsRef,
         dragRef.current = null;
         if (!editor) return;
         e.preventDefault();
+        const text = mappingText(token, editor);
+        if (text === null) return;
         if (editor.monaco) {
             const inst = editor.monaco;
             let pos = inst.getPosition();
@@ -2455,11 +2486,11 @@ function DestinationsTab({ channel, version, engineTypes, markDirty, actionsRef,
             const Range = (window as any).monaco.Range;
             inst.executeEdits('destination-mapping', [{
                 range: new Range(pos.lineNumber, pos.column, pos.lineNumber, pos.column),
-                text: token, forceMoveMarkers: true
+                text, forceMoveMarkers: true
             }]);
             inst.focus();
         } else {
-            insertIntoField(editor.el, token);
+            insertIntoField(editor.el, text);
         }
     }
 
@@ -2480,7 +2511,7 @@ function DestinationsTab({ channel, version, engineTypes, markDirty, actionsRef,
                         syncRows={() => tableRef.current && tableRef.current.setRows(dests())} />
                 </div>
             </div>
-            <MappingsRail onInsert={insertToken} dragRef={dragRef} />
+            <MappingsRail onInsert={insertToken} dragRef={dragRef} language={railLang} />
         </div>
     );
 }

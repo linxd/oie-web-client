@@ -40,7 +40,7 @@ import {
 // Straight from core/mappings.js, not via channel-editor.jsx's re-export of it —
 // the wizard has no other reason to reference the classic editor, and that lone
 // import is what would otherwise chain the two into one bundle chunk.
-import { DESTINATION_MAPPINGS } from '../../core/mappings.js';
+import { mappingsFor, mappingTextFor, mappingLanguageOf } from '../../core/mappings.js';
 
 const STEPS = ['Basics', 'Dependencies', 'Channel Options', 'Source', 'Destinations', 'Scripts', 'Review'];
 
@@ -254,7 +254,7 @@ function EmbeddedElementEditor({ channel, metaDataId, kind, onChange, viewportOf
 
 /* ---- connector step with Settings / Filter / Transformer / Response tabs ------- */
 
-/* ---- Destination Mappings rail (velocity variable insert / drag) -------------- */
+/* ---- Destination Mappings rail (language-aware variable insert / drag) -------- */
 
 // The classic editor's Destination Mappings tokens, presented like the alert
 // wizard's Variables panel: click inserts into the last-focused field of the
@@ -306,16 +306,35 @@ function insertIntoTarget(target: any, token: any, position?: any) {
 function DestinationMappingsRail({ hostRef }: any) {
     const targetRef = useRef<any>(null);   // last focused insertable inside hostRef
     const dragTokenRef = useRef<any>(null);
+    // Column shown by the rail: follows the language of the focused insertable,
+    // like Swing's per-connector VariableListHandler.TransferMode.
+    const [railLang, setRailLang] = useState('velocity');
     // Shares its collapse flag with the classic editor's rail (same rail). The
     // early return sits AFTER every hook so the hook order never changes.
     const [collapsed, setCollapsed] = useSideCollapse('dest-mappings');
+
+    /* Translate a rail token into the form the target understands (Velocity for
+       template fields, Rhino for a JavaScript editor); warn and return null when
+       the row has no equivalent there. */
+    const mappingText = (token: any, target: any): string | null => {
+        const language = mappingLanguageOf(target);
+        const text = mappingTextFor(token, language);
+        if (text === null) {
+            toast('此项仅支持连接器模板（Velocity）写法，脚本编辑器请改用 JavaScript 表达式', 'warn');
+            return null;
+        }
+        return text;
+    };
 
     useEffect(() => {
         const host = hostRef.current;
         if (!host) return undefined;
         const trackFocus = (e: any) => {
             const found = e.target instanceof Element ? insertableAt(e.target) : null;
-            if (found) targetRef.current = found;
+            if (found) {
+                targetRef.current = found;
+                setRailLang(mappingLanguageOf(found));
+            }
         };
         const onDragOver = (e: any) => {
             const carrying = dragTokenRef.current
@@ -324,12 +343,14 @@ function DestinationMappingsRail({ hostRef }: any) {
             if (insertableAt(e.target)) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; }
         };
         const onDrop = (e: any) => {
-            const token = dragTokenRef.current
+            const dragged = dragTokenRef.current
                 || (e.dataTransfer && (e.dataTransfer.getData(MAPPING_FLAVOR) || e.dataTransfer.getData('text/plain')));
             dragTokenRef.current = null;
-            const target = token ? insertableAt(e.target) : null;
+            const target = dragged ? insertableAt(e.target) : null;
             if (!target) return;
             e.preventDefault();
+            const token = mappingText(dragged, target);
+            if (token === null) return;
             let pos: any = null;
             if (target.monaco && target.monaco.getTargetAtClientPoint) {
                 const tgt = target.monaco.getTargetAtClientPoint(e.clientX, e.clientY);
@@ -349,7 +370,11 @@ function DestinationMappingsRail({ hostRef }: any) {
 
     const insert = (token: any) => {
         const target = targetRef.current;
-        if (target && insertIntoTarget(target, token)) return;
+        if (target) {
+            const text = mappingText(token, target);
+            if (text === null) return;
+            if (insertIntoTarget(target, text)) return;
+        }
         // No known target — fall back to the clipboard, like the classic editor.
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(token).then(
@@ -375,8 +400,8 @@ function DestinationMappingsRail({ hostRef }: any) {
             </div>
             <div className="panel-body flex flex-col gap-2">
                 <div className="border border-line rounded overflow-auto max-h-[324px] min-h-[108px]">
-                    {DESTINATION_MAPPINGS.map(([label, token]) => (
-                        <div key={token} role="button" draggable title={token}
+                    {mappingsFor(railLang).map(([label, token]) => (
+                        <div key={label} role="button" draggable title={token}
                             onDragStart={(e: any) => {
                                 dragTokenRef.current = token;
                                 e.dataTransfer.effectAllowed = 'copy';
@@ -390,7 +415,7 @@ function DestinationMappingsRail({ hostRef }: any) {
                         </div>
                     ))}
                 </div>
-                <div className="hint">点击可插入到当前聚焦的文本框，也可拖放到文本框中。</div>
+                <div className="hint">点击或拖放到文本框即可插入，写法随当前编辑器语言自动切换（模板用 $&#123;…&#125;，脚本用 JavaScript 表达式）。</div>
             </div>
         </div>
     );

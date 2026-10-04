@@ -66,8 +66,8 @@ function CodeField({ value, language, minHeight, placeholder, onChange, disabled
             placeholder,
             readOnly: !!disabled,
             maximizable: true, // connector code fields (incl. JavaScript Writer) can go full-screen
-            popoutTitle: label, // full-screen code view: header title + velocity variables rail
-            popoutVars: DESTINATION_MAPPINGS,
+            popoutTitle: label, // full-screen code view: header title + variables rail
+            popoutVars: DESTINATION_MAPPINGS, // rail adapts to this field's language
             onChange: (v) => onChangeRef.current && onChangeRef.current(v)
         });
         edRef.current = editor;

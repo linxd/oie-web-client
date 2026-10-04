@@ -6,6 +6,7 @@
 
 import { h } from './ui.js';
 import { icon } from './icons.js';
+import { mappingTextFor } from './mappings.js';
 import type * as MonacoNs from 'monaco-editor';
 
 export interface CodeEditorOptions {
@@ -43,8 +44,13 @@ export class CodeEditor {
             placeholder: opts.placeholder || ''
         }) as HTMLTextAreaElement;
         this.area.value = opts.value ?? '';
-        this.el = h('div.ce', { style: opts.minHeight ? { minHeight: opts.minHeight } : null },
-            this.gutter, this.area);
+        // data-lang: rails that insert into a plain textarea (the Monaco-less
+        // fallback) cannot read a model language, so the editor's own language
+        // travels on the root element.
+        this.el = h('div.ce', {
+            style: opts.minHeight ? { minHeight: opts.minHeight } : null,
+            dataset: { lang: String(opts.language || 'text') }
+        }, this.gutter, this.area);
 
         this.area.addEventListener('input', () => {
             this.syncGutter();
@@ -181,11 +187,31 @@ function attachCodeView(editor: CodeEditor, opts: CodeEditorOptions): void {
         insertAtCursor(editor, token);
     }
 
+    /* The rail's insert language: the Monaco model once the editor is upgraded,
+       otherwise the language it was created with (the upgrade uses the same one). */
+    function editorLanguage(): string {
+        try {
+            const model = editor.monaco && editor.monaco.getModel();
+            const id = model && model.getLanguageId();
+            if (id) return id;
+        } catch { /* older hosts */ }
+        return opts.language || 'velocity';
+    }
+
     function buildVarsRail(): HTMLElement | null {
         const vars = opts.popoutVars;
         if (!Array.isArray(vars) || vars.length === 0 || opts.readOnly) return null;
-        const list = h('div.ce-popout-vars-list');
+        // Rows are authored in the Velocity form; a Rhino editor needs the
+        // JavaScript expression instead, and rows with no JavaScript form (a
+        // counter, CDATA) drop out of that list rather than break the script.
+        const language = editorLanguage();
+        const rows: Array<[string, string]> = [];
         for (const [label, token] of vars) {
+            const text = mappingTextFor(token, language);
+            if (text !== null) rows.push([label, text]);
+        }
+        const list = h('div.ce-popout-vars-list');
+        for (const [label, token] of rows) {
             list.appendChild(h('div.ce-popout-var', {
                 title: token,
                 draggable: 'true',
