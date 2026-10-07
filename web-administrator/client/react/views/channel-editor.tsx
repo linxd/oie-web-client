@@ -1871,6 +1871,72 @@ const RESPONSE_LABELS_ZH: any = {
     'Postprocessor': '后处理器'
 };
 
+/* Collect response-map variable names from every step/script in the channel —
+   mirrors the Swing admin's SourceSettingsPanel.updateResponseDropDown() which
+   scans source filter/transformer, all destination filter/transformer/response-
+   Transformer steps, plus pre- and postprocessor scripts. Two patterns create
+   response variables: MapperStep with scope=RESPONSE (stores el.variable), and
+   JavaScript steps calling responseMap.put('key',…) or $r('key',…). */
+function collectResponseVariables(channel: any): string[] {
+    const vars = new Set<string>();
+    const responsePutRe = /responseMap\s*\.\s*put\s*\(\s*(['"])(((?!(?<!\\)\1).)*)(?<!\\)\1|\$r\s*\(\s*(['"])(((?!(?<!\\)\4).)*)(?<!\\)\4(?=\s*,)/g;
+
+    function scanElements(elements: any) {
+        const arr = oie.elementsToArray(elements);
+        for (const el of arr) {
+            if (el.enabled === false) continue;
+            // MapperStep with RESPONSE scope → el.variable is the response key
+            if (el.__type === 'com.mirth.connect.plugins.mapper.MapperStep'
+                && el.scope === 'RESPONSE'
+                && typeof el.variable === 'string' && el.variable.trim()) {
+                vars.add(el.variable.trim());
+            }
+            // JavaScript steps: scan script text for responseMap.put / $r patterns
+            if (typeof el.script === 'string') {
+                let m: any;
+                responsePutRe.lastIndex = 0;
+                while ((m = responsePutRe.exec(el.script))) {
+                    const key = m[2] || m[5];
+                    if (key) vars.add(key);
+                }
+            }
+        }
+    }
+
+    // Source connector filter + transformer
+    if (channel.sourceConnector) {
+        scanElements(channel.sourceConnector.filter?.elements);
+        scanElements(channel.sourceConnector.transformer?.elements);
+    }
+
+    // Destination connectors: filter + transformer + responseTransformer
+    for (const d of oie.destinationsOf(channel)) {
+        scanElements(d.filter?.elements);
+        scanElements(d.transformer?.elements);
+        scanElements(d.responseTransformer?.elements);
+    }
+
+    // Channel preprocessor / postprocessor scripts
+    if (typeof channel.preprocessingScript === 'string') {
+        let m: any;
+        responsePutRe.lastIndex = 0;
+        while ((m = responsePutRe.exec(channel.preprocessingScript))) {
+            const key = m[2] || m[5];
+            if (key) vars.add(key);
+        }
+    }
+    if (typeof channel.postprocessingScript === 'string') {
+        let m: any;
+        responsePutRe.lastIndex = 0;
+        while ((m = responsePutRe.exec(channel.postprocessingScript))) {
+            const key = m[2] || m[5];
+            if (key) vars.add(key);
+        }
+    }
+
+    return [...vars];
+}
+
 /* Source Settings — parity with the Swing SourceSettingsPanel. */
 function SourceSettings({ channel, scp, markDirty }: any) {
     const [, bump] = useReducer((x: any) => x + 1, 0);
@@ -1884,6 +1950,12 @@ function SourceSettings({ channel, scp, markDirty }: any) {
     if (respondAfter) {
         for (const d of oie.destinationsOf(channel)) {
             respOpts.push({ value: 'd' + d.metaDataId, label: d.name || `目的地 ${d.metaDataId}` });
+        }
+    }
+    // Scan all channel steps for responseMap variables (parity with Swing admin)
+    for (const rv of collectResponseVariables(channel)) {
+        if (!respOpts.some(o => o.value === rv)) {
+            respOpts.push({ value: rv, label: rv });
         }
     }
     const currentResp = scp.responseVariable ?? 'None';
