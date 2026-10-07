@@ -457,7 +457,7 @@ function ConnectorTabs({ channel, connector, mode, version, onChange, destIndex 
                     </div>
                     {/* Inbound/outbound data types are settable right here (mirrored in the
                         Transformer tab's Message Templates — same model). */}
-                    <DataTypeBar holder={connector.transformer} version={version} connectorType={mode} onChange={onChange} />
+                    <DataTypeBar holder={connector.transformer} version={version} connectorType={mode} onChange={onChange} channelId={channel.id} />
                     {/* "Wait for previous" applies to the 2nd destination onward (nothing
                         precedes the first). */}
                     {isDest && destIndex > 0 && (
@@ -642,7 +642,7 @@ function ReviewStep({ channel, inbound, outbound }: any) {
     const pruneText = (prune.pruneMetaDataDays == null && prune.pruneContentDays == null)
         ? '无限期存储'
         : `元数据 ${prune.pruneMetaDataDays == null ? '保留' : prune.pruneMetaDataDays + ' 天'} · 内容 ${prune.pruneContentDays == null ? '随元数据一并清除' : prune.pruneContentDays + ' 天'}`;
-    const tags = api.asList(channel.exportData && channel.exportData.channelTags, 'channelTag').map((t: any) => t && t.name).filter(Boolean);
+    const tags = api.asList(channel.exportData && channel.exportData.channelTags, 'channelTag').map((t: any) => t && t.name).filter((n: any) => n != null && n !== '').map(String);
     const attType = channel.properties && channel.properties.attachmentProperties && channel.properties.attachmentProperties.type;
     return (
         <div className="panel !mt-0 max-w-[738px]">

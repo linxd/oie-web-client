@@ -33,6 +33,36 @@ function repairFileCredentials(channel) {
     }
     return changed;
 }
+/** Send the engine's exact name for every tag it already knows by id. */
+export async function restoreChannelTagNames(channel, originalTagIds) {
+    const tags = api.asList(channel?.exportData?.channelTags, 'channelTag');
+    if (!tags.length)
+        return;
+    const assertSession = captureEngineSession();
+    let known;
+    try {
+        known = await api.server.channelTags();
+    }
+    catch {
+        assertSession();
+        // Channel View also exposes assigned tags; Tags View is not required.
+        // Newly entered strings are already exact and are not in the saved export.
+        const assigned = tags.filter(tag => !originalTagIds || originalTagIds.has(String(tag?.id))
+            || typeof tag?.name !== 'string');
+        known = assigned.length ? await api.channels.tags(channel.id) : [];
+        if (assigned.some(tag => !known.some(existing => String(existing.id) === String(tag?.id)))) {
+            throw new Error('Cannot verify channel tag names. Retry before saving.');
+        }
+    }
+    assertSession();
+    const names = new Map(known.map(tag => [String(tag.id), tag.name]));
+    for (const tag of tags) {
+        const name = names.get(String(tag?.id)) ?? tag?.name;
+        if (typeof name !== 'string')
+            throw new Error('Cannot verify channel tag names. Retry before saving.');
+        tag.name = name;
+    }
+}
 // External library/graph exports are not written by a channel save. Keep them
 // out of its baseline; resources, tags and all channel metadata remain included.
 function fingerprint(channel) {
@@ -49,8 +79,10 @@ function fingerprint(channel) {
 export async function loadChannelForEdit(id) {
     const channel = await api.channels.get(id);
     if (!channel || channel.id !== id)
-        throw new Error(`未找到通道 ${id}。`);
-    sessions.set(channel, { isNew: false, baseline: fingerprint(channel), workingBaseline: fingerprint(channel), saving: false });
+        throw new Error(`Channel ${id} was not found.`);
+    const baseline = fingerprint(channel);
+    await restoreChannelTagNames(channel);
+    sessions.set(channel, { isNew: false, baseline, workingBaseline: fingerprint(channel), saving: false });
     return channel;
 }
 /** Identity follows the working model through classic, wizard and subeditors.
@@ -82,7 +114,7 @@ export async function updateChannelWithConflict(channelId, update, options) {
         const latest = await api.channels.get(channelId);
         assertSession();
         if (!latest || latest.id !== channelId)
-            throw new Error('该通道已被删除。请重新打开通道列表后再保存。');
+            throw new Error('The channel was removed. Reopen the channel list before saving.');
         if (!savedByUser(latest, options.userId)) {
             const confirmed = await options.confirmConflict();
             assertSession();
@@ -200,11 +232,11 @@ export async function saveChannelModel(channel, options) {
         let conflict = false;
         if (!state.isNew) {
             if (!state.baseline)
-                throw new Error('无法校验原始通道，请重新打开后再保存。');
+                throw new Error('Cannot verify the original channel. Reopen it before saving.');
             current = current || await api.channels.get(channel.id);
             assertSession();
             if (!current || current.id !== channel.id)
-                throw new Error('该通道已被删除。请重新打开通道列表后再保存。');
+                throw new Error('The channel was removed. Reopen the channel list before saving.');
             conflict = fingerprint(current) !== state.baseline;
             if (conflict && !savedByUser(current, options.userId) && !await confirm(options.confirmConflict()))
                 return false;
@@ -221,6 +253,11 @@ export async function saveChannelModel(channel, options) {
             return true;
         }
         normalizeChannelDataTypeArrays(submitted);
+        const original = state.baseline ? JSON.parse(state.baseline) : null;
+        const originalTagIds = new Set(api.asList(original?.exportData?.channelTags, 'channelTag')
+            .map(tag => String(tag?.id)));
+        await restoreChannelTagNames(submitted, originalTagIds);
+        assertSession();
         const exportData = submitted.exportData = submitted.exportData || {};
         const metadata = exportData.metadata = exportData.metadata || { enabled: true };
         const previousTime = modifiedTime(current);
