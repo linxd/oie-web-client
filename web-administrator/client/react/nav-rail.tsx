@@ -38,6 +38,11 @@ import { RailPane } from './ui.jsx';
    plugins built against that convention still declare it. */
 export const LEGACY_SECTIONS = { Engine: 'Manage' };
 export const SECTION_ORDER = ['Monitor', 'Design', 'Manage'];
+/* Display labels for the built-in sections — the id stays English for stable
+   preference storage and plugin compatibility; only the rendered label changes. */
+const SECTION_LABELS: Record<string, string> = {
+    Monitor: '监控', Design: '设计', Manage: '管理'
+};
 /* Other holds the app's own actions and sits last; a section a plugin invents
    lands between Manage and it, with the catch-all 'Plugins' behind both. */
 export const SECTION_RANK = { Other: 800, Plugins: 900 };
@@ -79,6 +84,8 @@ export function NavRail({ collapsed, onPeek, onLogout }: any) {
     const allowed = platform.navItems()
         .filter((it: any) => !it.task || platform.checkTask(it.rbac || 'view', it.task));
     const groups = mergeNav(allowed, layout, MERGE_OPTS);
+    /* Built-in sections show their Chinese label; user-renamed groups keep their name. */
+    const displayLabel = (g: any) => (!g.renamed && SECTION_LABELS[g.id]) ? SECTION_LABELS[g.id] : g.label;
 
     /* Customizing needs the expanded rail. At 56px there are no labels and no group
        headings, and nowhere to put the grips, the eyes or a rename field — the icon
@@ -260,19 +267,19 @@ export function NavRail({ collapsed, onPeek, onLogout }: any) {
                 // target; otherwise it would vanish the moment it was created.
                 if (!shown.length && !editing) return null;
                 return (
-                    <RailPane key={group.id} title={group.label} paneKey={group.id}
+                    <RailPane key={group.id} title={displayLabel(group)} paneKey={group.id}
                         group={group.id === 'Other' ? 'other' : undefined}
                         className={dropHint && dropHint.kind === 'group' && dropHint.id === group.id ? 'rail-drop-into' : undefined}
                         headerExtra={editing ? (
                             <span className="rail-pane-tools">
                                 {group.custom ? (
                                     <button type="button" className="rail-tool" title="删除分组"
-                                        aria-label={`删除分组 ${group.label}`}
+                                        aria-label={`删除分组 ${displayLabel(group)}`}
                                         onClick={(e: any) => { e.stopPropagation(); apply(withoutGroup(layout, group.id)); }}>✕</button>
                                 ) : null}
                                 {group.renamed ? (
                                     <button type="button" className="rail-tool" title="重置名称"
-                                        aria-label={`重置 ${group.label} 的名称`}
+                                        aria-label={`重置 ${displayLabel(group)} 的名称`}
                                         onClick={(e: any) => { e.stopPropagation(); apply(withGroupLabel(layout, group.id, '')); }}>↺</button>
                                 ) : null}
                             </span>
